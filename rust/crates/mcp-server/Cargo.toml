@@ -10,6 +10,9 @@ description = "MCP (Model Context Protocol) server for benchpress"
 benchpress-core = { path = "../core" }
 benchpress-engine = { path = "../qa-engine" }
 benchpress-agents = { path = "../agents" }
+benchpress-workflow = { path = "../workflow" }
+benchpress-distiller = { path = "../distiller" }
+benchpress-judge = { path = "../judge" }
 axum.workspace = true
 tokio.workspace = true
 serde.workspace = true
@@ -17,3 +20,4 @@ serde_json.workspace = true
 jsonrpc-core.workspace = true
 tracing.workspace = true
 uuid.workspace = true
+directories.workspace = true

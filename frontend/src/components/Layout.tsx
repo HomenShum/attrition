@@ -3,9 +3,9 @@ import { Link, useLocation } from "react-router-dom";
 
 const NAV_LINKS = [
   { to: "/", label: "Home" },
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/sitemap", label: "Sitemap" },
-  { to: "/audit", label: "Audit" },
+  { to: "/workflows", label: "Workflows" },
+  { to: "/judge", label: "Judge" },
+  { to: "/compare", label: "Compare" },
 ] as const;
 
 const navStyle: React.CSSProperties = {

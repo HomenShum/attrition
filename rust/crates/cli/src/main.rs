@@ -1,5 +1,6 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
+use std::path::PathBuf;
 
 const BANNER: &str = r#"
     ____                  _     ____
@@ -104,6 +105,93 @@ enum Commands {
 
     /// Show version and system info
     Info,
+
+    // ── Workflow capture & distillation commands ───────────────────────
+
+    /// Capture a Claude Code session into a replayable workflow
+    Capture {
+        /// Path to Claude Code JSONL session file
+        path: PathBuf,
+
+        /// Workflow name (default: derived from filename)
+        #[arg(long)]
+        name: Option<String>,
+
+        /// Source model that produced the session
+        #[arg(long, default_value = "claude-opus-4-6")]
+        model: String,
+    },
+
+    /// List all captured workflows
+    Workflows,
+
+    /// Distill a workflow for cheaper replay on a target model
+    Distill {
+        /// Workflow ID (short prefix or full UUID)
+        workflow_id: String,
+
+        /// Target model for distillation
+        #[arg(long)]
+        target: String,
+    },
+
+    /// Start a judge session for workflow replay verification
+    Judge {
+        /// Workflow ID to judge against
+        workflow_id: String,
+
+        /// Model being evaluated during replay
+        #[arg(long, default_value = "claude-sonnet-4-20250514")]
+        replay_model: String,
+    },
+}
+
+/// Resolve the workflow database path (~/.benchpress/workflows.db).
+fn workflow_db_path() -> Result<PathBuf> {
+    let base = if let Some(proj_dirs) = directories::ProjectDirs::from("", "", "benchpress") {
+        proj_dirs.data_dir().to_path_buf()
+    } else {
+        // Fallback to home directory
+        dirs_fallback()
+    };
+    std::fs::create_dir_all(&base)?;
+    Ok(base.join("workflows.db"))
+}
+
+/// Fallback: ~/.benchpress/
+fn dirs_fallback() -> PathBuf {
+    let home = std::env::var("HOME")
+        .or_else(|_| std::env::var("USERPROFILE"))
+        .unwrap_or_else(|_| ".".to_string());
+    PathBuf::from(home).join(".benchpress")
+}
+
+/// Resolve a workflow ID from a short prefix or full UUID.
+fn resolve_workflow_id(
+    store: &benchpress_workflow::storage::WorkflowStore,
+    input: &str,
+) -> Result<uuid::Uuid> {
+    // Try parsing as a full UUID first
+    if let Ok(id) = uuid::Uuid::parse_str(input) {
+        return Ok(id);
+    }
+
+    // Otherwise treat as a prefix — search through all workflows
+    let all = store.list_workflows()?;
+    let matches: Vec<_> = all
+        .iter()
+        .filter(|w| w.id.to_string().starts_with(input))
+        .collect();
+
+    match matches.len() {
+        0 => anyhow::bail!("No workflow found matching '{}'", input),
+        1 => Ok(matches[0].id),
+        n => anyhow::bail!(
+            "Ambiguous prefix '{}' matches {} workflows. Use a longer prefix.",
+            input,
+            n
+        ),
+    }
 }
 
 #[tokio::main]
@@ -250,7 +338,184 @@ async fn main() -> Result<()> {
             println!("  Config dir: {}", benchpress_core::AppConfig::config_dir().display());
             println!("  Data dir: {}", benchpress_core::AppConfig::data_dir().display());
         }
+
+        // ── Workflow capture ──────────────────────────────────────────
+
+        Commands::Capture { path, name, model } => {
+            use benchpress_workflow::adapters::claude_code::ClaudeCodeAdapter;
+            use benchpress_workflow::adapters::WorkflowAdapter;
+            use benchpress_workflow::storage::WorkflowStore;
+            use benchpress_workflow::{Workflow, WorkflowMetadata, TokenCost};
+
+            let raw = std::fs::read(&path)?;
+            let events = ClaudeCodeAdapter::parse(&raw)?;
+
+            let workflow_name = name.unwrap_or_else(|| {
+                path.file_stem()
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("unnamed")
+                    .to_string()
+            });
+
+            let workflow = Workflow::new(
+                workflow_name.clone(),
+                model.clone(),
+                events.clone(),
+                WorkflowMetadata {
+                    adapter: ClaudeCodeAdapter::source_name().to_string(),
+                    session_id: None,
+                    project_path: path.parent().and_then(|p| p.to_str()).map(String::from),
+                    total_tokens: TokenCost::default(),
+                    duration_ms: 0,
+                    task_description: format!("Captured from {}", path.display()),
+                },
+            );
+
+            let db_path = workflow_db_path()?;
+            let store = WorkflowStore::new(&db_path)?;
+            store.save_workflow(&workflow)?;
+
+            if cli.json {
+                println!("{}", serde_json::to_string_pretty(&serde_json::json!({
+                    "id": workflow.id.to_string(),
+                    "name": workflow_name,
+                    "model": model,
+                    "event_count": events.len(),
+                    "fingerprint": workflow.fingerprint,
+                    "db_path": db_path.display().to_string(),
+                }))?);
+            } else {
+                println!(
+                    "Captured workflow: {} ({} events, {})",
+                    workflow_name,
+                    events.len(),
+                    model,
+                );
+                println!("  ID: {}", workflow.id);
+                println!("  Fingerprint: {}...{}", &workflow.fingerprint[..8], &workflow.fingerprint[workflow.fingerprint.len()-8..]);
+                println!("  Stored: {}", db_path.display());
+            }
+        }
+
+        // ── List workflows ────────────────────────────────────────────
+
+        Commands::Workflows => {
+            use benchpress_workflow::storage::WorkflowStore;
+
+            let db_path = workflow_db_path()?;
+            let store = WorkflowStore::new(&db_path)?;
+            let workflows = store.list_workflows()?;
+
+            if cli.json {
+                println!("{}", serde_json::to_string_pretty(&workflows)?);
+            } else if workflows.is_empty() {
+                println!("No workflows captured yet.");
+                println!("  Use: bp capture <path-to-session.jsonl>");
+            } else {
+                println!("{:<10} {:<30} {:<25} {:>6} {}", "ID", "Name", "Model", "Events", "Date");
+                println!("{}", "-".repeat(90));
+                for wf in &workflows {
+                    let short_id = &wf.id.to_string()[..8];
+                    let date = wf.captured_at.format("%Y-%m-%d %H:%M");
+                    println!(
+                        "{:<10} {:<30} {:<25} {:>6} {}",
+                        short_id,
+                        truncate_str(&wf.name, 28),
+                        truncate_str(&wf.source_model, 23),
+                        wf.event_count,
+                        date,
+                    );
+                }
+                println!("\n{} workflow(s) total", workflows.len());
+            }
+        }
+
+        // ── Distill ───────────────────────────────────────────────────
+
+        Commands::Distill { workflow_id, target } => {
+            use benchpress_workflow::storage::WorkflowStore;
+
+            let db_path = workflow_db_path()?;
+            let store = WorkflowStore::new(&db_path)?;
+            let id = resolve_workflow_id(&store, &workflow_id)?;
+            let workflow = store
+                .get_workflow(id)?
+                .ok_or_else(|| anyhow::anyhow!("Workflow {} not found", id))?;
+
+            let distilled = benchpress_distiller::distill(&workflow, &target);
+
+            if cli.json {
+                println!("{}", serde_json::to_string_pretty(&distilled)?);
+            } else {
+                println!("Distilled: {} -> {}", workflow.source_model, target);
+                println!("  Original events:  {}", workflow.events.len());
+                println!("  Distilled events: {}", distilled.events.len());
+                println!("  Compression:      {:.1}%", distilled.compression_ratio * 100.0);
+                println!("  Copy blocks:      {}", distilled.copy_blocks.len());
+                println!("  Checkpoints:      {}", distilled.checkpoints.len());
+                println!("  Est. tokens:      {} (was {})",
+                    distilled.estimated_cost.total_tokens,
+                    workflow.metadata.total_tokens.total_tokens,
+                );
+                println!("  Est. cost:        ${:.4} (was ${:.4})",
+                    distilled.estimated_cost.estimated_cost_usd,
+                    workflow.metadata.total_tokens.estimated_cost_usd,
+                );
+                println!("  Distilled ID:     {}", distilled.id);
+            }
+        }
+
+        // ── Judge ─────────────────────────────────────────────────────
+
+        Commands::Judge { workflow_id, replay_model } => {
+            use benchpress_judge::engine::JudgeEngine;
+            use benchpress_workflow::storage::WorkflowStore;
+
+            let db_path = workflow_db_path()?;
+            let store = WorkflowStore::new(&db_path)?;
+            let id = resolve_workflow_id(&store, &workflow_id)?;
+            let workflow = store
+                .get_workflow(id)?
+                .ok_or_else(|| anyhow::anyhow!("Workflow {} not found", id))?;
+
+            let mut engine = JudgeEngine::new();
+            let session_id = engine.start_session(
+                workflow.id,
+                workflow.events.clone(),
+                &replay_model,
+            );
+
+            if cli.json {
+                println!("{}", serde_json::to_string_pretty(&serde_json::json!({
+                    "session_id": session_id.to_string(),
+                    "workflow_id": workflow.id.to_string(),
+                    "workflow_name": workflow.name,
+                    "replay_model": replay_model,
+                    "expected_events": workflow.events.len(),
+                    "status": "active",
+                }))?);
+            } else {
+                println!("Judge session started");
+                println!("  Session ID: {}", session_id);
+                println!("  Workflow:   {} ({})", workflow.name, &workflow.id.to_string()[..8]);
+                println!("  Model:      {} -> {}", workflow.source_model, replay_model);
+                println!("  Events:     {} expected", workflow.events.len());
+                println!("  Status:     active");
+                println!();
+                println!("Use MCP tools bp.judge.event and bp.judge.verdict to");
+                println!("report replay events and finalize the judgment.");
+            }
+        }
     }
 
     Ok(())
+}
+
+/// Truncate a string with ellipsis if it exceeds max length.
+fn truncate_str(s: &str, max: usize) -> String {
+    if s.len() <= max {
+        s.to_string()
+    } else {
+        format!("{}...", &s[..max.saturating_sub(3)])
+    }
 }

@@ -104,26 +104,38 @@ async fn handle_tools_call(
 
     let tool_args = params.get("arguments").cloned().unwrap_or_default();
 
-    let tool = state
-        .tools
-        .iter()
-        .find(|t| t.name == tool_name)
-        .ok_or(JsonRpcError {
-            code: -32602,
-            message: format!("Unknown tool: {}", tool_name),
-        })?;
+    // Check if it's a stateful tool that needs McpState access
+    let result = match tool_name {
+        "bp.capture" => crate::tools::tool_capture(state, tool_args).await,
+        "bp.workflows" => crate::tools::tool_workflows(state).await,
+        "bp.distill" => crate::tools::tool_distill(state, tool_args).await,
+        "bp.judge.start" => crate::tools::tool_judge_start(state, tool_args).await,
+        "bp.judge.event" => crate::tools::tool_judge_event(state, tool_args).await,
+        "bp.judge.verdict" => crate::tools::tool_judge_verdict(state, tool_args).await,
+        _ => {
+            // Stateless tools use the function-pointer handler
+            let tool = state
+                .tools
+                .iter()
+                .find(|t| t.name == tool_name)
+                .ok_or(JsonRpcError {
+                    code: -32602,
+                    message: format!("Unknown tool: {}", tool_name),
+                })?;
 
-    let result = (tool.handler)(tool_args)
-        .await
-        .map_err(|e| JsonRpcError {
-            code: -32603,
-            message: e.to_string(),
-        })?;
+            (tool.handler)(tool_args).await
+        }
+    };
+
+    let value = result.map_err(|e| JsonRpcError {
+        code: -32603,
+        message: e.to_string(),
+    })?;
 
     Ok(serde_json::json!({
         "content": [{
             "type": "text",
-            "text": serde_json::to_string_pretty(&result).unwrap_or_default()
+            "text": serde_json::to_string_pretty(&value).unwrap_or_default()
         }]
     }))
 }

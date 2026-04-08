@@ -7,17 +7,43 @@ pub mod protocol;
 pub mod tools;
 
 use axum::{routing::post, Router};
+use std::path::PathBuf;
 use std::sync::Arc;
+use tokio::sync::Mutex;
 
 pub struct McpState {
     pub tools: Vec<tools::McpTool>,
+    pub workflow_store: Mutex<benchpress_workflow::storage::WorkflowStore>,
+    pub judge_engine: Mutex<benchpress_judge::engine::JudgeEngine>,
 }
 
 impl McpState {
     pub fn new() -> Self {
+        let db_path = Self::workflow_db_path();
+        let store = benchpress_workflow::storage::WorkflowStore::new(&db_path)
+            .expect("Failed to open workflow database");
+
         Self {
             tools: tools::register_all(),
+            workflow_store: Mutex::new(store),
+            judge_engine: Mutex::new(benchpress_judge::engine::JudgeEngine::new()),
         }
+    }
+
+    /// Resolve the workflow database path (~/.benchpress/workflows.db).
+    fn workflow_db_path() -> PathBuf {
+        let base = if let Some(proj_dirs) =
+            directories::ProjectDirs::from("", "", "benchpress")
+        {
+            proj_dirs.data_dir().to_path_buf()
+        } else {
+            let home = std::env::var("HOME")
+                .or_else(|_| std::env::var("USERPROFILE"))
+                .unwrap_or_else(|_| ".".to_string());
+            PathBuf::from(home).join(".benchpress")
+        };
+        std::fs::create_dir_all(&base).ok();
+        base.join("workflows.db")
     }
 }
 
