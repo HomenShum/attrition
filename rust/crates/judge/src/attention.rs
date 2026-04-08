@@ -1,7 +1,7 @@
 //! Context attention tracking — measures how closely the replay model
 //! followed the expected workflow's event sequence.
 
-use benchpress_workflow::CanonicalEvent;
+use attrition_workflow::CanonicalEvent;
 
 use crate::diff::compare_events;
 use crate::types::{AttentionEntry, AttentionMap, AttentionStatus};

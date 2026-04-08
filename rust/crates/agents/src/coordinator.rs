@@ -1,4 +1,4 @@
-use benchpress_core::Result;
+use attrition_core::Result;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -59,7 +59,7 @@ impl Coordinator {
         let id = task.id;
 
         if self.active_tasks.len() >= self.max_concurrent {
-            return Err(benchpress_core::Error::Agent(format!(
+            return Err(attrition_core::Error::Agent(format!(
                 "Max concurrent tasks ({}) reached",
                 self.max_concurrent
             )));

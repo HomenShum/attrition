@@ -1,13 +1,13 @@
 [package]
-name = "benchpress-sdk"
+name = "attrition-sdk"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
-description = "Rust SDK for consuming benchpress services"
+description = "Rust SDK for consuming attrition services"
 
 [dependencies]
-benchpress-core = { path = "../core" }
+attrition-core = { path = "../core" }
 reqwest.workspace = true
 tokio.workspace = true
 serde.workspace = true

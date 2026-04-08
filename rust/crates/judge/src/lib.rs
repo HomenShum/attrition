@@ -1,4 +1,4 @@
-//! benchpress-judge: Workflow replay judgment engine
+//! attrition-judge: Workflow replay judgment engine
 //!
 //! Compares expected canonical event streams against actual replay outputs.
 //! Produces verdicts (correct / partial / escalate / failed), divergence reports,

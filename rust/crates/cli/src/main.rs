@@ -3,19 +3,19 @@ use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
 const BANNER: &str = r#"
-    ____                  _     ____
-   | __ )  ___ _ __   ___| |__ |  _ \ _ __ ___  ___ ___
-   |  _ \ / _ \ '_ \ / __| '_ \| |_) | '__/ _ \/ __/ __|
-   | |_) |  __/ | | | (__| | | |  __/| | |  __/\__ \__ \
-   |____/ \___|_| |_|\___|_| |_|_|   |_|  \___||___/___/
-   benchpress — workflow memory + distillation engine
+        _   _        _ _   _
+   __ _| |_| |_ _ __(_) |_(_) ___  _ __
+  / _` | __| __| '__| | __| |/ _ \| '_ \
+ | (_| | |_| |_| |  | | |_| | (_) | | | |
+  \__,_|\__|\__|_|  |_|\__|_|\___/|_| |_|
+  attrition — workflow memory + distillation engine
 "#;
 
 #[derive(Parser)]
 #[command(name = "bp")]
 #[command(version = env!("CARGO_PKG_VERSION"))]
 #[command(about = "Workflow memory + distillation engine")]
-#[command(long_about = "benchpress: Capture frontier model workflows, distill for cheaper replay.\nRust rewrite with MCP protocol support.")]
+#[command(long_about = "attrition: Capture frontier model workflows, distill for cheaper replay.\nRust rewrite with MCP protocol support.")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -31,7 +31,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Start the benchpress server (API + MCP)
+    /// Start the attrition server (API + MCP)
     Serve {
         /// Host to bind to
         #[arg(long, default_value = "0.0.0.0")]
@@ -146,9 +146,9 @@ enum Commands {
     },
 }
 
-/// Resolve the workflow database path (~/.benchpress/workflows.db).
+/// Resolve the workflow database path (~/.attrition/workflows.db).
 fn workflow_db_path() -> Result<PathBuf> {
-    let base = if let Some(proj_dirs) = directories::ProjectDirs::from("", "", "benchpress") {
+    let base = if let Some(proj_dirs) = directories::ProjectDirs::from("", "", "attrition") {
         proj_dirs.data_dir().to_path_buf()
     } else {
         // Fallback to home directory
@@ -158,17 +158,17 @@ fn workflow_db_path() -> Result<PathBuf> {
     Ok(base.join("workflows.db"))
 }
 
-/// Fallback: ~/.benchpress/
+/// Fallback: ~/.attrition/
 fn dirs_fallback() -> PathBuf {
     let home = std::env::var("HOME")
         .or_else(|_| std::env::var("USERPROFILE"))
         .unwrap_or_else(|_| ".".to_string());
-    PathBuf::from(home).join(".benchpress")
+    PathBuf::from(home).join(".attrition")
 }
 
 /// Resolve a workflow ID from a short prefix or full UUID.
 fn resolve_workflow_id(
-    store: &benchpress_workflow::storage::WorkflowStore,
+    store: &attrition_workflow::storage::WorkflowStore,
     input: &str,
 ) -> Result<uuid::Uuid> {
     // Try parsing as a full UUID first
@@ -199,7 +199,7 @@ async fn main() -> Result<()> {
     let cli = Cli::parse();
 
     // Init telemetry — verbose flag controls filter level without unsafe set_var
-    benchpress_telemetry::init_with_level(if cli.verbose { "debug" } else { "info" });
+    attrition_telemetry::init_with_level(if cli.verbose { "debug" } else { "info" });
 
     match cli.command {
         Commands::Serve { host, port, mcp, mcp_port } => {
@@ -210,13 +210,13 @@ async fn main() -> Result<()> {
             }
             println!();
 
-            let config = benchpress_core::AppConfig {
-                server: benchpress_core::config::ServerConfig {
+            let config = attrition_core::AppConfig {
+                server: attrition_core::config::ServerConfig {
                     host: host.clone(),
                     port,
                     ..Default::default()
                 },
-                mcp: benchpress_core::config::McpConfig {
+                mcp: attrition_core::config::McpConfig {
                     enabled: mcp,
                     port: mcp_port,
                     auth_token: None,
@@ -224,11 +224,11 @@ async fn main() -> Result<()> {
                 ..Default::default()
             };
 
-            let app = benchpress_api::build_router(&config);
+            let app = attrition_api::build_router(&config);
 
             // Mount MCP server on separate port if enabled
             if mcp {
-                let mcp_router = benchpress_mcp::build_mcp_router();
+                let mcp_router = attrition_mcp::build_mcp_router();
                 let mcp_listener = tokio::net::TcpListener::bind(format!("{}:{}", host, mcp_port)).await?;
                 tracing::info!("MCP server listening on {}:{}", host, mcp_port);
                 tokio::spawn(async move {
@@ -239,12 +239,12 @@ async fn main() -> Result<()> {
             }
 
             let listener = tokio::net::TcpListener::bind(format!("{}:{}", host, port)).await?;
-            tracing::info!("benchpress API server listening on {}:{}", host, port);
+            tracing::info!("attrition API server listening on {}:{}", host, port);
             axum::serve(listener, app).await?;
         }
 
         Commands::Check { url, timeout } => {
-            let result = benchpress_engine::qa::run_qa_check(&url, timeout).await?;
+            let result = attrition_engine::qa::run_qa_check(&url, timeout).await?;
             if cli.json {
                 println!("{}", serde_json::to_string_pretty(&result)?);
             } else {
@@ -259,7 +259,7 @@ async fn main() -> Result<()> {
         }
 
         Commands::Sitemap { url, depth, max_pages } => {
-            let result = benchpress_engine::crawl::crawl_sitemap(&url, depth, max_pages).await?;
+            let result = attrition_engine::crawl::crawl_sitemap(&url, depth, max_pages).await?;
             if cli.json {
                 println!("{}", serde_json::to_string_pretty(&result)?);
             } else {
@@ -273,7 +273,7 @@ async fn main() -> Result<()> {
         }
 
         Commands::Audit { url } => {
-            let result = benchpress_engine::audit::run_ux_audit(&url).await?;
+            let result = attrition_engine::audit::run_ux_audit(&url).await?;
             if cli.json {
                 println!("{}", serde_json::to_string_pretty(&result)?);
             } else {
@@ -292,7 +292,7 @@ async fn main() -> Result<()> {
         }
 
         Commands::Diff { url, baseline } => {
-            let result = benchpress_engine::diff::run_diff_crawl(&url, baseline.as_deref()).await?;
+            let result = attrition_engine::diff::run_diff_crawl(&url, baseline.as_deref()).await?;
             if cli.json {
                 println!("{}", serde_json::to_string_pretty(&result)?);
             } else {
@@ -305,7 +305,7 @@ async fn main() -> Result<()> {
         }
 
         Commands::Pipeline { url } => {
-            let result = benchpress_agents::pipeline::run_pipeline(&url).await?;
+            let result = attrition_agents::pipeline::run_pipeline(&url).await?;
             if cli.json {
                 println!("{}", serde_json::to_string_pretty(&result)?);
             } else {
@@ -318,7 +318,7 @@ async fn main() -> Result<()> {
         }
 
         Commands::Health { url } => {
-            let client = benchpress_sdk::BpClient::new(&url);
+            let client = attrition_sdk::BpClient::new(&url);
             match client.health().await {
                 Ok(health) => {
                     println!("Server: {} (v{})", health.status, health.version);
@@ -335,17 +335,17 @@ async fn main() -> Result<()> {
             println!("{}", BANNER);
             println!("  Version: {}", env!("CARGO_PKG_VERSION"));
             println!("  Platform: {} / {}", std::env::consts::OS, std::env::consts::ARCH);
-            println!("  Config dir: {}", benchpress_core::AppConfig::config_dir().display());
-            println!("  Data dir: {}", benchpress_core::AppConfig::data_dir().display());
+            println!("  Config dir: {}", attrition_core::AppConfig::config_dir().display());
+            println!("  Data dir: {}", attrition_core::AppConfig::data_dir().display());
         }
 
         // ── Workflow capture ──────────────────────────────────────────
 
         Commands::Capture { path, name, model } => {
-            use benchpress_workflow::adapters::claude_code::ClaudeCodeAdapter;
-            use benchpress_workflow::adapters::WorkflowAdapter;
-            use benchpress_workflow::storage::WorkflowStore;
-            use benchpress_workflow::{Workflow, WorkflowMetadata, TokenCost};
+            use attrition_workflow::adapters::claude_code::ClaudeCodeAdapter;
+            use attrition_workflow::adapters::WorkflowAdapter;
+            use attrition_workflow::storage::WorkflowStore;
+            use attrition_workflow::{Workflow, WorkflowMetadata, TokenCost};
 
             let raw = std::fs::read(&path)?;
             let events = ClaudeCodeAdapter::parse(&raw)?;
@@ -400,7 +400,7 @@ async fn main() -> Result<()> {
         // ── List workflows ────────────────────────────────────────────
 
         Commands::Workflows => {
-            use benchpress_workflow::storage::WorkflowStore;
+            use attrition_workflow::storage::WorkflowStore;
 
             let db_path = workflow_db_path()?;
             let store = WorkflowStore::new(&db_path)?;
@@ -433,7 +433,7 @@ async fn main() -> Result<()> {
         // ── Distill ───────────────────────────────────────────────────
 
         Commands::Distill { workflow_id, target } => {
-            use benchpress_workflow::storage::WorkflowStore;
+            use attrition_workflow::storage::WorkflowStore;
 
             let db_path = workflow_db_path()?;
             let store = WorkflowStore::new(&db_path)?;
@@ -442,7 +442,7 @@ async fn main() -> Result<()> {
                 .get_workflow(id)?
                 .ok_or_else(|| anyhow::anyhow!("Workflow {} not found", id))?;
 
-            let distilled = benchpress_distiller::distill(&workflow, &target);
+            let distilled = attrition_distiller::distill(&workflow, &target);
 
             if cli.json {
                 println!("{}", serde_json::to_string_pretty(&distilled)?);
@@ -468,8 +468,8 @@ async fn main() -> Result<()> {
         // ── Judge ─────────────────────────────────────────────────────
 
         Commands::Judge { workflow_id, replay_model } => {
-            use benchpress_judge::engine::JudgeEngine;
-            use benchpress_workflow::storage::WorkflowStore;
+            use attrition_judge::engine::JudgeEngine;
+            use attrition_workflow::storage::WorkflowStore;
 
             let db_path = workflow_db_path()?;
             let store = WorkflowStore::new(&db_path)?;

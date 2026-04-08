@@ -99,11 +99,11 @@ impl AppConfig {
         }
     }
 
-    /// Platform-specific config directory: ~/.benchpress/
+    /// Platform-specific config directory: ~/.attrition/
     pub fn config_dir() -> PathBuf {
         directories::BaseDirs::new()
-            .map(|d| d.home_dir().join(".benchpress"))
-            .unwrap_or_else(|| PathBuf::from(".benchpress"))
+            .map(|d| d.home_dir().join(".attrition"))
+            .unwrap_or_else(|| PathBuf::from(".attrition"))
     }
 
     /// Data directory for SQLite, caches, etc.

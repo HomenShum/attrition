@@ -1,4 +1,4 @@
-//! benchpress-llm-client: Anthropic Messages API client
+//! attrition-llm-client: Anthropic Messages API client
 //!
 //! Typed HTTP client for the Claude family of models. Supports text generation,
 //! vision (screenshot analysis), token tracking, and retry with exponential

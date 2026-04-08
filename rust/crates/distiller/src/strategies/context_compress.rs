@@ -5,7 +5,7 @@
 //! - Sequential Think blocks -> merge into one
 //! - Think blocks that just summarize prior steps -> remove
 
-use benchpress_workflow::CanonicalEvent;
+use attrition_workflow::CanonicalEvent;
 
 /// Maximum length for a Think block before it gets truncated.
 const MAX_THINK_LEN: usize = 500;

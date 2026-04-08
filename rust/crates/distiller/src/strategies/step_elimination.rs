@@ -7,7 +7,7 @@
 //! - FileEdit events that are later overwritten by another FileEdit on same path -> keep last only
 //! - ToolCall retries (same tool, same args, first failed) -> keep only successful one
 
-use benchpress_workflow::CanonicalEvent;
+use attrition_workflow::CanonicalEvent;
 
 /// Eliminate redundant steps, returning a compacted event stream.
 pub fn eliminate(events: &[CanonicalEvent]) -> Vec<CanonicalEvent> {

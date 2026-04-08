@@ -1,16 +1,16 @@
 [package]
-name = "benchpress-api"
+name = "attrition-api"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
-description = "Axum HTTP API server for benchpress"
+description = "Axum HTTP API server for attrition"
 
 [dependencies]
-benchpress-core = { path = "../core" }
-benchpress-engine = { path = "../qa-engine" }
-benchpress-agents = { path = "../agents" }
-benchpress-telemetry = { path = "../telemetry" }
+attrition-core = { path = "../core" }
+attrition-engine = { path = "../qa-engine" }
+attrition-agents = { path = "../agents" }
+attrition-telemetry = { path = "../telemetry" }
 axum.workspace = true
 tokio.workspace = true
 tower.workspace = true

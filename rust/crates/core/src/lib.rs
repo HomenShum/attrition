@@ -1,7 +1,7 @@
-//! benchpress-core: Core types, configuration, and error handling
+//! attrition-core: Core types, configuration, and error handling
 //!
-//! This crate provides the foundational types shared across all benchpress crates.
-//! It is the dependency root — no other benchpress crate depends on anything
+//! This crate provides the foundational types shared across all attrition crates.
+//! It is the dependency root — no other attrition crate depends on anything
 //! except this one.
 
 pub mod config;

@@ -5,7 +5,7 @@
 
 use crate::adapters::WorkflowAdapter;
 use crate::CanonicalEvent;
-use benchpress_core::Result;
+use attrition_core::Result;
 use serde_json::Value;
 
 /// Parses Anthropic Messages API responses into canonical events.
@@ -25,7 +25,7 @@ pub struct RawApiAdapter;
 impl WorkflowAdapter for RawApiAdapter {
     fn parse(input: &[u8]) -> Result<Vec<CanonicalEvent>> {
         let text = std::str::from_utf8(input).map_err(|e| {
-            benchpress_core::Error::Internal(format!("Invalid UTF-8: {e}"))
+            attrition_core::Error::Internal(format!("Invalid UTF-8: {e}"))
         })?;
         let root: Value = serde_json::from_str(text)?;
 
@@ -127,7 +127,7 @@ fn extract_messages(root: &Value) -> Result<Vec<Value>> {
     if root.get("role").is_some() && root.get("content").is_some() {
         return Ok(vec![root.clone()]);
     }
-    Err(benchpress_core::Error::Internal(
+    Err(attrition_core::Error::Internal(
         "Expected messages array, bare array, or single message object".into(),
     ))
 }

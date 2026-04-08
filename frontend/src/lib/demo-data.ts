@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------
-// Demo data for benchpress workflow distillation UI
+// Demo data for attrition workflow distillation UI
 // Auto-seeds into localStorage on first visit if empty.
 // --------------------------------------------------------------------------
 

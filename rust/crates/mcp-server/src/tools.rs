@@ -8,7 +8,7 @@ pub struct McpTool {
     pub name: &'static str,
     pub description: &'static str,
     pub input_schema: serde_json::Value,
-    pub handler: fn(serde_json::Value) -> Pin<Box<dyn Future<Output = benchpress_core::Result<serde_json::Value>> + Send>>,
+    pub handler: fn(serde_json::Value) -> Pin<Box<dyn Future<Output = attrition_core::Result<serde_json::Value>> + Send>>,
 }
 
 /// Register all available MCP tools
@@ -243,45 +243,45 @@ pub fn register_all() -> Vec<McpTool> {
 
 // ── Stateless tool handlers (QA engine) ───────────────────────────────────
 
-async fn tool_qa_check(args: serde_json::Value) -> benchpress_core::Result<serde_json::Value> {
+async fn tool_qa_check(args: serde_json::Value) -> attrition_core::Result<serde_json::Value> {
     let url = args.get("url").and_then(|v| v.as_str()).unwrap_or("");
     let timeout = args.get("timeout_ms").and_then(|v| v.as_u64()).unwrap_or(30_000);
-    let result = benchpress_engine::qa::run_qa_check(url, timeout).await?;
-    serde_json::to_value(result).map_err(|e| benchpress_core::Error::Internal(e.to_string()))
+    let result = attrition_engine::qa::run_qa_check(url, timeout).await?;
+    serde_json::to_value(result).map_err(|e| attrition_core::Error::Internal(e.to_string()))
 }
 
-async fn tool_sitemap(args: serde_json::Value) -> benchpress_core::Result<serde_json::Value> {
+async fn tool_sitemap(args: serde_json::Value) -> attrition_core::Result<serde_json::Value> {
     let url = args.get("url").and_then(|v| v.as_str()).unwrap_or("");
     let max_depth = args.get("max_depth").and_then(|v| v.as_u64()).unwrap_or(3) as u8;
     let max_pages = args.get("max_pages").and_then(|v| v.as_u64()).unwrap_or(50) as usize;
-    let result = benchpress_engine::crawl::crawl_sitemap(url, max_depth, max_pages).await?;
-    serde_json::to_value(result).map_err(|e| benchpress_core::Error::Internal(e.to_string()))
+    let result = attrition_engine::crawl::crawl_sitemap(url, max_depth, max_pages).await?;
+    serde_json::to_value(result).map_err(|e| attrition_core::Error::Internal(e.to_string()))
 }
 
-async fn tool_ux_audit(args: serde_json::Value) -> benchpress_core::Result<serde_json::Value> {
+async fn tool_ux_audit(args: serde_json::Value) -> attrition_core::Result<serde_json::Value> {
     let url = args.get("url").and_then(|v| v.as_str()).unwrap_or("");
-    let result = benchpress_engine::audit::run_ux_audit(url).await?;
-    serde_json::to_value(result).map_err(|e| benchpress_core::Error::Internal(e.to_string()))
+    let result = attrition_engine::audit::run_ux_audit(url).await?;
+    serde_json::to_value(result).map_err(|e| attrition_core::Error::Internal(e.to_string()))
 }
 
-async fn tool_diff_crawl(args: serde_json::Value) -> benchpress_core::Result<serde_json::Value> {
+async fn tool_diff_crawl(args: serde_json::Value) -> attrition_core::Result<serde_json::Value> {
     let url = args.get("url").and_then(|v| v.as_str()).unwrap_or("");
     let baseline_id = args.get("baseline_id").and_then(|v| v.as_str());
-    let result = benchpress_engine::diff::run_diff_crawl(url, baseline_id).await?;
-    serde_json::to_value(result).map_err(|e| benchpress_core::Error::Internal(e.to_string()))
+    let result = attrition_engine::diff::run_diff_crawl(url, baseline_id).await?;
+    serde_json::to_value(result).map_err(|e| attrition_core::Error::Internal(e.to_string()))
 }
 
-async fn tool_workflow(args: serde_json::Value) -> benchpress_core::Result<serde_json::Value> {
+async fn tool_workflow(args: serde_json::Value) -> attrition_core::Result<serde_json::Value> {
     let url = args.get("url").and_then(|v| v.as_str()).unwrap_or("");
     let name = args.get("name").and_then(|v| v.as_str()).unwrap_or("unnamed");
-    let result = benchpress_engine::workflow::start_workflow(url, name).await?;
-    serde_json::to_value(result).map_err(|e| benchpress_core::Error::Internal(e.to_string()))
+    let result = attrition_engine::workflow::start_workflow(url, name).await?;
+    serde_json::to_value(result).map_err(|e| attrition_core::Error::Internal(e.to_string()))
 }
 
-async fn tool_pipeline(args: serde_json::Value) -> benchpress_core::Result<serde_json::Value> {
+async fn tool_pipeline(args: serde_json::Value) -> attrition_core::Result<serde_json::Value> {
     let url = args.get("url").and_then(|v| v.as_str()).unwrap_or("");
-    let result = benchpress_agents::pipeline::run_pipeline(url).await?;
-    serde_json::to_value(result).map_err(|e| benchpress_core::Error::Internal(e.to_string()))
+    let result = attrition_agents::pipeline::run_pipeline(url).await?;
+    serde_json::to_value(result).map_err(|e| attrition_core::Error::Internal(e.to_string()))
 }
 
 // ── Stateful tool handlers (workflow store + judge engine) ────────────────
@@ -290,15 +290,15 @@ async fn tool_pipeline(args: serde_json::Value) -> benchpress_core::Result<serde
 pub async fn tool_capture(
     state: &McpState,
     args: serde_json::Value,
-) -> benchpress_core::Result<serde_json::Value> {
-    use benchpress_workflow::adapters::claude_code::ClaudeCodeAdapter;
-    use benchpress_workflow::adapters::WorkflowAdapter;
-    use benchpress_workflow::{Workflow, WorkflowMetadata, TokenCost};
+) -> attrition_core::Result<serde_json::Value> {
+    use attrition_workflow::adapters::claude_code::ClaudeCodeAdapter;
+    use attrition_workflow::adapters::WorkflowAdapter;
+    use attrition_workflow::{Workflow, WorkflowMetadata, TokenCost};
 
     let session_path = args
         .get("session_path")
         .and_then(|v| v.as_str())
-        .ok_or_else(|| benchpress_core::Error::Internal("session_path is required".into()))?;
+        .ok_or_else(|| attrition_core::Error::Internal("session_path is required".into()))?;
 
     let model = args
         .get("model")
@@ -306,7 +306,7 @@ pub async fn tool_capture(
         .unwrap_or("claude-opus-4-6");
 
     let raw = std::fs::read(session_path).map_err(|e| {
-        benchpress_core::Error::Internal(format!("Failed to read {}: {}", session_path, e))
+        attrition_core::Error::Internal(format!("Failed to read {}: {}", session_path, e))
     })?;
     let events = ClaudeCodeAdapter::parse(&raw)?;
 
@@ -355,61 +355,61 @@ pub async fn tool_capture(
 /// bp.workflows — list all workflows
 pub async fn tool_workflows(
     state: &McpState,
-) -> benchpress_core::Result<serde_json::Value> {
+) -> attrition_core::Result<serde_json::Value> {
     let store = state.workflow_store.lock().await;
     let workflows = store.list_workflows()?;
     serde_json::to_value(&workflows)
-        .map_err(|e| benchpress_core::Error::Internal(e.to_string()))
+        .map_err(|e| attrition_core::Error::Internal(e.to_string()))
 }
 
 /// bp.distill — distill a workflow for cheaper replay
 pub async fn tool_distill(
     state: &McpState,
     args: serde_json::Value,
-) -> benchpress_core::Result<serde_json::Value> {
+) -> attrition_core::Result<serde_json::Value> {
     let workflow_id_str = args
         .get("workflow_id")
         .and_then(|v| v.as_str())
-        .ok_or_else(|| benchpress_core::Error::Internal("workflow_id is required".into()))?;
+        .ok_or_else(|| attrition_core::Error::Internal("workflow_id is required".into()))?;
 
     let target_model = args
         .get("target_model")
         .and_then(|v| v.as_str())
-        .ok_or_else(|| benchpress_core::Error::Internal("target_model is required".into()))?;
+        .ok_or_else(|| attrition_core::Error::Internal("target_model is required".into()))?;
 
     let store = state.workflow_store.lock().await;
     let id = resolve_workflow_id_from_store(&*store, workflow_id_str)?;
     let workflow = store
         .get_workflow(id)?
-        .ok_or_else(|| benchpress_core::Error::NotFound(format!("Workflow {}", id)))?;
+        .ok_or_else(|| attrition_core::Error::NotFound(format!("Workflow {}", id)))?;
     drop(store);
 
-    let distilled = benchpress_distiller::distill(&workflow, target_model);
+    let distilled = attrition_distiller::distill(&workflow, target_model);
 
     serde_json::to_value(&distilled)
-        .map_err(|e| benchpress_core::Error::Internal(e.to_string()))
+        .map_err(|e| attrition_core::Error::Internal(e.to_string()))
 }
 
 /// bp.judge.start — start a judge session
 pub async fn tool_judge_start(
     state: &McpState,
     args: serde_json::Value,
-) -> benchpress_core::Result<serde_json::Value> {
+) -> attrition_core::Result<serde_json::Value> {
     let workflow_id_str = args
         .get("workflow_id")
         .and_then(|v| v.as_str())
-        .ok_or_else(|| benchpress_core::Error::Internal("workflow_id is required".into()))?;
+        .ok_or_else(|| attrition_core::Error::Internal("workflow_id is required".into()))?;
 
     let replay_model = args
         .get("replay_model")
         .and_then(|v| v.as_str())
-        .ok_or_else(|| benchpress_core::Error::Internal("replay_model is required".into()))?;
+        .ok_or_else(|| attrition_core::Error::Internal("replay_model is required".into()))?;
 
     let store = state.workflow_store.lock().await;
     let id = resolve_workflow_id_from_store(&*store, workflow_id_str)?;
     let workflow = store
         .get_workflow(id)?
-        .ok_or_else(|| benchpress_core::Error::NotFound(format!("Workflow {}", id)))?;
+        .ok_or_else(|| attrition_core::Error::NotFound(format!("Workflow {}", id)))?;
     drop(store);
 
     let mut engine = state.judge_engine.lock().await;
@@ -433,23 +433,23 @@ pub async fn tool_judge_start(
 pub async fn tool_judge_event(
     state: &McpState,
     args: serde_json::Value,
-) -> benchpress_core::Result<serde_json::Value> {
+) -> attrition_core::Result<serde_json::Value> {
     let session_id_str = args
         .get("session_id")
         .and_then(|v| v.as_str())
-        .ok_or_else(|| benchpress_core::Error::Internal("session_id is required".into()))?;
+        .ok_or_else(|| attrition_core::Error::Internal("session_id is required".into()))?;
 
     let session_id = uuid::Uuid::parse_str(session_id_str).map_err(|e| {
-        benchpress_core::Error::Internal(format!("Invalid session_id UUID: {}", e))
+        attrition_core::Error::Internal(format!("Invalid session_id UUID: {}", e))
     })?;
 
     let event_value = args
         .get("event")
-        .ok_or_else(|| benchpress_core::Error::Internal("event is required".into()))?;
+        .ok_or_else(|| attrition_core::Error::Internal("event is required".into()))?;
 
-    let event: benchpress_workflow::CanonicalEvent =
+    let event: attrition_workflow::CanonicalEvent =
         serde_json::from_value(event_value.clone()).map_err(|e| {
-            benchpress_core::Error::Internal(format!("Invalid event format: {}", e))
+            attrition_core::Error::Internal(format!("Invalid event format: {}", e))
         })?;
 
     let mut engine = state.judge_engine.lock().await;
@@ -474,28 +474,28 @@ pub async fn tool_judge_event(
 pub async fn tool_judge_verdict(
     state: &McpState,
     args: serde_json::Value,
-) -> benchpress_core::Result<serde_json::Value> {
+) -> attrition_core::Result<serde_json::Value> {
     let session_id_str = args
         .get("session_id")
         .and_then(|v| v.as_str())
-        .ok_or_else(|| benchpress_core::Error::Internal("session_id is required".into()))?;
+        .ok_or_else(|| attrition_core::Error::Internal("session_id is required".into()))?;
 
     let session_id = uuid::Uuid::parse_str(session_id_str).map_err(|e| {
-        benchpress_core::Error::Internal(format!("Invalid session_id UUID: {}", e))
+        attrition_core::Error::Internal(format!("Invalid session_id UUID: {}", e))
     })?;
 
     let mut engine = state.judge_engine.lock().await;
     let verdict = engine.finalize(session_id)?;
 
     serde_json::to_value(&verdict)
-        .map_err(|e| benchpress_core::Error::Internal(e.to_string()))
+        .map_err(|e| attrition_core::Error::Internal(e.to_string()))
 }
 
 /// Resolve a workflow ID from a short prefix or full UUID.
 fn resolve_workflow_id_from_store(
-    store: &benchpress_workflow::storage::WorkflowStore,
+    store: &attrition_workflow::storage::WorkflowStore,
     input: &str,
-) -> benchpress_core::Result<uuid::Uuid> {
+) -> attrition_core::Result<uuid::Uuid> {
     // Try full UUID first
     if let Ok(id) = uuid::Uuid::parse_str(input) {
         return Ok(id);
@@ -509,12 +509,12 @@ fn resolve_workflow_id_from_store(
         .collect();
 
     match matches.len() {
-        0 => Err(benchpress_core::Error::NotFound(format!(
+        0 => Err(attrition_core::Error::NotFound(format!(
             "No workflow found matching '{}'",
             input
         ))),
         1 => Ok(matches[0].id),
-        n => Err(benchpress_core::Error::Internal(format!(
+        n => Err(attrition_core::Error::Internal(format!(
             "Ambiguous prefix '{}' matches {} workflows",
             input, n
         ))),

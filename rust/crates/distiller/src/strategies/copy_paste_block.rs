@@ -6,7 +6,7 @@
 //! - FileEdit with large `after` strings -> reusable output (confidence 0.9)
 //! - ToolCall results that are data lookups -> reusable (confidence 0.8)
 
-use benchpress_workflow::CanonicalEvent;
+use attrition_workflow::CanonicalEvent;
 use serde::{Deserialize, Serialize};
 
 /// A block of content that can be copy-pasted during replay instead of

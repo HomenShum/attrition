@@ -1,10 +1,10 @@
 [package]
-name = "benchpress-core"
+name = "attrition-core"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
-description = "Core types, config, and error handling for benchpress"
+description = "Core types, config, and error handling for attrition"
 
 [dependencies]
 serde.workspace = true

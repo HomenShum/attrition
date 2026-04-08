@@ -1,10 +1,10 @@
 [package]
-name = "benchpress-workflow"
+name = "attrition-workflow"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-benchpress-core = { path = "../core" }
+attrition-core = { path = "../core" }
 serde.workspace = true
 serde_json.workspace = true
 uuid.workspace = true

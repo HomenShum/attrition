@@ -3,7 +3,7 @@
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 
-use benchpress_core::error::{Error, Result};
+use attrition_core::error::{Error, Result};
 use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE};
 use tracing::{debug, warn};
 

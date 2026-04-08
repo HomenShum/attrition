@@ -1,13 +1,13 @@
-//! benchpress-sdk: Rust SDK for consuming benchpress services
+//! attrition-sdk: Rust SDK for consuming attrition services
 //!
 //! Provides a typed client for external applications to interact with
-//! the benchpress API and MCP server.
+//! the attrition API and MCP server.
 
-use benchpress_core::types::{QaResult, SitemapResult, UxAuditResult};
-use benchpress_core::Result;
+use attrition_core::types::{QaResult, SitemapResult, UxAuditResult};
+use attrition_core::Result;
 use serde::Deserialize;
 
-/// Client for the benchpress API
+/// Client for the attrition API
 pub struct BpClient {
     base_url: String,
     client: reqwest::Client,
@@ -15,7 +15,7 @@ pub struct BpClient {
 }
 
 impl BpClient {
-    /// Create a new client pointing at a benchpress server
+    /// Create a new client pointing at a attrition server
     pub fn new(base_url: &str) -> Self {
         Self {
             base_url: base_url.trim_end_matches('/').to_string(),
@@ -56,7 +56,7 @@ impl BpClient {
             .await?;
 
         let result: QaResult = resp.json().await.map_err(|e| {
-            benchpress_core::Error::Internal(format!("Failed to parse QA result: {}", e))
+            attrition_core::Error::Internal(format!("Failed to parse QA result: {}", e))
         })?;
         Ok(result)
     }
@@ -74,7 +74,7 @@ impl BpClient {
             .await?;
 
         let result: SitemapResult = resp.json().await.map_err(|e| {
-            benchpress_core::Error::Internal(format!("Failed to parse sitemap: {}", e))
+            attrition_core::Error::Internal(format!("Failed to parse sitemap: {}", e))
         })?;
         Ok(result)
     }
@@ -88,7 +88,7 @@ impl BpClient {
             .await?;
 
         let result: UxAuditResult = resp.json().await.map_err(|e| {
-            benchpress_core::Error::Internal(format!("Failed to parse UX audit: {}", e))
+            attrition_core::Error::Internal(format!("Failed to parse UX audit: {}", e))
         })?;
         Ok(result)
     }
@@ -101,7 +101,7 @@ impl BpClient {
             .await?;
 
         let result: HealthResponse = resp.json().await.map_err(|e| {
-            benchpress_core::Error::Internal(format!("Failed to parse health: {}", e))
+            attrition_core::Error::Internal(format!("Failed to parse health: {}", e))
         })?;
         Ok(result)
     }

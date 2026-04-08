@@ -6,7 +6,7 @@
 
 use crate::adapters::WorkflowAdapter;
 use crate::CanonicalEvent;
-use benchpress_core::Result;
+use attrition_core::Result;
 use serde_json::Value;
 
 /// Parses Claude Code `.jsonl` session files into canonical events.
@@ -15,7 +15,7 @@ pub struct ClaudeCodeAdapter;
 impl WorkflowAdapter for ClaudeCodeAdapter {
     fn parse(input: &[u8]) -> Result<Vec<CanonicalEvent>> {
         let text = std::str::from_utf8(input).map_err(|e| {
-            benchpress_core::Error::Internal(format!("Invalid UTF-8 in JSONL: {e}"))
+            attrition_core::Error::Internal(format!("Invalid UTF-8 in JSONL: {e}"))
         })?;
 
         let mut events = Vec::new();

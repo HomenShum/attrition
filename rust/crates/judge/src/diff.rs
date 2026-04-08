@@ -3,7 +3,7 @@
 //! Uses a variant-aware alignment algorithm to produce per-event divergences
 //! with severity classification and human-readable suggestions.
 
-use benchpress_workflow::CanonicalEvent;
+use attrition_workflow::CanonicalEvent;
 
 use crate::types::{Divergence, DivergenceSeverity};
 

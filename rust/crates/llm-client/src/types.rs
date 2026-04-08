@@ -92,7 +92,7 @@ pub struct ApiErrorDetail {
 
 // ── Model Configuration ────────────────────────────────────────────────────
 
-/// Named model tiers for the benchpress pipeline.
+/// Named model tiers for the attrition pipeline.
 #[derive(Debug, Clone)]
 pub struct ModelConfig {
     /// Default workhorse model.

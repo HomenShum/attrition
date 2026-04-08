@@ -52,8 +52,8 @@ export function Landing() {
               marginBottom: "0.75rem",
             }}
           >
-            bench
-            <span style={{ color: "var(--accent)" }}>press</span>
+            att
+            <span style={{ color: "var(--accent)" }}>rition</span>
           </h1>
 
           <p
@@ -219,7 +219,7 @@ export function Landing() {
             </div>
             <div>
               <span style={{ color: "var(--accent)" }}>$</span> cargo install
-              benchpress-cli
+              attrition-cli
             </div>
             <div
               style={{ marginTop: "0.75rem", color: "var(--text-muted)" }}

@@ -1,18 +1,18 @@
 [package]
-name = "benchpress-mcp"
+name = "attrition-mcp"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
-description = "MCP (Model Context Protocol) server for benchpress"
+description = "MCP (Model Context Protocol) server for attrition"
 
 [dependencies]
-benchpress-core = { path = "../core" }
-benchpress-engine = { path = "../qa-engine" }
-benchpress-agents = { path = "../agents" }
-benchpress-workflow = { path = "../workflow" }
-benchpress-distiller = { path = "../distiller" }
-benchpress-judge = { path = "../judge" }
+attrition-core = { path = "../core" }
+attrition-engine = { path = "../qa-engine" }
+attrition-agents = { path = "../agents" }
+attrition-workflow = { path = "../workflow" }
+attrition-distiller = { path = "../distiller" }
+attrition-judge = { path = "../judge" }
 axum.workspace = true
 tokio.workspace = true
 serde.workspace = true

@@ -5,7 +5,7 @@
 //! - FileCreate/FileEdit -> checkpoint after (verify file exists/matches)
 //! - ToolCall with side effects (Bash commands) -> checkpoint after
 
-use benchpress_workflow::CanonicalEvent;
+use attrition_workflow::CanonicalEvent;
 use serde::{Deserialize, Serialize};
 
 /// A verification checkpoint that can be used during replay to ensure

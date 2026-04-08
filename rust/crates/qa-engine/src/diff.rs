@@ -1,5 +1,5 @@
-use benchpress_core::types::{CrawlSnapshot, DiffCrawlResult, DiffType, PageDiff};
-use benchpress_core::Result;
+use attrition_core::types::{CrawlSnapshot, DiffCrawlResult, DiffType, PageDiff};
+use attrition_core::Result;
 
 /// Compare two crawl snapshots and produce a diff
 pub fn diff_snapshots(before: &CrawlSnapshot, after: &CrawlSnapshot) -> Vec<PageDiff> {

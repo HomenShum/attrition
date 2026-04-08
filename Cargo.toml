@@ -20,7 +20,7 @@ version = "0.1.0"
 edition = "2024"
 authors = ["NodeBench <hello@nodebenchai.com>"]
 license = "MIT"
-repository = "https://github.com/Homen-ta/benchpress"
+repository = "https://github.com/HomenShum/attrition"
 description = "Workflow memory + distillation engine — capture frontier model workflows, distill for cheaper replay"
 
 [workspace.dependencies]

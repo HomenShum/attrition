@@ -5,7 +5,7 @@ pub mod generic;
 pub mod raw_api;
 
 use crate::CanonicalEvent;
-use benchpress_core::Result;
+use attrition_core::Result;
 
 /// Trait for parsing agent session data into the canonical event stream.
 ///

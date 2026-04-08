@@ -1,8 +1,8 @@
-# benchpress
+# attrition
 
 **Workflow Memory + Distillation Engine.** Capture frontier model workflows, distill for cheaper replay.
 
-AI coding agents produce brilliant multi-step workflows -- refactors, bug fixes, feature builds -- then throw them away. benchpress captures these workflows, distills them by eliminating redundant steps, and replays them on cheaper models at 60-70% lower token cost. A judge engine verifies replay correctness in real time.
+AI coding agents produce brilliant multi-step workflows -- refactors, bug fixes, feature builds -- then throw them away. attrition captures these workflows, distills them by eliminating redundant steps, and replays them on cheaper models at 60-70% lower token cost. A judge engine verifies replay correctness in real time.
 
 > Rust workspace with MCP protocol support. Works with Claude Code, Cursor, Windsurf, and any MCP-compatible agent.
 
@@ -10,7 +10,7 @@ AI coding agents produce brilliant multi-step workflows -- refactors, bug fixes,
 
 ```bash
 # Install
-cargo install benchpress-cli
+cargo install attrition-cli
 
 # Capture a Claude Code session
 bp capture ~/.claude/sessions/session.jsonl --name "auth-refactor"
@@ -33,7 +33,7 @@ bp workflows
 12-crate Rust workspace:
 
 ```
-benchpress/
+attrition/
   rust/crates/
     core/          Core types, config, error handling
     api/           Axum HTTP API server
@@ -109,7 +109,7 @@ Add to your `.mcp.json` or Claude Code settings:
 ```json
 {
   "mcpServers": {
-    "benchpress": {
+    "attrition": {
       "command": "bp",
       "args": ["serve", "--mcp"]
     }
@@ -148,7 +148,7 @@ The distiller applies four strategies in sequence:
 ```bash
 cargo build --workspace          # Build all 12 crates
 cargo test --workspace           # Run all tests
-cargo build --release -p benchpress-cli  # Release binary
+cargo build --release -p attrition-cli  # Release binary
 ```
 
 ### Dev Server

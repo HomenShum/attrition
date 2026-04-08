@@ -1,25 +1,25 @@
 [package]
-name = "benchpress-cli"
+name = "attrition-cli"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
-description = "CLI binary for benchpress"
+description = "CLI binary for attrition"
 
 [[bin]]
 name = "bp"
 path = "src/main.rs"
 
 [dependencies]
-benchpress-core = { path = "../core" }
-benchpress-api = { path = "../api" }
-benchpress-mcp = { path = "../mcp-server" }
-benchpress-engine = { path = "../qa-engine" }
-benchpress-agents = { path = "../agents" }
-benchpress-telemetry = { path = "../telemetry" }
-benchpress-workflow = { path = "../workflow" }
-benchpress-distiller = { path = "../distiller" }
-benchpress-judge = { path = "../judge" }
+attrition-core = { path = "../core" }
+attrition-api = { path = "../api" }
+attrition-mcp = { path = "../mcp-server" }
+attrition-engine = { path = "../qa-engine" }
+attrition-agents = { path = "../agents" }
+attrition-telemetry = { path = "../telemetry" }
+attrition-workflow = { path = "../workflow" }
+attrition-distiller = { path = "../distiller" }
+attrition-judge = { path = "../judge" }
 clap.workspace = true
 tokio.workspace = true
 tracing.workspace = true
@@ -30,5 +30,5 @@ anyhow.workspace = true
 uuid.workspace = true
 chrono.workspace = true
 directories.workspace = true
-benchpress-sdk = { path = "../sdk" }
+attrition-sdk = { path = "../sdk" }
 axum.workspace = true

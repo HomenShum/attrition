@@ -8,8 +8,8 @@ use std::collections::HashMap;
 use chrono::Utc;
 use uuid::Uuid;
 
-use benchpress_core::error::{Error, Result};
-use benchpress_workflow::CanonicalEvent;
+use attrition_core::error::{Error, Result};
+use attrition_workflow::CanonicalEvent;
 
 use crate::diff::compare_events;
 use crate::types::{

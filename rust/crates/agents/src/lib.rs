@@ -1,4 +1,4 @@
-//! benchpress-agents: Multi-agent orchestration
+//! attrition-agents: Multi-agent orchestration
 //!
 //! Hierarchical agent system:
 //! - Coordinator: Routes tasks to specialist agents

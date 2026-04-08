@@ -54,7 +54,7 @@ export function Layout({ children }: { children: ReactNode }) {
       {/* Top nav */}
       <nav style={navStyle}>
         <Link to="/" style={logoStyle}>
-          bench<span style={{ color: "var(--accent)" }}>press</span>
+          att<span style={{ color: "var(--accent)" }}>rition</span>
         </Link>
 
         <div style={{ display: "flex", gap: "0.25rem" }}>
@@ -82,7 +82,7 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
 
         <a
-          href="https://github.com/Homen-ta/benchpress"
+          href="https://github.com/HomenShum/attrition"
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -100,7 +100,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
       {/* Footer */}
       <footer style={footerStyle}>
-        benchpress &middot; workflow memory + distillation engine
+        attrition &middot; workflow memory + distillation engine
       </footer>
     </div>
   );

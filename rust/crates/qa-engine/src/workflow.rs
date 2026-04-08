@@ -1,5 +1,5 @@
-use benchpress_core::types::{TokenCost, Workflow, WorkflowAction, WorkflowStep};
-use benchpress_core::Result;
+use attrition_core::types::{TokenCost, Workflow, WorkflowAction, WorkflowStep};
+use attrition_core::Result;
 use uuid::Uuid;
 
 /// Record a new workflow by capturing user actions

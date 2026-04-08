@@ -4,7 +4,7 @@
 //! listing and similarity search without deserializing the event stream.
 
 use crate::types::{Workflow, WorkflowSummary};
-use benchpress_core::{Error, Result};
+use attrition_core::{Error, Result};
 use chrono::{DateTime, Utc};
 use rusqlite::{params, Connection};
 use std::path::Path;

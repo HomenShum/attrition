@@ -1,10 +1,10 @@
 [package]
-name = "benchpress-llm-client"
+name = "attrition-llm-client"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-benchpress-core = { path = "../core" }
+attrition-core = { path = "../core" }
 reqwest.workspace = true
 tokio.workspace = true
 serde.workspace = true

@@ -8,7 +8,7 @@
 
 use crate::adapters::WorkflowAdapter;
 use crate::CanonicalEvent;
-use benchpress_core::Result;
+use attrition_core::Result;
 use serde::Deserialize;
 
 /// Accepts pre-structured canonical events. No transformation needed.
@@ -22,7 +22,7 @@ struct GenericInput {
 impl WorkflowAdapter for GenericAdapter {
     fn parse(input: &[u8]) -> Result<Vec<CanonicalEvent>> {
         let text = std::str::from_utf8(input).map_err(|e| {
-            benchpress_core::Error::Internal(format!("Invalid UTF-8: {e}"))
+            attrition_core::Error::Internal(format!("Invalid UTF-8: {e}"))
         })?;
         let parsed: GenericInput = serde_json::from_str(text)?;
         Ok(parsed.events)

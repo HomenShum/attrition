@@ -1,13 +1,13 @@
 [package]
-name = "benchpress-telemetry"
+name = "attrition-telemetry"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
-description = "Telemetry, tracing, and observability for benchpress"
+description = "Telemetry, tracing, and observability for attrition"
 
 [dependencies]
-benchpress-core = { path = "../core" }
+attrition-core = { path = "../core" }
 tracing.workspace = true
 tracing-subscriber.workspace = true
 serde.workspace = true

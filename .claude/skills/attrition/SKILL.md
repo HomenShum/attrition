@@ -1,10 +1,10 @@
 ---
-name: benchpress
+name: attrition
 description: Capture, distill, and replay coding agent workflows
-triggers: ["bp", "benchpress", "capture workflow", "distill", "judge", "replay workflow"]
+triggers: ["bp", "attrition", "capture workflow", "distill", "judge", "replay workflow"]
 ---
 
-# Benchpress -- Workflow Memory + Distillation
+# Attrition -- Workflow Memory + Distillation
 
 Capture frontier model workflows, distill them for cheaper replay, and judge replay correctness.
 
@@ -95,4 +95,4 @@ Finalize to get the verdict:
 
 ## Storage
 
-Workflows are stored in SQLite at `~/.benchpress/workflows.db`. The database is created automatically on first use.
+Workflows are stored in SQLite at `~/.attrition/workflows.db`. The database is created automatically on first use.

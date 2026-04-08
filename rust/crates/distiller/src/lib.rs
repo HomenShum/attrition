@@ -1,4 +1,4 @@
-//! benchpress-distiller: Workflow distillation engine
+//! attrition-distiller: Workflow distillation engine
 //!
 //! Takes a captured frontier-model workflow and distills it for cheaper replay:
 //! 1. Eliminates redundant steps (retries, dead-end searches, overwritten edits)
@@ -8,7 +8,7 @@
 
 pub mod strategies;
 
-use benchpress_workflow::{CanonicalEvent, TokenCost, Workflow};
+use attrition_workflow::{CanonicalEvent, TokenCost, Workflow};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -100,7 +100,7 @@ fn estimate_cost(original: &TokenCost, ratio: f64) -> TokenCost {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use benchpress_workflow::WorkflowMetadata;
+    use attrition_workflow::WorkflowMetadata;
     use serde_json::json;
 
     fn make_test_workflow() -> Workflow {

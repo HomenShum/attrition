@@ -1,10 +1,10 @@
-# benchpress -- Claude Code Project Instructions
+# attrition -- Claude Code Project Instructions
 
 ## Project Overview
 
-benchpress is a workflow memory and distillation engine for AI coding agents. 12-crate Rust workspace with Axum API server, MCP protocol server (12 tools), workflow capture/storage, 4-strategy distillation engine, replay judgment engine, browser automation, multi-agent orchestration, and CLI binary (`bp`). React 19 + Vite + TypeScript frontend.
+attrition is a workflow memory and distillation engine for AI coding agents. 12-crate Rust workspace with Axum API server, MCP protocol server (12 tools), workflow capture/storage, 4-strategy distillation engine, replay judgment engine, browser automation, multi-agent orchestration, and CLI binary (`bp`). React 19 + Vite + TypeScript frontend.
 
-Core thesis: frontier model workflows are ephemeral. benchpress captures them, distills them by eliminating redundant steps, and replays them on cheaper models at 60-70% lower token cost. A judge engine verifies replay correctness in real time.
+Core thesis: frontier model workflows are ephemeral. attrition captures them, distills them by eliminating redundant steps, and replays them on cheaper models at 60-70% lower token cost. A judge engine verifies replay correctness in real time.
 
 ## Architecture
 
@@ -63,8 +63,8 @@ Core thesis: frontier model workflows are ephemeral. benchpress captures them, d
 - Build: `cargo build --workspace` from project root
 - Test: `cargo test --workspace`
 - Binary: `bp` (from `rust/crates/cli/`)
-- Config dir: `~/.benchpress/`
-- Data dir: `~/.benchpress/` (SQLite at `workflows.db`)
+- Config dir: `~/.attrition/`
+- Data dir: `~/.attrition/` (SQLite at `workflows.db`)
 - Server ports: API on 8100, MCP on 8101, frontend dev on 5173
 - Tool prefix: `bp.*`
 - MCP protocol version: `2024-11-05`
@@ -93,12 +93,12 @@ Core thesis: frontier model workflows are ephemeral. benchpress captures them, d
 
 - `.claude/rules/bp_capture.md` -- Auto-suggest workflow capture after complex tasks
 - `.claude/rules/bp_after_fix.md` -- Re-run judge session after code changes
-- `.claude/skills/benchpress/SKILL.md` -- Full skill with MCP tool usage examples
+- `.claude/skills/attrition/SKILL.md` -- Full skill with MCP tool usage examples
 
 ## Testing
 
 - Unit tests: `cargo test --workspace`
-- Integration tests: `cargo test -p benchpress-api -- --test-threads=1`
+- Integration tests: `cargo test -p attrition-api -- --test-threads=1`
 - Frontend: `cd frontend && npm test`
 - Workflow crate: roundtrip save/load, list/count, fingerprint similarity
 - Distiller: compression ratio, copy block extraction, checkpoint extraction, cost reduction
