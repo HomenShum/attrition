@@ -1,5 +1,14 @@
 {
+  "headers": [
+    {
+      "source": "/install",
+      "headers": [
+        { "key": "Content-Type", "value": "text/plain; charset=utf-8" }
+      ]
+    }
+  ],
   "rewrites": [
+    { "source": "/install", "destination": "/install" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

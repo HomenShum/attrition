@@ -1,11 +1,17 @@
 use attrition_core::AppConfig;
+use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
+use tokio::sync::Mutex;
+
+use crate::routes::judge::HookSession;
 
 /// Shared application state across all request handlers
 pub struct AppState {
     pub config: AppConfig,
     pub request_count: AtomicU64,
     pub start_time: std::time::Instant,
+    /// In-memory hook session evidence, keyed by session_id.
+    pub hook_sessions: Mutex<HashMap<String, HookSession>>,
 }
 
 impl AppState {
@@ -14,6 +20,7 @@ impl AppState {
             config,
             request_count: AtomicU64::new(0),
             start_time: std::time::Instant::now(),
+            hook_sessions: Mutex::new(HashMap::new()),
         }
     }
 

@@ -10,6 +10,7 @@ description = "Axum HTTP API server for attrition"
 attrition-core = { path = "../core" }
 attrition-engine = { path = "../qa-engine" }
 attrition-agents = { path = "../agents" }
+attrition-judge = { path = "../judge" }
 attrition-telemetry = { path = "../telemetry" }
 axum.workspace = true
 tokio.workspace = true

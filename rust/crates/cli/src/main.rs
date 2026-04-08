@@ -137,13 +137,23 @@ enum Commands {
 
     /// Start a judge session for workflow replay verification
     Judge {
-        /// Workflow ID to judge against
-        workflow_id: String,
+        /// Workflow ID to judge against (ignored when --on-stop is set)
+        workflow_id: Option<String>,
 
         /// Model being evaluated during replay
         #[arg(long, default_value = "claude-sonnet-4-20250514")]
         replay_model: String,
+
+        /// Run as a Claude Code Stop hook — read activity log, produce verdict, exit
+        #[arg(long)]
+        on_stop: bool,
     },
+
+    /// Process a Claude Code PostToolUse hook event (reads JSON from stdin)
+    Hook,
+
+    /// Install attrition hooks into Claude Code settings.json
+    Install,
 }
 
 /// Resolve the workflow database path (~/.attrition/workflows.db).
@@ -467,46 +477,266 @@ async fn main() -> Result<()> {
 
         // ── Judge ─────────────────────────────────────────────────────
 
-        Commands::Judge { workflow_id, replay_model } => {
-            use attrition_judge::engine::JudgeEngine;
-            use attrition_workflow::storage::WorkflowStore;
-
-            let db_path = workflow_db_path()?;
-            let store = WorkflowStore::new(&db_path)?;
-            let id = resolve_workflow_id(&store, &workflow_id)?;
-            let workflow = store
-                .get_workflow(id)?
-                .ok_or_else(|| anyhow::anyhow!("Workflow {} not found", id))?;
-
-            let mut engine = JudgeEngine::new();
-            let session_id = engine.start_session(
-                workflow.id,
-                workflow.events.clone(),
-                &replay_model,
-            );
-
-            if cli.json {
-                println!("{}", serde_json::to_string_pretty(&serde_json::json!({
-                    "session_id": session_id.to_string(),
-                    "workflow_id": workflow.id.to_string(),
-                    "workflow_name": workflow.name,
-                    "replay_model": replay_model,
-                    "expected_events": workflow.events.len(),
-                    "status": "active",
-                }))?);
+        Commands::Judge { workflow_id, replay_model, on_stop } => {
+            if on_stop {
+                // --on-stop mode: read activity log, count tool calls, produce verdict
+                let verdict = run_on_stop_judge()?;
+                println!("{}", serde_json::to_string(&verdict)?);
             } else {
-                println!("Judge session started");
-                println!("  Session ID: {}", session_id);
-                println!("  Workflow:   {} ({})", workflow.name, &workflow.id.to_string()[..8]);
-                println!("  Model:      {} -> {}", workflow.source_model, replay_model);
-                println!("  Events:     {} expected", workflow.events.len());
-                println!("  Status:     active");
-                println!();
-                println!("Use MCP tools bp.judge.event and bp.judge.verdict to");
-                println!("report replay events and finalize the judgment.");
+                // Normal judge mode: requires workflow_id
+                let workflow_id = workflow_id
+                    .ok_or_else(|| anyhow::anyhow!("workflow_id is required when not using --on-stop"))?;
+
+                use attrition_judge::engine::JudgeEngine;
+                use attrition_workflow::storage::WorkflowStore;
+
+                let db_path = workflow_db_path()?;
+                let store = WorkflowStore::new(&db_path)?;
+                let id = resolve_workflow_id(&store, &workflow_id)?;
+                let workflow = store
+                    .get_workflow(id)?
+                    .ok_or_else(|| anyhow::anyhow!("Workflow {} not found", id))?;
+
+                let mut engine = JudgeEngine::new();
+                let session_id = engine.start_session(
+                    workflow.id,
+                    workflow.events.clone(),
+                    &replay_model,
+                );
+
+                if cli.json {
+                    println!("{}", serde_json::to_string_pretty(&serde_json::json!({
+                        "session_id": session_id.to_string(),
+                        "workflow_id": workflow.id.to_string(),
+                        "workflow_name": workflow.name,
+                        "replay_model": replay_model,
+                        "expected_events": workflow.events.len(),
+                        "status": "active",
+                    }))?);
+                } else {
+                    println!("Judge session started");
+                    println!("  Session ID: {}", session_id);
+                    println!("  Workflow:   {} ({})", workflow.name, &workflow.id.to_string()[..8]);
+                    println!("  Model:      {} -> {}", workflow.source_model, replay_model);
+                    println!("  Events:     {} expected", workflow.events.len());
+                    println!("  Status:     active");
+                    println!();
+                    println!("Use MCP tools bp.judge.event and bp.judge.verdict to");
+                    println!("report replay events and finalize the judgment.");
+                }
             }
         }
+
+        // ── Hook (PostToolUse stdin processor) ───────────────────────
+
+        Commands::Hook => {
+            // Silent on all errors — never break the agent
+            let _ = run_hook();
+        }
+
+        // ── Install hooks into Claude Code ───────────────────────────
+
+        Commands::Install => {
+            run_install()?;
+        }
     }
+
+    Ok(())
+}
+
+// ── Hook implementation ────────────────────────────────────────────────────
+
+/// Read a PostToolUse JSON event from stdin, extract tool name + input key names
+/// (never values for privacy), append one JSONL line to ~/.attrition/activity.jsonl.
+fn run_hook() -> Result<()> {
+    use std::io::Read;
+
+    let mut input = String::new();
+    std::io::stdin().read_to_string(&mut input)?;
+
+    let event: serde_json::Value = serde_json::from_str(&input)?;
+
+    let tool_name = event
+        .get("tool_name")
+        .and_then(|v| v.as_str())
+        .unwrap_or("unknown");
+
+    // Extract only key names from tool_input — never values (privacy)
+    let input_keys: Vec<&str> = event
+        .get("tool_input")
+        .and_then(|v| v.as_object())
+        .map(|obj| obj.keys().map(|k| k.as_str()).collect())
+        .unwrap_or_default();
+
+    let session_id = event
+        .get("session_id")
+        .and_then(|v| v.as_str())
+        .unwrap_or("unknown");
+
+    let record = serde_json::json!({
+        "ts": chrono::Utc::now().to_rfc3339(),
+        "tool": tool_name,
+        "input_keys": input_keys,
+        "session_id": session_id,
+    });
+
+    // Ensure ~/.attrition/ exists
+    let attrition_dir = dirs_fallback();
+    std::fs::create_dir_all(&attrition_dir)?;
+
+    let log_path = attrition_dir.join("activity.jsonl");
+    use std::io::Write;
+    let mut file = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&log_path)?;
+    writeln!(file, "{}", serde_json::to_string(&record)?)?;
+
+    Ok(())
+}
+
+// ── On-stop judge implementation ───────────────────────────────────────────
+
+/// Read the activity log, count tool calls in current session, produce a verdict.
+fn run_on_stop_judge() -> Result<serde_json::Value> {
+    let log_path = dirs_fallback().join("activity.jsonl");
+
+    if !log_path.exists() {
+        return Ok(serde_json::json!({
+            "verdict": "correct",
+            "reason": "No activity log found — trivial task.",
+            "tool_count": 0,
+            "decision": "allow_stop",
+        }));
+    }
+
+    let content = std::fs::read_to_string(&log_path)?;
+    let lines: Vec<&str> = content.lines().filter(|l| !l.trim().is_empty()).collect();
+    let tool_count = lines.len();
+
+    if tool_count < 5 {
+        return Ok(serde_json::json!({
+            "verdict": "correct",
+            "reason": format!("Only {} tool calls — trivial task, no workflow enforcement needed.", tool_count),
+            "tool_count": tool_count,
+            "decision": "allow_stop",
+        }));
+    }
+
+    // For non-trivial sessions, check for evidence of common completion steps
+    let has_build = lines.iter().any(|l| l.contains("\"build\"") || l.contains("\"tsc\""));
+    let has_test = lines.iter().any(|l| l.contains("\"test\"") || l.contains("\"vitest\""));
+    let has_visual = lines.iter().any(|l| {
+        l.contains("\"screenshot\"") || l.contains("\"preview\"") || l.contains("\"browser\"")
+    });
+
+    let mut missing = Vec::new();
+    if !has_build {
+        missing.push("build/type-check");
+    }
+    if !has_test {
+        missing.push("test run");
+    }
+    if !has_visual {
+        missing.push("visual verification");
+    }
+
+    if missing.is_empty() {
+        Ok(serde_json::json!({
+            "verdict": "correct",
+            "reason": format!("{} tool calls with build, test, and visual evidence.", tool_count),
+            "tool_count": tool_count,
+            "decision": "allow_stop",
+        }))
+    } else {
+        Ok(serde_json::json!({
+            "verdict": "incomplete",
+            "reason": format!("{} tool calls but missing evidence for: {}.", tool_count, missing.join(", ")),
+            "tool_count": tool_count,
+            "missing": missing,
+            "decision": "warn",
+        }))
+    }
+}
+
+// ── Install implementation ─────────────────────────────────────────────────
+
+/// Write hook config to ~/.claude/settings.json.
+/// Adds PostToolUse hook (bp hook) and Stop hook (bp judge --on-stop).
+/// Backs up existing settings.json first.
+fn run_install() -> Result<()> {
+    let home = std::env::var("HOME")
+        .or_else(|_| std::env::var("USERPROFILE"))
+        .unwrap_or_else(|_| ".".to_string());
+    let claude_dir = PathBuf::from(&home).join(".claude");
+    let settings_path = claude_dir.join("settings.json");
+
+    // Ensure ~/.claude/ exists
+    std::fs::create_dir_all(&claude_dir)?;
+
+    // Load existing settings or start fresh
+    let mut settings: serde_json::Value = if settings_path.exists() {
+        // Back up first
+        let backup_path = claude_dir.join("settings.json.bak");
+        std::fs::copy(&settings_path, &backup_path)?;
+        println!("  Backed up: {}", backup_path.display());
+
+        let content = std::fs::read_to_string(&settings_path)?;
+        serde_json::from_str(&content).unwrap_or_else(|_| serde_json::json!({}))
+    } else {
+        serde_json::json!({})
+    };
+
+    // Ensure settings is an object
+    let obj = settings.as_object_mut()
+        .ok_or_else(|| anyhow::anyhow!("settings.json is not a JSON object"))?;
+
+    // Set up hooks array
+    let hooks = obj
+        .entry("hooks")
+        .or_insert_with(|| serde_json::json!({}));
+    let hooks_obj = hooks.as_object_mut()
+        .ok_or_else(|| anyhow::anyhow!("hooks field is not a JSON object"))?;
+
+    // Determine bp binary path — use the one currently running
+    let bp_path = std::env::current_exe()
+        .map(|p| p.display().to_string())
+        .unwrap_or_else(|_| "bp".to_string());
+
+    // PostToolUse hook
+    hooks_obj.insert(
+        "PostToolUse".to_string(),
+        serde_json::json!([{
+            "type": "command",
+            "command": format!("{} hook", bp_path),
+        }]),
+    );
+
+    // Stop hook
+    hooks_obj.insert(
+        "Stop".to_string(),
+        serde_json::json!([{
+            "type": "command",
+            "command": format!("{} judge _ --on-stop", bp_path),
+        }]),
+    );
+
+    // Write settings
+    let output = serde_json::to_string_pretty(&settings)?;
+    std::fs::write(&settings_path, output)?;
+
+    println!("{}", BANNER);
+    println!("  Hooks installed into Claude Code:");
+    println!();
+    println!("  PostToolUse -> bp hook");
+    println!("    Silently logs tool name + input keys to ~/.attrition/activity.jsonl");
+    println!();
+    println!("  Stop -> bp judge --on-stop");
+    println!("    Reads activity log, produces verdict JSON (allow/warn)");
+    println!();
+    println!("  Settings: {}", settings_path.display());
+    println!();
+    println!("  To uninstall, remove the hooks from {}", settings_path.display());
 
     Ok(())
 }
