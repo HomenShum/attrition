@@ -1,0 +1,20 @@
+[package]
+name = "nodebench-qa-engine"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "QA engine: browser automation, crawling, accessibility audits"
+
+[dependencies]
+nodebench-qa-core = { path = "../core" }
+tokio.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+# chromiumoxide.workspace = true  # Enable when browser automation needed

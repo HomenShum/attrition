@@ -1,0 +1,28 @@
+[package]
+name = "nodebench-qa-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "CLI binary for nodebench-qa"
+
+[[bin]]
+name = "nbqa"
+path = "src/main.rs"
+
+[dependencies]
+nodebench-qa-core = { path = "../core" }
+nodebench-qa-api = { path = "../api" }
+nodebench-qa-mcp = { path = "../mcp-server" }
+nodebench-qa-engine = { path = "../qa-engine" }
+nodebench-qa-agents = { path = "../agents" }
+nodebench-qa-telemetry = { path = "../telemetry" }
+clap.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+nodebench-qa-sdk = { path = "../sdk" }
+axum.workspace = true

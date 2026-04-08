@@ -1,0 +1,62 @@
+[workspace]
+resolver = "2"
+members = [
+    "rust/crates/core",
+    "rust/crates/api",
+    "rust/crates/mcp-server",
+    "rust/crates/qa-engine",
+    "rust/crates/agents",
+    "rust/crates/cli",
+    "rust/crates/telemetry",
+    "rust/crates/sdk",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["NodeBench <hello@nodebenchai.com>"]
+license = "MIT"
+repository = "https://github.com/Homen-ta/nodebench-qa"
+description = "Full-stack QA platform for AI coding agents — Rust + React rewrite"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.44", features = ["full"] }
+# Web framework
+axum = { version = "0.8", features = ["ws", "multipart"] }
+tower = { version = "0.5", features = ["full"] }
+tower-http = { version = "0.6", features = ["cors", "trace", "compression-gzip"] }
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+# Error handling
+thiserror = "2.0"
+anyhow = "1.0"
+# Logging / telemetry
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+# Browser automation
+chromiumoxide = { version = "0.7", features = ["tokio-runtime"] }
+# CLI
+clap = { version = "4.5", features = ["derive", "env"] }
+# Config
+config = "0.14"
+directories = "6.0"
+# UUID
+uuid = { version = "1.0", features = ["v4", "serde"] }
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+# Crypto
+sha2 = "0.10"
+# Async channels
+tokio-tungstenite = "0.26"
+futures-util = "0.3"
+# MCP protocol
+jsonrpc-core = "18.0"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+strip = true
