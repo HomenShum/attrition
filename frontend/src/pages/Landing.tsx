@@ -112,8 +112,6 @@ export function Landing() {
           flexDirection: "column",
           alignItems: "center",
           padding: "4rem 1.5rem 2rem",
-          width: "100%",
-          boxSizing: "border-box",
         }}
       >
         <div style={{ textAlign: "center", width: "100%", maxWidth: 820 }}>

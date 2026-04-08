@@ -46,8 +46,6 @@ export function Layout({ children }: { children: ReactNode }) {
     <div
       style={{
         minHeight: "100vh",
-        maxWidth: "100vw",
-        overflowX: "hidden",
         display: "flex",
         flexDirection: "column",
         background: "var(--bg-primary)",
@@ -98,7 +96,7 @@ export function Layout({ children }: { children: ReactNode }) {
       </nav>
 
       {/* Main content */}
-      <main style={{ flex: 1, width: "100%", maxWidth: "100vw", overflowX: "hidden" }}>{children}</main>
+      <main style={{ flex: 1 }}>{children}</main>
 
       {/* Footer */}
       <footer style={footerStyle}>
