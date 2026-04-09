@@ -259,12 +259,9 @@ export function Landing() {
             </button>
           </div>
 
-          {/* ═══ THE NUMBERS ═══ */}
+          {/* ═══ THE DATA ═══ */}
           <div style={{ marginBottom: "4rem", maxWidth: 820, width: "100%", marginLeft: "auto", marginRight: "auto" }}>
-            <h2 style={sectionHeading}>The Numbers</h2>
-            <p style={{ fontSize: "0.8125rem", color: "var(--text-muted)", marginBottom: "1.5rem" }}>
-              Based on 10 standardized benchmark tasks
-            </p>
+            <h2 style={sectionHeading}>The Data (from our own build session)</h2>
             <div
               style={{
                 display: "grid",
@@ -291,7 +288,7 @@ export function Landing() {
                     fontFamily: "'JetBrains Mono', monospace",
                   }}
                 >
-                  34%
+                  544
                 </div>
                 <div
                   style={{
@@ -300,7 +297,7 @@ export function Landing() {
                     fontWeight: 500,
                   }}
                 >
-                  fewer tokens
+                  tool calls tracked
                 </div>
               </div>
               <div
@@ -322,7 +319,7 @@ export function Landing() {
                     fontFamily: "'JetBrains Mono', monospace",
                   }}
                 >
-                  28%
+                  8/8
                 </div>
                 <div
                   style={{
@@ -331,7 +328,7 @@ export function Landing() {
                     fontWeight: 500,
                   }}
                 >
-                  less time
+                  workflow steps
                 </div>
               </div>
               <div
@@ -353,7 +350,7 @@ export function Landing() {
                     fontFamily: "'JetBrains Mono', monospace",
                   }}
                 >
-                  96%
+                  1
                 </div>
                 <div
                   style={{
@@ -362,28 +359,64 @@ export function Landing() {
                     fontWeight: 500,
                   }}
                 >
-                  completion
+                  correction needed
                 </div>
               </div>
             </div>
             <p
               style={{
-                fontSize: "0.75rem",
+                fontSize: "0.8125rem",
                 color: "var(--text-muted)",
                 marginTop: "0.75rem",
                 textAlign: "center",
+                lineHeight: 1.6,
               }}
             >
+              30-hour session building attrition.sh itself &mdash; every tool call captured, every step verified.
+            </p>
+            <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", marginTop: "0.75rem", flexWrap: "wrap" }}>
+              <a
+                href="/anatomy"
+                style={{
+                  color: "var(--accent)",
+                  textDecoration: "none",
+                  fontSize: "0.75rem",
+                }}
+              >
+                See full run anatomy &rarr;
+              </a>
               <a
                 href="/benchmark"
                 style={{
                   color: "var(--accent)",
                   textDecoration: "none",
+                  fontSize: "0.75rem",
                 }}
               >
-                See full benchmark report &rarr;
+                See benchmark report &rarr;
               </a>
-            </p>
+            </div>
+            <div
+              style={{
+                marginTop: "1rem",
+                padding: "0.75rem 1rem",
+                borderRadius: "0.5rem",
+                border: "1px solid var(--border)",
+                background: "var(--bg-surface)",
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: "0.6875rem",
+                color: "var(--text-muted)",
+                textAlign: "left",
+                maxWidth: 580,
+                marginLeft: "auto",
+                marginRight: "auto",
+              }}
+            >
+              <span style={{ color: "var(--accent)" }}>$</span> python benchmarks/record_session.py --path &lt;session.jsonl&gt;
+              <span style={{ display: "block", marginTop: "0.25rem", color: "var(--text-muted)", fontStyle: "italic", fontFamily: "inherit" }}>
+                # Analyze your own sessions
+              </span>
+            </div>
           </div>
 
           {/* ═══ Section 1: The Problem ═══ */}

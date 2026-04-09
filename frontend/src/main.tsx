@@ -11,6 +11,7 @@ import { Distill } from "./pages/Distill";
 import { Judge } from "./pages/Judge";
 import { Compare } from "./pages/Compare";
 import { Benchmark } from "./pages/Benchmark";
+import { RunAnatomy } from "./pages/RunAnatomy";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -22,6 +23,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <Route path="/distill/:id" element={<Distill />} />
         <Route path="/judge" element={<Judge />} />
         <Route path="/compare" element={<Compare />} />
+        <Route path="/anatomy" element={<RunAnatomy />} />
         <Route path="/benchmark" element={<Benchmark />} />
         {/* Legacy QA routes (kept for backward compatibility) */}
         <Route path="/dashboard" element={<Dashboard />} />
