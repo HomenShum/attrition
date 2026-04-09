@@ -1,0 +1,25 @@
+{
+  "baseline": {
+    "session_id": "aa625586-5d06-4027-b6b5-35e8d9c369b7.jsonl",
+    "model": "claude-opus-4-6",
+    "tokens": 290448597,
+    "tool_calls": 560,
+    "corrections": 1,
+    "completion": 1.0,
+    "cost_usd": 4367.6469,
+    "duration_min": 2569.0
+  },
+  "with_attrition": {
+    "judge_verdict": "correct",
+    "steps_auto_tracked": 8,
+    "nudges_fired": 0,
+    "false_corrections_filtered": 5,
+    "workflow_auto_detected": true
+  },
+  "distillation": {
+    "original_tokens": 290448597,
+    "estimated_distilled_tokens": 159746728,
+    "savings_pct": 45.0,
+    "cost_savings_usd": 1965.44
+  }
+}

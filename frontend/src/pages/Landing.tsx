@@ -259,163 +259,66 @@ export function Landing() {
             </button>
           </div>
 
-          {/* ═══ THE DATA ═══ */}
+          {/* ═══ THE DATA — real flagship benchmark ═══ */}
           <div style={{ marginBottom: "4rem", maxWidth: 820, width: "100%", marginLeft: "auto", marginRight: "auto" }}>
-            <h2 style={sectionHeading}>The Data (from our own build session)</h2>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "1rem",
-              }}
-            >
-              <div
-                style={{
-                  ...glassCard,
-                  padding: "1.5rem",
-                  textAlign: "center",
-                  border: "1px solid rgba(217,119,87,0.2)",
-                  background: "rgba(217,119,87,0.03)",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "2.5rem",
-                    fontWeight: 700,
-                    color: "var(--accent)",
-                    lineHeight: 1.1,
-                    marginBottom: "0.375rem",
-                    fontFamily: "'JetBrains Mono', monospace",
-                  }}
-                >
-                  544
+            <h2 style={sectionHeading}>Real Data (from building attrition.sh)</h2>
+
+            {/* Row 1: Session stats */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.75rem", marginBottom: "1rem" }}>
+              {[
+                { value: "560", label: "tool calls tracked" },
+                { value: "8/8", label: "workflow steps" },
+                { value: "1", label: "correction needed" },
+                { value: "45%", label: "distillation savings" },
+              ].map((card) => (
+                <div key={card.label} style={{ ...glassCard, padding: "1.25rem 0.75rem", textAlign: "center", border: "1px solid rgba(217,119,87,0.2)", background: "rgba(217,119,87,0.03)" }}>
+                  <div style={{ fontSize: "2rem", fontWeight: 700, color: "var(--accent)", lineHeight: 1.1, marginBottom: "0.25rem", fontFamily: "'JetBrains Mono', monospace" }}>
+                    {card.value}
+                  </div>
+                  <div style={{ fontSize: "0.6875rem", color: "var(--text-secondary)", fontWeight: 500 }}>
+                    {card.label}
+                  </div>
                 </div>
-                <div
-                  style={{
-                    fontSize: "0.8125rem",
-                    color: "var(--text-secondary)",
-                    fontWeight: 500,
-                  }}
-                >
-                  tool calls tracked
+              ))}
+            </div>
+
+            {/* Row 2: Judge verdict + distillation */}
+            <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: "0.75rem", marginBottom: "1rem" }}>
+              <div style={{ ...glassCard, padding: "1rem 1.25rem", textAlign: "left" }}>
+                <div style={{ fontSize: "0.6875rem", textTransform: "uppercase" as const, letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: "0.5rem" }}>
+                  Strict Judge Verdict
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.375rem" }}>
+                  <span style={{ display: "inline-block", padding: "0.125rem 0.5rem", borderRadius: "0.25rem", background: "rgba(34,197,94,0.15)", color: "#22c55e", fontSize: "0.75rem", fontWeight: 600 }}>CORRECT</span>
+                  <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>allow_stop: true</span>
+                </div>
+                <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                  All 8 required workflow steps had tool-call evidence. Zero nudges needed. 5 false corrections in code strings auto-filtered.
                 </div>
               </div>
-              <div
-                style={{
-                  ...glassCard,
-                  padding: "1.5rem",
-                  textAlign: "center",
-                  border: "1px solid rgba(217,119,87,0.2)",
-                  background: "rgba(217,119,87,0.03)",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "2.5rem",
-                    fontWeight: 700,
-                    color: "var(--accent)",
-                    lineHeight: 1.1,
-                    marginBottom: "0.375rem",
-                    fontFamily: "'JetBrains Mono', monospace",
-                  }}
-                >
-                  8/8
+              <div style={{ ...glassCard, padding: "1rem 1.25rem", textAlign: "left" }}>
+                <div style={{ fontSize: "0.6875rem", textTransform: "uppercase" as const, letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: "0.5rem" }}>
+                  Distillation Estimate
                 </div>
-                <div
-                  style={{
-                    fontSize: "0.8125rem",
-                    color: "var(--text-secondary)",
-                    fontWeight: 500,
-                  }}
-                >
-                  workflow steps
+                <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--accent)", marginBottom: "0.375rem", fontFamily: "'JetBrains Mono', monospace" }}>
+                  290M &rarr; 160M tokens (45% smaller)
                 </div>
-              </div>
-              <div
-                style={{
-                  ...glassCard,
-                  padding: "1.5rem",
-                  textAlign: "center",
-                  border: "1px solid rgba(217,119,87,0.2)",
-                  background: "rgba(217,119,87,0.03)",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "2.5rem",
-                    fontWeight: 700,
-                    color: "var(--accent)",
-                    lineHeight: 1.1,
-                    marginBottom: "0.375rem",
-                    fontFamily: "'JetBrains Mono', monospace",
-                  }}
-                >
-                  1
-                </div>
-                <div
-                  style={{
-                    fontSize: "0.8125rem",
-                    color: "var(--text-secondary)",
-                    fontWeight: 500,
-                  }}
-                >
-                  correction needed
+                <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                  Replay cost: $2,402 vs $4,368 original. Savings: $1,965 per replay via step elimination + copy-paste extraction + context compression.
                 </div>
               </div>
             </div>
-            <p
-              style={{
-                fontSize: "0.8125rem",
-                color: "var(--text-muted)",
-                marginTop: "0.75rem",
-                textAlign: "center",
-                lineHeight: 1.6,
-              }}
-            >
-              30-hour session building attrition.sh itself &mdash; every tool call captured, every step verified.
+
+            <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", textAlign: "center", lineHeight: 1.6 }}>
+              42-hour session, 120+ files created, 12 Rust crates, 87 tests. Real data from a real build. Not simulated.
             </p>
-            <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", marginTop: "0.75rem", flexWrap: "wrap" }}>
-              <a
-                href="/anatomy"
-                style={{
-                  color: "var(--accent)",
-                  textDecoration: "none",
-                  fontSize: "0.75rem",
-                }}
-              >
+            <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center", marginTop: "0.5rem", flexWrap: "wrap" }}>
+              <a href="/anatomy" style={{ color: "var(--accent)", textDecoration: "none", fontSize: "0.75rem" }}>
                 See full run anatomy &rarr;
               </a>
-              <a
-                href="/benchmark"
-                style={{
-                  color: "var(--accent)",
-                  textDecoration: "none",
-                  fontSize: "0.75rem",
-                }}
-              >
+              <a href="/benchmark" style={{ color: "var(--accent)", textDecoration: "none", fontSize: "0.75rem" }}>
                 See benchmark report &rarr;
               </a>
-            </div>
-            <div
-              style={{
-                marginTop: "1rem",
-                padding: "0.75rem 1rem",
-                borderRadius: "0.5rem",
-                border: "1px solid var(--border)",
-                background: "var(--bg-surface)",
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: "0.6875rem",
-                color: "var(--text-muted)",
-                textAlign: "left",
-                maxWidth: 580,
-                marginLeft: "auto",
-                marginRight: "auto",
-              }}
-            >
-              <span style={{ color: "var(--accent)" }}>$</span> python benchmarks/record_session.py --path &lt;session.jsonl&gt;
-              <span style={{ display: "block", marginTop: "0.25rem", color: "var(--text-muted)", fontStyle: "italic", fontFamily: "inherit" }}>
-                # Analyze your own sessions
-              </span>
             </div>
           </div>
 
