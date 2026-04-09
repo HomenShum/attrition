@@ -8,6 +8,7 @@ ATTRITION_VERSION="0.1.0"
 ATTRITION_DIR="$HOME/.attrition"
 ATTRITION_BIN="$ATTRITION_DIR/bin"
 ATTRITION_DB="$ATTRITION_DIR/workflows.db"
+PLUGIN_REPO="https://raw.githubusercontent.com/HomenShum/attrition/main/.claude-plugin"
 
 # Colors
 RED='\033[0;31m'
@@ -53,7 +54,7 @@ esac
 
 # ── Step 2: Create attrition directory ───────────────────────────────────────
 
-mkdir -p "$ATTRITION_DIR" "$ATTRITION_BIN"
+mkdir -p "$ATTRITION_DIR" "$ATTRITION_BIN" "$ATTRITION_DIR/auto_captures"
 info "Data dir: $ATTRITION_DIR"
 
 # ── Step 3: Detect email for identity ────────────────────────────────────────
@@ -76,14 +77,132 @@ else
   warn "Install Rust (rustup.rs) for full CLI: bp capture, bp distill, bp judge"
 fi
 
-# ── Step 5: Install PostToolUse hook ─────────────────────────────────────────
+# ── Step 5: Detect plugin system availability ────────────────────────────────
 
-ACTIVITY_LOG="$ATTRITION_DIR/activity.jsonl"
+PLUGIN_INSTALLED=false
 
-# The hook: reads stdin JSON from Claude Code, extracts tool_name + input keys,
-# scrubs sensitive values, appends one line to activity.jsonl.
-# Privacy: never logs input values, never logs output, never logs file contents.
-HOOK_CMD="python3 -c \"
+# Check if Claude Code supports the plugin system
+# The plugin system uses .claude-plugin/ directories recognized by Claude Code >= 2.x
+if [ "$PLATFORM" = "claude-code" ]; then
+  # Check for claude binary and version
+  CLAUDE_VERSION=""
+  if command -v claude &>/dev/null; then
+    CLAUDE_VERSION=$(claude --version 2>/dev/null | head -1 || echo "")
+  fi
+
+  # Install as plugin if we're inside a git repo (project-level plugin)
+  if [ -d ".git" ] || git rev-parse --is-inside-work-tree &>/dev/null 2>&1; then
+    PLUGIN_DIR=".claude-plugin"
+    info "Git repo detected. Installing as Claude Code plugin..."
+
+    mkdir -p "$PLUGIN_DIR/hooks" "$PLUGIN_DIR/skills/attrition"
+
+    # Write plugin.json
+    cat > "$PLUGIN_DIR/plugin.json" << 'PLUGINJSON'
+{
+  "name": "attrition",
+  "version": "0.1.0",
+  "description": "Always-on workflow judge. Catches skipped steps, blocks incomplete work, replays cheaper.",
+  "author": "attrition.sh",
+  "homepage": "https://attrition.sh",
+  "repository": "https://github.com/HomenShum/attrition",
+  "license": "MIT",
+  "entrypoint": "hooks/hooks.json"
+}
+PLUGINJSON
+
+    # Write hooks.json
+    cat > "$PLUGIN_DIR/hooks/hooks.json" << 'HOOKSJSON'
+{
+  "description": "attrition — always-on workflow judge",
+  "hooks": {
+    "SessionStart": [{ "matcher": "", "hooks": [{ "type": "command", "command": "\"$CLAUDE_PLUGIN_ROOT/hooks/session-start.sh\"", "timeout_ms": 5000 }] }],
+    "UserPromptSubmit": [{ "matcher": "", "hooks": [{ "type": "command", "command": "\"$CLAUDE_PLUGIN_ROOT/hooks/detect-workflow.sh\"", "timeout_ms": 5000 }] }],
+    "PreToolUse": [{ "matcher": "Grep|Glob|WebSearch", "hooks": [{ "type": "command", "command": "\"$CLAUDE_PLUGIN_ROOT/hooks/block-redundant.sh\"", "timeout_ms": 3000 }] }],
+    "PostToolUse": [{ "matcher": "", "hooks": [{ "type": "command", "command": "\"$CLAUDE_PLUGIN_ROOT/hooks/track-tool.sh\"", "timeout_ms": 5000 }] }],
+    "Stop": [{ "matcher": "", "hooks": [{ "type": "command", "command": "\"$CLAUDE_PLUGIN_ROOT/hooks/judge-stop.sh\"", "timeout_ms": 10000 }] }],
+    "SubagentStop": [{ "matcher": "", "hooks": [{ "type": "command", "command": "\"$CLAUDE_PLUGIN_ROOT/hooks/judge-stop.sh\"", "timeout_ms": 10000 }] }],
+    "InstructionsLoaded": [{ "matcher": "", "hooks": [{ "type": "command", "command": "\"$CLAUDE_PLUGIN_ROOT/hooks/inject-workflow.sh\"", "timeout_ms": 3000 }] }],
+    "PreCompact": [{ "matcher": "", "hooks": [{ "type": "command", "command": "\"$CLAUDE_PLUGIN_ROOT/hooks/save-state.sh\"", "timeout_ms": 5000 }] }],
+    "SessionEnd": [{ "matcher": "", "hooks": [{ "type": "command", "command": "\"$CLAUDE_PLUGIN_ROOT/hooks/auto-capture.sh\"", "timeout_ms": 15000 }] }],
+    "FileChanged": [{ "matcher": "", "hooks": [{ "type": "command", "command": "\"$CLAUDE_PLUGIN_ROOT/hooks/track-file.sh\"", "timeout_ms": 2000 }] }]
+  }
+}
+HOOKSJSON
+
+    # Download hook scripts from repo (or write inline if offline)
+    HOOK_SCRIPTS=(
+      "session-start.sh"
+      "detect-workflow.sh"
+      "block-redundant.sh"
+      "track-tool.sh"
+      "judge-stop.sh"
+      "inject-workflow.sh"
+      "save-state.sh"
+      "auto-capture.sh"
+      "track-file.sh"
+    )
+
+    for script in "${HOOK_SCRIPTS[@]}"; do
+      if curl -sfL "$PLUGIN_REPO/hooks/$script" -o "$PLUGIN_DIR/hooks/$script" 2>/dev/null; then
+        chmod +x "$PLUGIN_DIR/hooks/$script"
+      else
+        warn "Could not download $script — will need manual copy"
+      fi
+    done
+
+    # Write skill file
+    cat > "$PLUGIN_DIR/skills/attrition/SKILL.md" << 'SKILLMD'
+---
+name: attrition
+description: Capture, distill, and replay coding agent workflows
+triggers: ["bp", "attrition", "capture workflow", "distill", "judge", "replay workflow"]
+---
+
+# Attrition -- Workflow Memory + Distillation
+
+Capture frontier model workflows, distill them for cheaper replay, and judge replay correctness.
+
+## Quick Start
+
+- Capture: `bp capture <session-path> --name "feature-auth-flow"`
+- List: `bp workflows`
+- Distill: `bp distill <workflow-id> --target claude-sonnet-4-20250514`
+- Judge: `bp judge start <workflow-id>` then `bp judge event` then `bp judge verdict`
+
+## Verdicts
+
+| Verdict | Meaning | Action |
+|---------|---------|--------|
+| `correct` | Perfect replay match | Ship it |
+| `partial` (>0.8) | Minor divergences | Review divergence list |
+| `partial` (<0.8) | Significant divergences | Investigate before shipping |
+| `escalate` | Too many major divergences | Human review required |
+| `failed` | Critical divergences | Do not ship |
+SKILLMD
+
+    # Make all hook scripts executable
+    chmod +x "$PLUGIN_DIR/hooks/"*.sh 2>/dev/null || true
+
+    PLUGIN_INSTALLED=true
+    ok "Plugin installed at $PLUGIN_DIR/"
+    ok "  plugin.json — manifest"
+    ok "  hooks/hooks.json — 10 hook definitions"
+    ok "  hooks/*.sh — 9 hook scripts"
+    ok "  skills/attrition/SKILL.md — bundled skill"
+  fi
+fi
+
+# ── Step 6: Fallback — inject hooks into settings.json ───────────────────────
+
+if [ "$PLUGIN_INSTALLED" = false ]; then
+  info "Plugin system not available. Falling back to settings.json hook injection..."
+
+  ACTIVITY_LOG="$ATTRITION_DIR/activity.jsonl"
+
+  # The hook: reads stdin JSON from Claude Code, extracts tool_name + input keys,
+  # scrubs sensitive values, appends one line to activity.jsonl.
+  HOOK_CMD="python3 -c \"
 import sys,json,pathlib,time
 try:
  d=json.loads(sys.stdin.read())
@@ -99,22 +218,19 @@ try:
 except: pass
 \""
 
-# ── Step 6: Install judge hooks into settings.json ───────────────────────────
+  info "Installing hooks into $SETTINGS_FILE..."
 
-info "Installing hooks into $SETTINGS_FILE..."
+  mkdir -p "$SETTINGS_DIR"
 
-mkdir -p "$SETTINGS_DIR"
+  if [ "$PLATFORM" = "claude-code" ]; then
+    # Back up existing settings
+    if [ -f "$SETTINGS_FILE" ]; then
+      cp "$SETTINGS_FILE" "$SETTINGS_FILE.bak"
+      info "Backed up existing settings to $SETTINGS_FILE.bak"
+    fi
 
-if [ "$PLATFORM" = "claude-code" ]; then
-  # Write Claude Code settings.json with 4 hooks
-  # Back up existing settings
-  if [ -f "$SETTINGS_FILE" ]; then
-    cp "$SETTINGS_FILE" "$SETTINGS_FILE.bak"
-    info "Backed up existing settings to $SETTINGS_FILE.bak"
-  fi
-
-  # Merge hooks into existing settings (or create new)
-  python3 -c "
+    # Merge hooks into existing settings (or create new)
+    python3 -c "
 import json, os
 settings_file = '$SETTINGS_FILE'
 try:
@@ -146,6 +262,7 @@ with open(settings_file, 'w') as f:
 print('  Hooks installed successfully.')
 " 2>/dev/null || warn "Could not auto-install hooks. Add manually to $SETTINGS_FILE"
 
+  fi
 fi
 
 # ── Step 7: Install .claude/rules ────────────────────────────────────────────
@@ -182,18 +299,35 @@ fi
 echo ""
 echo -e "${GREEN}${BOLD}  Installation complete!${NC}"
 echo ""
-echo -e "  ${BOLD}What's active:${NC}"
-echo -e "    ${GREEN}✓${NC} PostToolUse hook — tracks every tool call"
-echo -e "    ${GREEN}✓${NC} Stop hook — judges completion before agent stops"
-echo -e "    ${GREEN}✓${NC} Activity log: $ACTIVITY_LOG"
+
+if [ "$PLUGIN_INSTALLED" = true ]; then
+  echo -e "  ${BOLD}Installed as Claude Code Plugin:${NC}"
+  echo -e "    ${GREEN}+${NC} SessionStart hook — resumes incomplete workflows"
+  echo -e "    ${GREEN}+${NC} UserPromptSubmit hook — detects workflow patterns"
+  echo -e "    ${GREEN}+${NC} PreToolUse hook — blocks redundant searches"
+  echo -e "    ${GREEN}+${NC} PostToolUse hook — tracks every tool call"
+  echo -e "    ${GREEN}+${NC} Stop hook — judges completion, blocks if incomplete"
+  echo -e "    ${GREEN}+${NC} SubagentStop hook — judges subagent completion"
+  echo -e "    ${GREEN}+${NC} InstructionsLoaded hook — injects active workflow steps"
+  echo -e "    ${GREEN}+${NC} PreCompact hook — saves state before context prune"
+  echo -e "    ${GREEN}+${NC} SessionEnd hook — auto-captures workflow"
+  echo -e "    ${GREEN}+${NC} FileChanged hook — tracks file modifications"
+  echo -e "    ${GREEN}+${NC} Bundled skill: attrition (capture/distill/judge)"
+else
+  echo -e "  ${BOLD}What's active (legacy hook mode):${NC}"
+  echo -e "    ${GREEN}+${NC} PostToolUse hook — tracks every tool call"
+  echo -e "    ${GREEN}+${NC} Stop hook — judges completion before agent stops"
+fi
+
+echo -e "    ${GREEN}+${NC} Activity log: $ATTRITION_DIR/activity.jsonl"
 if [ -f ".claude/rules/attrition.md" ]; then
-echo -e "    ${GREEN}✓${NC} Claude Code rule: .claude/rules/attrition.md"
+echo -e "    ${GREEN}+${NC} Claude Code rule: .claude/rules/attrition.md"
 fi
 echo ""
 echo -e "  ${BOLD}Next steps:${NC}"
-echo -e "    • Start a Claude Code session — hooks fire automatically"
-echo -e "    • View workflows: ${CYAN}bp workflows${NC}"
-echo -e "    • Distill for replay: ${CYAN}bp distill <id> --target sonnet-4-6${NC}"
+echo -e "    * Start a Claude Code session — hooks fire automatically"
+echo -e "    * View workflows: ${CYAN}bp workflows${NC}"
+echo -e "    * Distill for replay: ${CYAN}bp distill <id> --target sonnet-4-6${NC}"
 echo ""
 echo -e "  ${BOLD}Dashboard:${NC} https://attrition.sh/judge"
 echo ""

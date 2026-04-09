@@ -89,7 +89,76 @@ Core thesis: frontier model workflows are ephemeral. attrition captures them, di
 | `bp.judge.event` | Yes | Report event, get nudge |
 | `bp.judge.verdict` | Yes | Finalize, produce verdict |
 
-## Claude Code Integration
+## Claude Code Plugin System
+
+attrition ships as a Claude Code plugin (`.claude-plugin/`). The plugin registers 10 hooks across the full session lifecycle:
+
+### Plugin Manifest
+- `.claude-plugin/plugin.json` -- Plugin metadata (name, version, entrypoint)
+- `.claude-plugin/hooks/hooks.json` -- Hook definitions for all 10 lifecycle events
+- `.claude-plugin/skills/attrition/SKILL.md` -- Bundled skill (capture/distill/judge)
+
+### Hook Scripts (10 total)
+
+| Hook | Script | Trigger | Behavior |
+|------|--------|---------|----------|
+| SessionStart | `session-start.sh` | Session begins | Checks for prior incomplete workflows, persists env vars |
+| UserPromptSubmit | `detect-workflow.sh` | User sends prompt | Pattern-matches 5 workflow types (dev_flywheel, qa_audit, research, refactor, deploy), saves required steps |
+| PreToolUse | `block-redundant.sh` | Before Grep/Glob/WebSearch | SHA-256 hashes query, blocks exact duplicates within the session |
+| PostToolUse | `track-tool.sh` | After any tool call | Scrubs sensitive values, appends to `~/.attrition/activity.jsonl` |
+| Stop | `judge-stop.sh` | Agent tries to stop | Scores workflow evidence vs required steps. EXIT 2 = HARD BLOCK if <50% done |
+| SubagentStop | `judge-stop.sh` | Subagent tries to stop | Same judge logic as Stop |
+| InstructionsLoaded | `inject-workflow.sh` | Instructions refresh | Injects active workflow's required steps into agent context |
+| PreCompact | `save-state.sh` | Before context prune | Saves tool summary + active workflow to `compact_state.json` |
+| SessionEnd | `auto-capture.sh` | Session ends | Auto-captures sessions with 5+ tool calls to `~/.attrition/auto_captures/` |
+| FileChanged | `track-file.sh` | File modified | Appends file path + timestamp to `~/.attrition/file_changes.jsonl` |
+
+### Workflow Detection Patterns
+
+The `detect-workflow.sh` hook recognizes these workflow types:
+
+| Workflow | Trigger Words | Required Steps |
+|----------|---------------|----------------|
+| dev_flywheel | "flywheel", "full pass", "ship this" | understand plan, search context, inspect, implement, test, verify, commit |
+| qa_audit | "qa this", "audit", "dogfood" | start server, navigate pages, check console, test interactions, report |
+| research | "research", "investigate", "deep dive" | define scope, web search, read sources, synthesize |
+| refactor | "refactor", "migrate", "upgrade" | search patterns, read files, edit, check breaks, update types, test, build |
+| deploy | "deploy", "release", "ship to prod" | test, build, bump version, tag, push staging, smoke test, promote |
+
+### Judge Scoring (judge-stop.sh)
+
+| Score | Verdict | Exit Code | Effect |
+|-------|---------|-----------|--------|
+| 100% | ALLOW | 0 | Clean stop, workflow file removed |
+| >= 85% | ALLOW_WARN | 0 | Stop allowed, minor gaps logged |
+| >= 50% | ESCALATE | 0 | Warning printed, agent can still stop |
+| < 50% | BLOCK | 2 | HARD BLOCK -- agent cannot stop |
+
+### Data Directory (`~/.attrition/`)
+
+| File | Purpose |
+|------|---------|
+| `activity.jsonl` | Tool call log (scrubbed) |
+| `search_log.jsonl` | Search hash dedup log (session-scoped) |
+| `active_workflow.json` | Current workflow + required steps |
+| `compact_state.json` | Saved state before context prune |
+| `file_changes.jsonl` | File modification log |
+| `current_session_id` | Current session ID |
+| `auto_captures/*.json` | Auto-captured workflow files |
+| `workflows.db` | SQLite workflow storage (bp CLI) |
+
+### Installation
+
+Plugin mode (preferred -- inside a git repo):
+```bash
+curl -sL attrition.sh/install | bash
+```
+This writes `.claude-plugin/` into the project. Claude Code picks it up automatically.
+
+Legacy mode (fallback -- no git repo):
+The installer falls back to injecting hooks directly into `~/.claude/settings.json`.
+
+### Legacy Integration
 
 - `.claude/rules/bp_capture.md` -- Auto-suggest workflow capture after complex tasks
 - `.claude/rules/bp_after_fix.md` -- Re-run judge session after code changes

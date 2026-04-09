@@ -1,5 +1,6 @@
 //! Adapters parse raw session data from various agent formats into canonical events.
 
+pub mod agents_md;
 pub mod claude_code;
 pub mod generic;
 pub mod raw_api;

@@ -1,0 +1,10 @@
+{
+  "name": "attrition",
+  "version": "0.1.0",
+  "description": "Always-on workflow judge. Catches skipped steps, blocks incomplete work, replays cheaper.",
+  "author": "attrition.sh",
+  "homepage": "https://attrition.sh",
+  "repository": "https://github.com/HomenShum/attrition",
+  "license": "MIT",
+  "entrypoint": "hooks/hooks.json"
+}

@@ -152,6 +152,17 @@ enum Commands {
     /// Process a Claude Code PostToolUse hook event (reads JSON from stdin)
     Hook,
 
+    /// Import an AGENTS.md file as an enforceable workflow
+    ImportAgents {
+        /// Path to AGENTS.md (default: ./AGENTS.md)
+        #[arg(default_value = "AGENTS.md")]
+        path: PathBuf,
+
+        /// Workflow name (default: derived from filename)
+        #[arg(long)]
+        name: Option<String>,
+    },
+
     /// Install attrition hooks into Claude Code settings.json
     Install,
 }
@@ -532,6 +543,71 @@ async fn main() -> Result<()> {
         Commands::Hook => {
             // Silent on all errors — never break the agent
             let _ = run_hook();
+        }
+
+        // ── Import AGENTS.md ──────────────────────────────────────────
+
+        Commands::ImportAgents { path, name } => {
+            use attrition_workflow::adapters::agents_md::AgentsMdAdapter;
+            use attrition_workflow::adapters::WorkflowAdapter;
+            use attrition_workflow::storage::WorkflowStore;
+            use attrition_workflow::{Workflow, WorkflowMetadata, TokenCost};
+
+            if !path.exists() {
+                anyhow::bail!("File not found: {}", path.display());
+            }
+
+            let raw = std::fs::read(&path)?;
+            let events = AgentsMdAdapter::parse(&raw)?;
+
+            if events.is_empty() {
+                println!("No steps found in {}. Nothing to import.", path.display());
+                return Ok(());
+            }
+
+            let workflow_name = name.unwrap_or_else(|| {
+                path.file_stem()
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("agents-md")
+                    .to_string()
+            });
+
+            let workflow = Workflow::new(
+                workflow_name.clone(),
+                "agents-md".to_string(),
+                events.clone(),
+                WorkflowMetadata {
+                    adapter: AgentsMdAdapter::source_name().to_string(),
+                    session_id: None,
+                    project_path: path.parent().and_then(|p| p.to_str()).map(String::from),
+                    total_tokens: TokenCost::default(),
+                    duration_ms: 0,
+                    task_description: format!("Imported from {}", path.display()),
+                },
+            );
+
+            let db_path = workflow_db_path()?;
+            let store = WorkflowStore::new(&db_path)?;
+            store.save_workflow(&workflow)?;
+
+            if cli.json {
+                println!("{}", serde_json::to_string_pretty(&serde_json::json!({
+                    "id": workflow.id.to_string(),
+                    "name": workflow_name,
+                    "steps": events.len(),
+                    "source": path.display().to_string(),
+                    "db_path": db_path.display().to_string(),
+                }))?);
+            } else {
+                println!(
+                    "Imported {} steps from {} as workflow '{}'",
+                    events.len(),
+                    path.display(),
+                    workflow_name,
+                );
+                println!("  ID: {}", workflow.id);
+                println!("  Stored: {}", db_path.display());
+            }
         }
 
         // ── Install hooks into Claude Code ───────────────────────────

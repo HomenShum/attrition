@@ -11,6 +11,38 @@ use std::sync::Arc;
 
 use crate::state::AppState;
 
+// ── AGENTS.md auto-discovery ──────────────────────────────────────────────
+
+/// Try to read and parse an AGENTS.md file from the current directory.
+/// Returns the extracted step strings (section-prefixed bullet points) or
+/// an empty vec if the file doesn't exist or can't be parsed.
+fn load_agents_md_steps() -> Vec<String> {
+    let path = std::path::Path::new("AGENTS.md");
+    if !path.exists() {
+        return Vec::new();
+    }
+
+    let Ok(bytes) = std::fs::read(path) else {
+        return Vec::new();
+    };
+
+    use attrition_workflow::adapters::agents_md::AgentsMdAdapter;
+    use attrition_workflow::adapters::WorkflowAdapter;
+    use attrition_workflow::CanonicalEvent;
+
+    let Ok(events) = AgentsMdAdapter::parse(&bytes) else {
+        return Vec::new();
+    };
+
+    events
+        .into_iter()
+        .filter_map(|ev| match ev {
+            CanonicalEvent::Assert { condition, .. } => Some(condition),
+            _ => None,
+        })
+        .collect()
+}
+
 // ── Workflow detection ─────────────────────────────────────────────────────
 
 /// Built-in workflow patterns for keyword-based detection.
@@ -191,6 +223,10 @@ async fn on_prompt(
 ) -> Json<OnPromptResponse> {
     state.increment_requests();
 
+    // Auto-discover AGENTS.md steps from the current directory
+    let agents_md_steps = load_agents_md_steps();
+    let has_agents_md = !agents_md_steps.is_empty();
+
     match detect_workflow(&req.prompt) {
         Some(pattern) => {
             // Create or update hook session if session_id provided
@@ -202,12 +238,49 @@ async fn on_prompt(
                 });
                 session.workflow_name = Some(pattern.name.to_string());
                 session.expected_steps = pattern.steps.iter().map(|s| s.to_string()).collect();
+
+                // Merge AGENTS.md steps — append any that aren't already covered
+                for step in &agents_md_steps {
+                    if !session.expected_steps.iter().any(|s| s == step) {
+                        session.expected_steps.push(step.clone());
+                    }
+                }
+            }
+
+            let mut inject = pattern.inject_context.to_string();
+            if has_agents_md {
+                inject.push_str(&format!(
+                    " Also enforcing {} rules from AGENTS.md.",
+                    agents_md_steps.len()
+                ));
             }
 
             Json(OnPromptResponse {
                 detected: true,
                 workflow_name: Some(pattern.name.to_string()),
-                inject_context: Some(pattern.inject_context.to_string()),
+                inject_context: Some(inject),
+            })
+        }
+        None if has_agents_md => {
+            // No keyword-detected workflow, but AGENTS.md exists — create
+            // an ad-hoc workflow from it so rules are still enforced.
+            if let Some(sid) = &req.session_id {
+                let mut sessions = state.hook_sessions.lock().await;
+                let session = sessions.entry(sid.clone()).or_insert_with(|| HookSession {
+                    session_id: sid.clone(),
+                    ..Default::default()
+                });
+                session.workflow_name = Some("agents-md".to_string());
+                session.expected_steps = agents_md_steps.clone();
+            }
+
+            Json(OnPromptResponse {
+                detected: true,
+                workflow_name: Some("agents-md".to_string()),
+                inject_context: Some(format!(
+                    "Found AGENTS.md with {} rules. Enforcing as workflow steps.",
+                    agents_md_steps.len()
+                )),
             })
         }
         None => Json(OnPromptResponse {
