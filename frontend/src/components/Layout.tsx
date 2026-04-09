@@ -5,6 +5,7 @@ const NAV_LINKS = [
   { to: "/", label: "Home" },
   { to: "/workflows", label: "Workflows" },
   { to: "/judge", label: "Judge" },
+  { to: "/benchmark", label: "Benchmark" },
   { to: "/compare", label: "Compare" },
 ] as const;
 

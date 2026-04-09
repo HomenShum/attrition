@@ -1,0 +1,24 @@
+name: "refactor-async-client"
+description: "Refactor the API client from callback-based to async/await with proper error boundaries"
+category: "refactor"
+complexity: "complex"
+required_steps:
+  search: "Find all API client usages, callback patterns, and error handling"
+  read: "Read API client module, all consumers, and existing error types"
+  edit: "Convert to async/await, add AbortController, typed errors, retry logic"
+  test: "Run full test suite including integration tests for API calls"
+  build: "Run tsc and vite build to verify all async types resolve"
+  preview: "Verify API-dependent pages still render and handle errors"
+prompt: |
+  Refactor the API client from callbacks to async/await. Requirements:
+  1. Convert all API methods to return Promise instead of taking callbacks
+  2. Add AbortController support for request cancellation
+  3. Implement typed error classes (NetworkError, ApiError, TimeoutError)
+  4. Add configurable retry logic with exponential backoff (max 3 retries)
+  5. Update all consumers (minimum 8 call sites)
+  6. Add request/response interceptor support
+  7. Run full test suite and build
+expected_tokens_without: 52000
+expected_tokens_with: 34000
+expected_time_without_min: 20
+expected_time_with_min: 13

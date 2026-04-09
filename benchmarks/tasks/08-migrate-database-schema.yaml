@@ -1,0 +1,25 @@
+name: "migrate-database-schema"
+description: "Migrate database schema to add multi-tenancy support with data isolation"
+category: "refactor"
+complexity: "complex"
+required_steps:
+  search: "Find all database queries, schema definitions, and migration files"
+  read: "Read current schema, ORM models, query builders, and seed data"
+  edit: "Add tenant_id column, update all queries, create migration, update indexes"
+  test: "Run migration tests, data isolation tests, and full integration suite"
+  build: "Compile with new schema types and verify all queries type-check"
+  preview: "Verify application works with multi-tenant data in dev environment"
+prompt: |
+  Add multi-tenancy to the database schema. Requirements:
+  1. Add tenant_id column to all user-facing tables (minimum 6 tables)
+  2. Create database migration file with rollback support
+  3. Add row-level security policies for tenant data isolation
+  4. Update all query builders to include tenant_id filter
+  5. Add tenant context middleware that sets current tenant from auth
+  6. Update seed data to include multiple tenants
+  7. Add cross-tenant access prevention tests
+  8. Run full migration, test suite, and build
+expected_tokens_without: 55000
+expected_tokens_with: 36000
+expected_time_without_min: 22
+expected_time_with_min: 14

@@ -1,0 +1,23 @@
+name: "fix-css-layout"
+description: "Fix CSS grid layout breaking on mobile viewports causing horizontal overflow"
+category: "bugfix"
+complexity: "simple"
+required_steps:
+  search: "Find CSS grid declarations and media query breakpoints"
+  read: "Read the affected layout components and stylesheet"
+  edit: "Fix grid template columns, add proper breakpoints, fix overflow"
+  test: "Run visual regression tests or screenshot comparisons"
+  build: "Run build to verify CSS processing"
+  preview: "Screenshot page at 375px, 768px, and 1280px widths"
+prompt: |
+  Fix the CSS grid layout that breaks on mobile. Requirements:
+  1. Identify the grid container causing horizontal overflow below 768px
+  2. Change grid-template-columns to use minmax() for fluid sizing
+  3. Add proper media query breakpoints (375px, 768px, 1024px)
+  4. Fix any overflowing text with overflow-wrap: break-word
+  5. Verify no horizontal scrollbar appears at any viewport width
+  6. Run build and visually verify all three breakpoints
+expected_tokens_without: 16000
+expected_tokens_with: 11000
+expected_time_without_min: 5
+expected_time_with_min: 4

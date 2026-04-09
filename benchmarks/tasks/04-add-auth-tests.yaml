@@ -1,0 +1,24 @@
+name: "add-auth-tests"
+description: "Add comprehensive test coverage for the authentication flow including edge cases"
+category: "testing"
+complexity: "medium"
+required_steps:
+  search: "Find auth module, middleware, token handling, and session management"
+  read: "Read auth implementation, existing tests, and API routes"
+  edit: "Write test files for login, logout, token refresh, session expiry, RBAC"
+  test: "Run the new auth test suite and verify 100% of new tests pass"
+  build: "Run tsc to verify test types compile"
+  preview: "Verify auth flow works end-to-end in the running app"
+prompt: |
+  Add comprehensive test coverage for the auth system. Requirements:
+  1. Login flow tests: valid credentials, invalid password, nonexistent user, rate limiting
+  2. Token management: JWT creation, expiration, refresh, invalid signatures
+  3. Session management: creation, persistence, cleanup, concurrent sessions
+  4. Authorization: role-based access for admin/user/guest, permission checks
+  5. Edge cases: expired tokens during request, simultaneous logouts, CSRF
+  6. Minimum 20 test cases total
+  7. Run tests and verify build
+expected_tokens_without: 35000
+expected_tokens_with: 22000
+expected_time_without_min: 14
+expected_time_with_min: 9

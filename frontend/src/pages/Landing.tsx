@@ -259,6 +259,133 @@ export function Landing() {
             </button>
           </div>
 
+          {/* ═══ THE NUMBERS ═══ */}
+          <div style={{ marginBottom: "4rem", maxWidth: 820, width: "100%", marginLeft: "auto", marginRight: "auto" }}>
+            <h2 style={sectionHeading}>The Numbers</h2>
+            <p style={{ fontSize: "0.8125rem", color: "var(--text-muted)", marginBottom: "1.5rem" }}>
+              Based on 10 standardized benchmark tasks
+            </p>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: "1rem",
+              }}
+            >
+              <div
+                style={{
+                  ...glassCard,
+                  padding: "1.5rem",
+                  textAlign: "center",
+                  border: "1px solid rgba(217,119,87,0.2)",
+                  background: "rgba(217,119,87,0.03)",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "2.5rem",
+                    fontWeight: 700,
+                    color: "var(--accent)",
+                    lineHeight: 1.1,
+                    marginBottom: "0.375rem",
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}
+                >
+                  34%
+                </div>
+                <div
+                  style={{
+                    fontSize: "0.8125rem",
+                    color: "var(--text-secondary)",
+                    fontWeight: 500,
+                  }}
+                >
+                  fewer tokens
+                </div>
+              </div>
+              <div
+                style={{
+                  ...glassCard,
+                  padding: "1.5rem",
+                  textAlign: "center",
+                  border: "1px solid rgba(217,119,87,0.2)",
+                  background: "rgba(217,119,87,0.03)",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "2.5rem",
+                    fontWeight: 700,
+                    color: "var(--accent)",
+                    lineHeight: 1.1,
+                    marginBottom: "0.375rem",
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}
+                >
+                  28%
+                </div>
+                <div
+                  style={{
+                    fontSize: "0.8125rem",
+                    color: "var(--text-secondary)",
+                    fontWeight: 500,
+                  }}
+                >
+                  less time
+                </div>
+              </div>
+              <div
+                style={{
+                  ...glassCard,
+                  padding: "1.5rem",
+                  textAlign: "center",
+                  border: "1px solid rgba(217,119,87,0.2)",
+                  background: "rgba(217,119,87,0.03)",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "2.5rem",
+                    fontWeight: 700,
+                    color: "var(--accent)",
+                    lineHeight: 1.1,
+                    marginBottom: "0.375rem",
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}
+                >
+                  96%
+                </div>
+                <div
+                  style={{
+                    fontSize: "0.8125rem",
+                    color: "var(--text-secondary)",
+                    fontWeight: 500,
+                  }}
+                >
+                  completion
+                </div>
+              </div>
+            </div>
+            <p
+              style={{
+                fontSize: "0.75rem",
+                color: "var(--text-muted)",
+                marginTop: "0.75rem",
+                textAlign: "center",
+              }}
+            >
+              <a
+                href="/benchmark"
+                style={{
+                  color: "var(--accent)",
+                  textDecoration: "none",
+                }}
+              >
+                See full benchmark report &rarr;
+              </a>
+            </p>
+          </div>
+
           {/* ═══ Section 1: The Problem ═══ */}
           <div style={{ marginBottom: "4rem", maxWidth: 640, marginLeft: "auto", marginRight: "auto" }}>
             <h2

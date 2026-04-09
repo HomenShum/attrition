@@ -1,0 +1,25 @@
+name: "add-api-endpoint"
+description: "Add a new REST API endpoint for user profile management with validation"
+category: "feature"
+complexity: "medium"
+required_steps:
+  search: "Find existing API route patterns, middleware, and validation schemas"
+  read: "Read router setup, database models, and existing endpoint implementations"
+  edit: "Add route handler, request validation, database queries, response types"
+  test: "Run API tests covering CRUD operations, validation, and auth"
+  build: "Compile and verify all types resolve correctly"
+  preview: "Test endpoint manually with curl or API client"
+prompt: |
+  Add a user profile API endpoint. Requirements:
+  1. GET /api/profile/:id - fetch profile with auth check
+  2. PUT /api/profile/:id - update profile with field validation
+  3. DELETE /api/profile/:id - soft delete with admin-only guard
+  4. Add request body validation (email format, name length, avatar URL)
+  5. Add rate limiting (60 requests/minute per user)
+  6. Return consistent error response format
+  7. Add OpenAPI/Swagger annotations
+  8. Run tests and verify build
+expected_tokens_without: 30000
+expected_tokens_with: 20000
+expected_time_without_min: 11
+expected_time_with_min: 7

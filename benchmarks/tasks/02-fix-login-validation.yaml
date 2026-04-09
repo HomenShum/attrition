@@ -1,0 +1,24 @@
+name: "fix-login-validation"
+description: "Fix missing client-side validation on the login form causing silent failures"
+category: "bugfix"
+complexity: "simple"
+required_steps:
+  search: "Find login form component and related validation utilities"
+  read: "Read current form implementation and error handling"
+  edit: "Add email format validation, password length check, and error display"
+  test: "Run tests covering empty fields, invalid email, short password"
+  build: "Run tsc to verify type safety of validation logic"
+  preview: "Screenshot form with validation errors visible"
+prompt: |
+  Fix the login form validation. Currently submitting with invalid data
+  causes a silent 400 error. Requirements:
+  1. Add client-side email format validation
+  2. Add minimum password length check (8 chars)
+  3. Display inline error messages below each field
+  4. Disable submit button while fields are invalid
+  5. Show server-side errors when they occur
+  6. Run tests and verify build
+expected_tokens_without: 18000
+expected_tokens_with: 12000
+expected_time_without_min: 6
+expected_time_with_min: 4

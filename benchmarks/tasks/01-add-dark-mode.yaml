@@ -1,0 +1,23 @@
+name: "add-dark-mode"
+description: "Add a dark mode toggle to the application settings page with theme persistence"
+category: "feature"
+complexity: "medium"
+required_steps:
+  search: "Find existing theme/settings files and CSS variables"
+  read: "Read current settings page, CSS custom properties, and layout component"
+  edit: "Add toggle component, theme context provider, and dark mode CSS variables"
+  test: "Run vitest to verify theme switching logic and persistence"
+  build: "Run tsc --noEmit and vite build to verify no type errors"
+  preview: "Screenshot settings page in both light and dark modes"
+prompt: |
+  Add a dark mode toggle to the settings page. Requirements:
+  1. Create a ThemeProvider context that persists preference to localStorage
+  2. Add a toggle switch component to the settings page
+  3. Define CSS custom properties for both light and dark themes
+  4. Ensure all existing components respect the theme variables
+  5. Add prefers-color-scheme media query as default
+  6. Run all tests and verify the build passes
+expected_tokens_without: 32000
+expected_tokens_with: 21000
+expected_time_without_min: 12
+expected_time_with_min: 8

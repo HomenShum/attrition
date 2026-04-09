@@ -1,0 +1,25 @@
+name: "update-landing-deploy"
+description: "Redesign the landing page hero section and deploy to production with CI checks"
+category: "workflow"
+complexity: "complex"
+required_steps:
+  search: "Find current landing page, deployment config, CI pipeline files"
+  read: "Read landing page component, deploy scripts, environment configs"
+  edit: "Redesign hero, update copy, add analytics events, update CI config"
+  test: "Run unit tests, integration tests, and lighthouse score check"
+  build: "Run full production build including bundle analysis"
+  preview: "Screenshot new landing page on desktop and mobile viewports"
+prompt: |
+  Redesign the landing page hero and deploy. Requirements:
+  1. Update hero section: new headline, subheadline, and CTA button
+  2. Add animated gradient background with prefers-reduced-motion respect
+  3. Add analytics tracking events for hero CTA clicks
+  4. Update meta tags (title, description, OG image)
+  5. Run lighthouse CI check (target: performance > 90)
+  6. Verify mobile responsive layout (375px, 768px, 1280px)
+  7. Update CI pipeline to include the new checks
+  8. Run all tests and production build
+expected_tokens_without: 48000
+expected_tokens_with: 32000
+expected_time_without_min: 18
+expected_time_with_min: 12

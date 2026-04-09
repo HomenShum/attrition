@@ -1,0 +1,26 @@
+name: "implement-search"
+description: "Implement full-text search with faceted filtering and result highlighting"
+category: "feature"
+complexity: "complex"
+required_steps:
+  search: "Find existing data models, API routes, and any search-related code"
+  read: "Read database schema, indexing configuration, and UI components"
+  edit: "Add search index, query parser, API endpoint, result component with highlights"
+  test: "Run search accuracy tests, edge case tests, and performance benchmarks"
+  build: "Build with search dependencies and verify bundle size"
+  preview: "Test search UI with various queries including typos and filters"
+prompt: |
+  Implement full-text search. Requirements:
+  1. Create search index on title, description, and tags fields
+  2. Build query parser supporting: quoted phrases, exclusions (-word), field:value
+  3. Add GET /api/search?q=...&category=...&sort=... endpoint
+  4. Implement result highlighting with <mark> tags on matched terms
+  5. Add faceted filtering (category, date range, author)
+  6. Add typo tolerance using Levenshtein distance (threshold: 2)
+  7. Debounced search-as-you-type UI component
+  8. Pagination with cursor-based approach
+  9. Run tests and verify build
+expected_tokens_without: 50000
+expected_tokens_with: 33000
+expected_time_without_min: 20
+expected_time_with_min: 13

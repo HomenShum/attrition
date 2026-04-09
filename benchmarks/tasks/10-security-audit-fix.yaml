@@ -1,0 +1,27 @@
+name: "security-audit-fix"
+description: "Run security audit, fix all critical and high vulnerabilities, add security headers"
+category: "workflow"
+complexity: "complex"
+required_steps:
+  search: "Find all input handling, auth code, SQL queries, and HTTP headers"
+  read: "Read auth middleware, input sanitization, CSP headers, and dependency list"
+  edit: "Fix XSS vectors, add CSRF protection, parameterize queries, add security headers"
+  test: "Run security-focused test suite including injection and XSS attempts"
+  build: "Run build with strict CSP and verify no inline script violations"
+  preview: "Verify security headers present in browser dev tools"
+prompt: |
+  Run a security audit and fix all issues. Requirements:
+  1. Audit all user input handlers for XSS vulnerabilities (sanitize HTML)
+  2. Add CSRF token generation and validation middleware
+  3. Parameterize all SQL queries (find and fix any string concatenation)
+  4. Add security headers: CSP, X-Frame-Options, X-Content-Type-Options,
+     Strict-Transport-Security, Referrer-Policy
+  5. Audit dependencies for known CVEs (npm audit / cargo audit)
+  6. Add rate limiting to all public endpoints
+  7. Add input length limits to all text fields
+  8. Write security regression tests for each fix
+  9. Run full test suite and build
+expected_tokens_without: 45000
+expected_tokens_with: 30000
+expected_time_without_min: 18
+expected_time_with_min: 12
