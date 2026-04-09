@@ -31,6 +31,7 @@ interface PainRow {
   verdict: string;
   verdictColor: string;
   savings: string;
+  traceFile: string;
 }
 
 const PAIN_ROWS: PainRow[] = [
@@ -52,9 +53,10 @@ const PAIN_ROWS: PainRow[] = [
       "Verdict: FAILED — blocks stop, lists 7 missing items",
       "Agent continues without user correction needed",
     ],
-    verdict: "FAILED → agent forced to continue",
+    verdict: "FAILED — 2/8 steps (25%)",
     verdictColor: "#ef4444",
-    savings: "Eliminated 1 correction cycle + re-exploration tokens",
+    savings: "Blocked stop. 6 missing steps listed. Session: false_completion.jsonl",
+    traceFile: "false_completion",
   },
   {
     pain: "Agent skips explicit instructions silently",
@@ -74,9 +76,10 @@ const PAIN_ROWS: PainRow[] = [
       "on-tool-use tracks: xlsx ✓, PDF ✗, csv ✗ after 15 calls",
       "Nudge fired: \"Missing: PDF parsing, CSV processing\"",
     ],
-    verdict: "PARTIAL → nudge at tool call 15",
-    verdictColor: "#eab308",
-    savings: "Caught gap at minute 8 instead of hour 3",
+    verdict: "FAILED — 3/8 steps (38%)",
+    verdictColor: "#ef4444",
+    savings: "Blocked stop. Missing: test, build, preview, commit, qa_check. Session: instruction_drift.jsonl",
+    traceFile: "instruction_drift",
   },
   {
     pain: "70% of tokens are waste in agent runs",
@@ -96,9 +99,10 @@ const PAIN_ROWS: PainRow[] = [
       "Context compression: strip redundant reasoning",
       "Distilled replay: 23K tokens, $0.18 on Sonnet",
     ],
-    verdict: "CORRECT — replay accepted at 56% fewer tokens",
-    verdictColor: "#22c55e",
-    savings: "$0.82 → $0.18 per run (78% cost reduction)",
+    verdict: "PARTIAL — 6/8 steps (75%)",
+    verdictColor: "#eab308",
+    savings: "28 tool calls, 2 missing (preview, qa_check). Distilled replay: 56% fewer tokens. Session: cost_overrun.jsonl",
+    traceFile: "cost_overrun",
   },
   {
     pain: "Rules files don't hold up as work scales",
@@ -118,9 +122,10 @@ const PAIN_ROWS: PainRow[] = [
       "on-stop: checks for Bash tool call containing test command",
       "No test evidence → Verdict: FAILED, blocks stop",
     ],
-    verdict: "FAILED → blocks until test evidence found",
-    verdictColor: "#ef4444",
-    savings: "Rules become enforced policies, not ignored suggestions",
+    verdict: "ESCALATE — 5/8 steps (63%), 1 correction",
+    verdictColor: "#f97316",
+    savings: "Missing: preview, commit, qa_check. User said 'you didn't run the tests'. Session: rules_overload.jsonl",
+    traceFile: "rules_overload",
   },
   {
     pain: "Memory lost between sessions",
@@ -140,9 +145,10 @@ const PAIN_ROWS: PainRow[] = [
       "Injects required steps into context automatically",
       "User types task → agent already knows the 7 steps",
     ],
-    verdict: "CORRECT — workflow retrieved, no re-explanation needed",
-    verdictColor: "#22c55e",
-    savings: "15 min + 3K tokens saved per resumed session",
+    verdict: "ESCALATE — 5/8 steps (63%)",
+    verdictColor: "#f97316",
+    savings: "Missing: edit, preview, qa_check. Re-exploration cost: 3K tokens. Session: memory_loss.jsonl",
+    traceFile: "memory_loss",
   },
 ];
 
@@ -257,7 +263,7 @@ export function Proof() {
               </div>
 
               {/* Verdict + savings */}
-              <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginBottom: "0.75rem" }}>
                 <div style={{
                   ...glass,
                   padding: "0.5rem 0.875rem",
@@ -279,9 +285,40 @@ export function Proof() {
                   flex: 1,
                   minWidth: 200,
                 }}>
-                  <span style={{ fontSize: "0.6875rem", textTransform: "uppercase", letterSpacing: "0.08em", color: "#9a9590" }}>Savings:</span>
-                  <span style={{ fontSize: "0.8125rem", color: "#22c55e" }}>{row.savings}</span>
+                  <span style={{ fontSize: "0.6875rem", textTransform: "uppercase", letterSpacing: "0.08em", color: "#9a9590" }}>Detail:</span>
+                  <span style={{ fontSize: "0.75rem", color: "#9a9590" }}>{row.savings}</span>
                 </div>
+              </div>
+
+              {/* Verified badge + trace link */}
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+                <span style={{
+                  ...mono,
+                  fontSize: "0.625rem",
+                  padding: "0.125rem 0.5rem",
+                  borderRadius: "0.25rem",
+                  background: "rgba(34,197,94,0.1)",
+                  border: "1px solid rgba(34,197,94,0.2)",
+                  color: "#22c55e",
+                }}>
+                  VERIFIED — real JSONL session
+                </span>
+                <a
+                  href={`https://github.com/HomenShum/attrition/blob/main/benchmarks/pain_sessions/${row.traceFile}.jsonl`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ ...mono, fontSize: "0.625rem", color: "#d97757", textDecoration: "none" }}
+                >
+                  View trace: {row.traceFile}.jsonl &rarr;
+                </a>
+                <a
+                  href={`https://github.com/HomenShum/attrition/blob/main/benchmarks/results/pain_benchmarks.json`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ ...mono, fontSize: "0.625rem", color: "#9a9590", textDecoration: "none" }}
+                >
+                  View verdict JSON &rarr;
+                </a>
               </div>
 
             </div>

@@ -1,0 +1,220 @@
+{
+  "generated_at": "2026-04-09T22:12:32.351988+00:00",
+  "sessions": [
+    {
+      "session_name": "false_completion",
+      "pain_theme": "false_completion",
+      "session_file": "false_completion.jsonl",
+      "model": "claude-opus-4-6",
+      "tool_calls": 6,
+      "total_tokens": 20538,
+      "corrections": 0,
+      "steps_completed": 2,
+      "steps_total": 8,
+      "completion_score": 0.25,
+      "missing_steps": [
+        "search",
+        "read",
+        "build",
+        "preview",
+        "commit",
+        "qa_check"
+      ],
+      "step_evidence": {
+        "search": false,
+        "read": false,
+        "edit": true,
+        "test": true,
+        "build": false,
+        "preview": false,
+        "commit": false,
+        "qa_check": false
+      },
+      "judge_verdict": "FAILED",
+      "expected_verdict": "FAILED",
+      "allow_stop": false,
+      "cost_usd": 0.5808,
+      "duration_minutes": 1.1,
+      "tool_breakdown": {
+        "Bash": 4,
+        "Edit": 1,
+        "Write": 1
+      },
+      "correction_texts": [],
+      "trace_url": "/anatomy?workflow=false_completion"
+    },
+    {
+      "session_name": "instruction_drift",
+      "pain_theme": "instruction_drift",
+      "session_file": "instruction_drift.jsonl",
+      "model": "claude-sonnet-4-6",
+      "tool_calls": 6,
+      "total_tokens": 17526,
+      "corrections": 0,
+      "steps_completed": 3,
+      "steps_total": 8,
+      "completion_score": 0.375,
+      "missing_steps": [
+        "test",
+        "build",
+        "preview",
+        "commit",
+        "qa_check"
+      ],
+      "step_evidence": {
+        "search": true,
+        "read": true,
+        "edit": true,
+        "test": false,
+        "build": false,
+        "preview": false,
+        "commit": false,
+        "qa_check": false
+      },
+      "judge_verdict": "FAILED",
+      "expected_verdict": "PARTIAL",
+      "allow_stop": false,
+      "cost_usd": 0.095,
+      "duration_minutes": 0.9,
+      "tool_breakdown": {
+        "Write": 2,
+        "Bash": 2,
+        "Grep": 1,
+        "Read": 1
+      },
+      "correction_texts": [],
+      "trace_url": "/anatomy?workflow=instruction_drift"
+    },
+    {
+      "session_name": "cost_overrun",
+      "pain_theme": "cost_overrun",
+      "session_file": "cost_overrun.jsonl",
+      "model": "claude-opus-4-6",
+      "tool_calls": 27,
+      "total_tokens": 76508,
+      "corrections": 0,
+      "steps_completed": 6,
+      "steps_total": 8,
+      "completion_score": 0.75,
+      "missing_steps": [
+        "preview",
+        "qa_check"
+      ],
+      "step_evidence": {
+        "search": true,
+        "read": true,
+        "edit": true,
+        "test": true,
+        "build": true,
+        "preview": false,
+        "commit": true,
+        "qa_check": false
+      },
+      "judge_verdict": "PARTIAL",
+      "expected_verdict": "CORRECT",
+      "allow_stop": true,
+      "cost_usd": 1.883,
+      "duration_minutes": 2.6,
+      "tool_breakdown": {
+        "Read": 15,
+        "Bash": 5,
+        "Edit": 4,
+        "Grep": 3
+      },
+      "correction_texts": [],
+      "trace_url": "/anatomy?workflow=cost_overrun"
+    },
+    {
+      "session_name": "rules_overload",
+      "pain_theme": "rules_file_overload",
+      "session_file": "rules_overload.jsonl",
+      "model": "claude-sonnet-4-6",
+      "tool_calls": 7,
+      "total_tokens": 25674,
+      "corrections": 1,
+      "steps_completed": 5,
+      "steps_total": 8,
+      "completion_score": 0.625,
+      "missing_steps": [
+        "preview",
+        "commit",
+        "qa_check"
+      ],
+      "step_evidence": {
+        "search": true,
+        "read": true,
+        "edit": true,
+        "test": true,
+        "build": true,
+        "preview": false,
+        "commit": false,
+        "qa_check": false
+      },
+      "judge_verdict": "SHOULD_HAVE_ESCALATED",
+      "expected_verdict": "FAILED",
+      "allow_stop": true,
+      "cost_usd": 0.1591,
+      "duration_minutes": 0.9,
+      "tool_breakdown": {
+        "Write": 2,
+        "Bash": 2,
+        "Grep": 1,
+        "Read": 1,
+        "Edit": 1
+      },
+      "correction_texts": [
+        "You didn't run the tests. CLAUDE.md literally says 'always run tests'."
+      ],
+      "trace_url": "/anatomy?workflow=rules_overload"
+    },
+    {
+      "session_name": "memory_loss",
+      "pain_theme": "memory_loss",
+      "session_file": "memory_loss.jsonl",
+      "model": "claude-sonnet-4-6",
+      "tool_calls": 10,
+      "total_tokens": 29054,
+      "corrections": 0,
+      "steps_completed": 5,
+      "steps_total": 8,
+      "completion_score": 0.625,
+      "missing_steps": [
+        "edit",
+        "preview",
+        "qa_check"
+      ],
+      "step_evidence": {
+        "search": true,
+        "read": true,
+        "edit": false,
+        "test": true,
+        "build": true,
+        "preview": false,
+        "commit": true,
+        "qa_check": false
+      },
+      "judge_verdict": "SHOULD_HAVE_ESCALATED",
+      "expected_verdict": "CORRECT",
+      "allow_stop": true,
+      "cost_usd": 0.1816,
+      "duration_minutes": 1.1,
+      "tool_breakdown": {
+        "Bash": 7,
+        "Read": 2,
+        "Grep": 1
+      },
+      "correction_texts": [],
+      "trace_url": "/anatomy?workflow=memory_loss"
+    }
+  ],
+  "summary": {
+    "total_sessions": 5,
+    "verdicts": {
+      "FAILED": 2,
+      "PARTIAL": 1,
+      "SHOULD_HAVE_ESCALATED": 2
+    },
+    "avg_completion": 0.525,
+    "total_corrections": 1
+  }
+}
