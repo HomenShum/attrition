@@ -1,33 +1,46 @@
 import { useState, useEffect } from "react";
 import { Layout } from "../components/Layout";
 import {
-  seedDemoData,
-  getJudgeSessions,
-  type JudgeSession,
-  type Verdict,
-  type DivergenceSeverity,
-  type Divergence,
-  type Nudge,
-} from "../lib/demo-data";
+  listJudgeSessions,
+  getJudgeSession,
+  type JudgeSessionSummary,
+  type JudgeSessionDetail,
+  type DivergenceEntry,
+  type NudgeEntry,
+} from "../lib/api";
 
-// --------------------------------------------------------------------------
-// Verdict / severity badge helpers
-// --------------------------------------------------------------------------
+/* ── Types for display ─────────────────────────────────────────────── */
+
+type Verdict = "correct" | "partial" | "failed" | "escalate";
+type DisplaySeverity = "Major" | "Minor" | "Critical";
+type EventStatus = "Followed" | "Skipped" | "Diverged";
+
+/* ── Styling helpers ────────────────────────────────────────────────── */
+
+const mono: React.CSSProperties = {
+  fontFamily: "'JetBrains Mono', monospace",
+};
 
 const VERDICT_COLORS: Record<Verdict, { bg: string; fg: string }> = {
-  Correct:  { bg: "rgba(72,187,120,0.12)",  fg: "#48bb78" },
-  Partial:  { bg: "rgba(236,201,75,0.12)",  fg: "#ecc94b" },
-  Escalate: { bg: "rgba(217,119,87,0.12)",  fg: "#d97757" },
-  Failed:   { bg: "rgba(239,68,68,0.12)",   fg: "#ef4444" },
+  correct: { bg: "rgba(72,187,120,0.12)", fg: "#48bb78" },
+  partial: { bg: "rgba(236,201,75,0.12)", fg: "#ecc94b" },
+  failed: { bg: "rgba(239,68,68,0.12)", fg: "#ef4444" },
+  escalate: { bg: "rgba(168,130,255,0.12)", fg: "#a882ff" },
 };
 
-const SEVERITY_COLORS: Record<DivergenceSeverity, { bg: string; fg: string }> = {
-  Minor:    { bg: "rgba(99,179,237,0.12)",  fg: "#63b3ed" },
-  Major:    { bg: "rgba(217,119,87,0.12)",  fg: "#d97757" },
-  Critical: { bg: "rgba(239,68,68,0.12)",   fg: "#ef4444" },
+const SEVERITY_COLORS: Record<string, { bg: string; fg: string }> = {
+  minor: { bg: "rgba(99,179,237,0.12)", fg: "#63b3ed" },
+  major: { bg: "rgba(217,119,87,0.12)", fg: "#d97757" },
+  critical: { bg: "rgba(239,68,68,0.12)", fg: "#ef4444" },
 };
 
-function Badge({ label, colors }: { label: string; colors: { bg: string; fg: string } }) {
+function Badge({
+  label,
+  colors,
+}: {
+  label: string;
+  colors: { bg: string; fg: string };
+}) {
   return (
     <span
       style={{
@@ -36,7 +49,7 @@ function Badge({ label, colors }: { label: string; colors: { bg: string; fg: str
         borderRadius: "9999px",
         fontSize: "0.6875rem",
         fontWeight: 600,
-        fontFamily: "'JetBrains Mono', monospace",
+        ...mono,
         background: colors.bg,
         color: colors.fg,
         border: `1px solid ${colors.fg}22`,
@@ -49,17 +62,15 @@ function Badge({ label, colors }: { label: string; colors: { bg: string; fg: str
   );
 }
 
-// --------------------------------------------------------------------------
-// Attention heatmap
-// --------------------------------------------------------------------------
+/* ── Attention heatmap ──────────────────────────────────────────────── */
 
-function AttentionHeatmap({ statuses }: { statuses: JudgeSession["eventStatuses"] }) {
-  const STATUS_COLORS: Record<string, string> = {
-    Followed: "#48bb78",
-    Skipped:  "#4a5568",
-    Diverged: "#ef4444",
-  };
+const STATUS_COLORS: Record<EventStatus, string> = {
+  Followed: "#48bb78",
+  Skipped: "#63b3ed",
+  Diverged: "#ef4444",
+};
 
+function AttentionHeatmap({ statuses }: { statuses: EventStatus[] }) {
   return (
     <div>
       <div
@@ -68,7 +79,7 @@ function AttentionHeatmap({ statuses }: { statuses: JudgeSession["eventStatuses"
           fontWeight: 600,
           textTransform: "uppercase",
           letterSpacing: "0.08em",
-          color: "var(--text-muted)",
+          color: "#9a9590",
           marginBottom: "0.5rem",
         }}
       >
@@ -91,12 +102,16 @@ function AttentionHeatmap({ statuses }: { statuses: JudgeSession["eventStatuses"
               height: 24,
               background: STATUS_COLORS[status],
               opacity: 0.8,
-              transition: "opacity 0.15s",
-              cursor: "default",
               minWidth: 4,
+              cursor: "default",
+              transition: "opacity 0.15s",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.8"; }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "1";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "0.8";
+            }}
           />
         ))}
       </div>
@@ -106,12 +121,22 @@ function AttentionHeatmap({ statuses }: { statuses: JudgeSession["eventStatuses"
           gap: "1rem",
           marginTop: "0.375rem",
           fontSize: "0.6875rem",
-          color: "var(--text-muted)",
+          color: "#9a9590",
         }}
       >
         {Object.entries(STATUS_COLORS).map(([label, color]) => (
-          <div key={label} style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
-            <div style={{ width: 8, height: 8, borderRadius: 2, background: color }} />
+          <div
+            key={label}
+            style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}
+          >
+            <div
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 2,
+                background: color,
+              }}
+            />
             {label}
           </div>
         ))}
@@ -120,13 +145,36 @@ function AttentionHeatmap({ statuses }: { statuses: JudgeSession["eventStatuses"
   );
 }
 
-// --------------------------------------------------------------------------
-// Divergence card
-// --------------------------------------------------------------------------
+/* ── Divergence card ────────────────────────────────────────────────── */
 
-function DivergenceCard({ div, nudges }: { div: Divergence; nudges: Nudge[] }) {
-  const sevColors = SEVERITY_COLORS[div.severity];
-  const relatedNudges = nudges.filter((n) => n.divergenceId === div.id);
+function DivergenceCard({
+  div,
+  nudges,
+}: {
+  div: DivergenceEntry;
+  nudges: NudgeEntry[];
+}) {
+  const sev = div.severity;
+  const sevColors = SEVERITY_COLORS[sev] ?? SEVERITY_COLORS.minor;
+  const displaySev: DisplaySeverity =
+    sev === "critical" ? "Critical" : sev === "major" ? "Major" : "Minor";
+  const relatedNudges = nudges.filter(
+    (n) => n.event_index === div.event_index,
+  );
+
+  const expectedSummary =
+    typeof div.expected === "object" && div.expected !== null
+      ? (div.expected as Record<string, unknown>).type
+        ? `${(div.expected as Record<string, unknown>).type}: ${JSON.stringify(div.expected).slice(0, 120)}`
+        : JSON.stringify(div.expected).slice(0, 150)
+      : String(div.expected);
+
+  const actualSummary =
+    typeof div.actual === "object" && div.actual !== null
+      ? (div.actual as Record<string, unknown>).type
+        ? `${(div.actual as Record<string, unknown>).type}: ${JSON.stringify(div.actual).slice(0, 120)}`
+        : JSON.stringify(div.actual).slice(0, 150)
+      : String(div.actual);
 
   return (
     <div
@@ -134,7 +182,7 @@ function DivergenceCard({ div, nudges }: { div: Divergence; nudges: Nudge[] }) {
         padding: "1rem 1.25rem",
         borderRadius: "0.625rem",
         border: `1px solid ${sevColors.fg}22`,
-        background: "var(--bg-surface)",
+        background: "#141415",
         marginBottom: "0.75rem",
       }}
     >
@@ -146,19 +194,20 @@ function DivergenceCard({ div, nudges }: { div: Divergence; nudges: Nudge[] }) {
           marginBottom: "0.75rem",
         }}
       >
-        <Badge label={div.severity} colors={sevColors} />
-        <span
-          style={{
-            fontSize: "0.75rem",
-            color: "var(--text-muted)",
-            fontFamily: "'JetBrains Mono', monospace",
-          }}
-        >
-          Event #{div.eventIndex + 1}
+        <Badge label={displaySev} colors={sevColors} />
+        <span style={{ fontSize: "0.75rem", color: "#9a9590", ...mono }}>
+          Event #{div.event_index + 1}
         </span>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "0.75rem" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "0.75rem",
+          marginBottom: "0.75rem",
+        }}
+      >
         <div>
           <div
             style={{
@@ -166,14 +215,22 @@ function DivergenceCard({ div, nudges }: { div: Divergence; nudges: Nudge[] }) {
               fontWeight: 600,
               textTransform: "uppercase",
               letterSpacing: "0.08em",
-              color: "var(--text-muted)",
+              color: "#9a9590",
               marginBottom: "0.25rem",
             }}
           >
             Expected
           </div>
-          <p style={{ fontSize: "0.8125rem", color: "var(--text-secondary)", lineHeight: 1.5, margin: 0 }}>
-            {div.expected}
+          <p
+            style={{
+              fontSize: "0.8125rem",
+              color: "#9a9590",
+              lineHeight: 1.5,
+              margin: 0,
+              wordBreak: "break-word",
+            }}
+          >
+            {expectedSummary}
           </p>
         </div>
         <div>
@@ -183,14 +240,22 @@ function DivergenceCard({ div, nudges }: { div: Divergence; nudges: Nudge[] }) {
               fontWeight: 600,
               textTransform: "uppercase",
               letterSpacing: "0.08em",
-              color: "var(--text-muted)",
+              color: "#9a9590",
               marginBottom: "0.25rem",
             }}
           >
             Actual
           </div>
-          <p style={{ fontSize: "0.8125rem", color: "#ef4444", lineHeight: 1.5, margin: 0 }}>
-            {div.actual}
+          <p
+            style={{
+              fontSize: "0.8125rem",
+              color: "#ef4444",
+              lineHeight: 1.5,
+              margin: 0,
+              wordBreak: "break-word",
+            }}
+          >
+            {actualSummary}
           </p>
         </div>
       </div>
@@ -199,19 +264,18 @@ function DivergenceCard({ div, nudges }: { div: Divergence; nudges: Nudge[] }) {
         style={{
           padding: "0.625rem 0.875rem",
           borderRadius: "0.375rem",
-          background: "var(--bg-primary)",
-          border: "1px solid var(--border)",
+          background: "#0a0a0b",
+          border: "1px solid rgba(255,255,255,0.06)",
           fontSize: "0.8125rem",
-          color: "var(--text-secondary)",
+          color: "#9a9590",
           lineHeight: 1.5,
           marginBottom: relatedNudges.length > 0 ? "0.75rem" : 0,
         }}
       >
-        <span style={{ color: "var(--accent)", fontWeight: 600 }}>Suggestion:</span>{" "}
+        <span style={{ color: "#d97757", fontWeight: 600 }}>Suggestion:</span>{" "}
         {div.suggestion}
       </div>
 
-      {/* Nudge history */}
       {relatedNudges.length > 0 && (
         <div>
           <div
@@ -220,51 +284,23 @@ function DivergenceCard({ div, nudges }: { div: Divergence; nudges: Nudge[] }) {
               fontWeight: 600,
               textTransform: "uppercase",
               letterSpacing: "0.08em",
-              color: "var(--text-muted)",
+              color: "#9a9590",
               marginBottom: "0.375rem",
             }}
           >
-            Nudge History
+            Nudges
           </div>
-          {relatedNudges.map((nudge) => (
+          {relatedNudges.map((nudge, i) => (
             <div
-              key={nudge.id}
+              key={i}
               style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: "0.5rem",
                 padding: "0.375rem 0",
                 fontSize: "0.75rem",
+                color: "#9a9590",
+                lineHeight: 1.4,
               }}
             >
-              <span
-                style={{
-                  display: "inline-block",
-                  padding: "0.0625rem 0.375rem",
-                  borderRadius: "0.25rem",
-                  fontSize: "0.625rem",
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                  background:
-                    nudge.status === "accepted"
-                      ? "rgba(72,187,120,0.12)"
-                      : nudge.status === "rejected"
-                      ? "rgba(239,68,68,0.12)"
-                      : "rgba(236,201,75,0.12)",
-                  color:
-                    nudge.status === "accepted"
-                      ? "#48bb78"
-                      : nudge.status === "rejected"
-                      ? "#ef4444"
-                      : "#ecc94b",
-                  flexShrink: 0,
-                }}
-              >
-                {nudge.status}
-              </span>
-              <span style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>
-                {nudge.message}
-              </span>
+              {nudge.message}
             </div>
           ))}
         </div>
@@ -273,165 +309,290 @@ function DivergenceCard({ div, nudges }: { div: Divergence; nudges: Nudge[] }) {
   );
 }
 
-// --------------------------------------------------------------------------
-// Main component
-// --------------------------------------------------------------------------
+/* ── Shared state banners ──────────────────────────────────────────── */
+
+function ServerDownBanner() {
+  return (
+    <div
+      style={{
+        padding: "3rem 2rem",
+        textAlign: "center",
+        borderRadius: "0.75rem",
+        border: "1px solid rgba(239,68,68,0.15)",
+        background: "rgba(239,68,68,0.04)",
+      }}
+    >
+      <div style={{ fontSize: "2rem", marginBottom: "1rem", opacity: 0.3 }}>
+        {"\u26A0"}
+      </div>
+      <h3
+        style={{
+          fontSize: "1.125rem",
+          fontWeight: 600,
+          marginBottom: "0.5rem",
+          color: "#ef4444",
+        }}
+      >
+        Backend unreachable
+      </h3>
+      <p style={{ fontSize: "0.875rem", color: "#9a9590", marginBottom: "1rem" }}>
+        Start the server to see live judge data:
+      </p>
+      <div
+        style={{
+          display: "inline-block",
+          padding: "0.75rem 1.25rem",
+          borderRadius: "0.5rem",
+          background: "#0a0a0b",
+          border: "1px solid rgba(255,255,255,0.06)",
+          ...mono,
+          fontSize: "0.8125rem",
+          color: "#9a9590",
+        }}
+      >
+        <span style={{ color: "#d97757" }}>$</span> bp serve --port 8100
+      </div>
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div
+      style={{
+        padding: "4rem 2rem",
+        textAlign: "center",
+        borderRadius: "0.75rem",
+        border: "1px solid rgba(255,255,255,0.06)",
+        background: "#141415",
+      }}
+    >
+      <div style={{ fontSize: "2rem", marginBottom: "1rem", opacity: 0.3 }}>
+        {"\u2696"}
+      </div>
+      <h3
+        style={{
+          fontSize: "1.125rem",
+          fontWeight: 600,
+          marginBottom: "0.75rem",
+          color: "#e8e6e3",
+        }}
+      >
+        No judge sessions
+      </h3>
+      <p
+        style={{
+          fontSize: "0.875rem",
+          color: "#9a9590",
+          maxWidth: 480,
+          margin: "0 auto 1.5rem",
+          lineHeight: 1.6,
+        }}
+      >
+        Start a replay to judge how a different model executes a captured workflow.
+      </p>
+      <div
+        style={{
+          display: "inline-block",
+          padding: "0.75rem 1.25rem",
+          borderRadius: "0.5rem",
+          background: "#0a0a0b",
+          border: "1px solid rgba(255,255,255,0.06)",
+          ...mono,
+          fontSize: "0.8125rem",
+          color: "#9a9590",
+        }}
+      >
+        <span style={{ color: "#d97757" }}>$</span> bp judge {"<workflow-id>"}
+      </div>
+    </div>
+  );
+}
+
+/* ── Helper: build heatmap from detail ─────────────────────────────── */
+
+function buildEventStatuses(
+  detail: JudgeSessionDetail,
+): EventStatus[] {
+  const expected = detail.events_expected;
+  const actual = detail.events_actual;
+  const maxLen = Math.max(expected.length, actual.length);
+  const statuses: EventStatus[] = [];
+
+  // Build divergence index set from verdict
+  const divIndices = new Set<number>();
+  if (detail.verdict?.divergences) {
+    for (const d of detail.verdict.divergences) {
+      divIndices.add(d.event_index);
+    }
+  }
+
+  for (let i = 0; i < maxLen; i++) {
+    if (divIndices.has(i)) {
+      statuses.push("Diverged");
+    } else if (i >= actual.length) {
+      statuses.push("Skipped");
+    } else {
+      statuses.push("Followed");
+    }
+  }
+  return statuses;
+}
+
+/* ── Main component ─────────────────────────────────────────────────── */
 
 export function Judge() {
-  const [sessions, setSessions] = useState<JudgeSession[]>([]);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [sessions, setSessions] = useState<JudgeSessionSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedDetail, setExpandedDetail] =
+    useState<JudgeSessionDetail | null>(null);
 
   useEffect(() => {
-    seedDemoData();
-    setSessions(getJudgeSessions());
-    setLoading(false);
+    listJudgeSessions()
+      .then((data) => {
+        setSessions(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "Failed to load");
+        setLoading(false);
+      });
   }, []);
 
-  const activeSessions = sessions.filter(
-    (s) => s.progress < s.totalEvents || s.verdict === "Partial" || s.verdict === "Escalate",
-  );
+  const handleExpand = async (id: string) => {
+    if (expandedId === id) {
+      setExpandedId(null);
+      setExpandedDetail(null);
+      return;
+    }
+    setExpandedId(id);
+    try {
+      const detail = await getJudgeSession(id);
+      setExpandedDetail(detail);
+    } catch {
+      setExpandedDetail(null);
+    }
+  };
 
-  const formatDate = (iso: string) => {
-    const d = new Date(iso);
-    return d.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const thStyle: React.CSSProperties = {
+    padding: "0.75rem 1rem",
+    fontSize: "0.6875rem",
+    fontWeight: 600,
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: "#9a9590",
+    textAlign: "left",
+    borderBottom: "1px solid rgba(255,255,255,0.06)",
+    background: "#1a1a1b",
   };
 
   return (
     <Layout>
-      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "2rem 1.5rem" }}>
+      <div
+        style={{ maxWidth: 960, margin: "0 auto", padding: "2rem 1.5rem" }}
+      >
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: "1.5rem",
-            flexWrap: "wrap",
-            gap: "1rem",
-          }}
-        >
-          <div>
-            <h1
-              style={{
-                fontSize: "1.75rem",
-                fontWeight: 700,
-                letterSpacing: "-0.02em",
-                marginBottom: "0.25rem",
-              }}
-            >
-              Judge Dashboard
-            </h1>
-            <p style={{ fontSize: "0.875rem", color: "var(--text-muted)" }}>
-              {activeSessions.length} active session{activeSessions.length !== 1 ? "s" : ""}
-            </p>
-          </div>
+        <div style={{ marginBottom: "1.5rem" }}>
+          <h1
+            style={{
+              fontSize: "1.75rem",
+              fontWeight: 700,
+              letterSpacing: "-0.02em",
+              marginBottom: "0.25rem",
+              color: "#e8e6e3",
+            }}
+          >
+            Judge Dashboard
+          </h1>
+          <p style={{ fontSize: "0.875rem", color: "#9a9590" }}>
+            {loading
+              ? "Loading..."
+              : error
+              ? "Server unreachable"
+              : `${sessions.length} judge sessions`}
+          </p>
         </div>
 
-        {/* Loading */}
+        {/* States */}
         {loading && (
           <div
             style={{
               padding: "3rem",
               textAlign: "center",
-              color: "var(--text-muted)",
-              fontSize: "0.875rem",
+              color: "#9a9590",
             }}
           >
             Loading sessions...
           </div>
         )}
-
-        {/* Empty state */}
-        {!loading && sessions.length === 0 && (
-          <div
-            style={{
-              padding: "4rem 2rem",
-              textAlign: "center",
-              borderRadius: "0.75rem",
-              border: "1px solid var(--border)",
-              background: "var(--bg-surface)",
-            }}
-          >
-            <div style={{ fontSize: "2rem", marginBottom: "1rem", opacity: 0.3 }}>
-              {"\u2696"}
-            </div>
-            <h3
-              style={{
-                fontSize: "1.125rem",
-                fontWeight: 600,
-                marginBottom: "0.5rem",
-              }}
-            >
-              No judge sessions
-            </h3>
-            <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>
-              Start a replay to activate the judge.
-            </p>
-          </div>
-        )}
+        {!loading && error && <ServerDownBanner />}
+        {!loading && !error && sessions.length === 0 && <EmptyState />}
 
         {/* Sessions table */}
-        {!loading && sessions.length > 0 && (
+        {!loading && !error && sessions.length > 0 && (
           <div
             style={{
               borderRadius: "0.75rem",
-              border: "1px solid var(--border)",
-              background: "var(--bg-surface)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              background: "#141415",
               overflow: "hidden",
             }}
           >
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr>
-                  {["Workflow", "Replay Model", "Progress", "Verdict", "Divergences", ""].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        style={{
-                          padding: "0.75rem 1rem",
-                          fontSize: "0.6875rem",
-                          fontWeight: 600,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.08em",
-                          color: "var(--text-muted)",
-                          textAlign: h === "" ? "right" : "left",
-                          borderBottom: "1px solid var(--border)",
-                          background: "var(--bg-elevated)",
-                        }}
-                      >
-                        {h}
-                      </th>
-                    ),
-                  )}
+                  {[
+                    "Workflow",
+                    "Replay Model",
+                    "Progress",
+                    "Verdict",
+                    "Divergences",
+                    "",
+                  ].map((h) => (
+                    <th
+                      key={h || "_toggle"}
+                      style={{
+                        ...thStyle,
+                        textAlign: h === "" ? "right" : "left",
+                      }}
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {sessions.map((session) => {
                   const isExpanded = expandedId === session.id;
-                  const progressPct = Math.round(
-                    (session.progress / session.totalEvents) * 100,
-                  );
-                  const verdictColors = VERDICT_COLORS[session.verdict];
+                  const verdictKey: Verdict = session.verdict?.verdict ?? "partial";
+                  const verdictColors =
+                    VERDICT_COLORS[verdictKey] ?? VERDICT_COLORS.partial;
+                  const isOpus = session.replay_model.includes("opus");
+                  const modelColor = isOpus
+                    ? "#d97757"
+                    : session.replay_model.includes("sonnet")
+                    ? "#63b3ed"
+                    : "#a882ff";
+                  const modelBg = isOpus
+                    ? "rgba(217,119,87,0.12)"
+                    : session.replay_model.includes("sonnet")
+                    ? "rgba(99,179,237,0.12)"
+                    : "rgba(168,130,255,0.12)";
+                  const divCount =
+                    session.verdict?.divergences?.length ?? 0;
 
                   return (
-                    <>
+                    <tbody key={session.id}>
                       <tr
-                        key={session.id}
                         style={{
                           cursor: "pointer",
                           transition: "background 0.1s",
                         }}
-                        onClick={() =>
-                          setExpandedId(isExpanded ? null : session.id)
-                        }
+                        onClick={() => handleExpand(session.id)}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.background = "var(--bg-elevated)";
+                          e.currentTarget.style.background = "#1a1a1b";
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.background = "transparent";
@@ -442,16 +603,16 @@ export function Judge() {
                             padding: "0.75rem 1rem",
                             fontSize: "0.875rem",
                             fontWeight: 500,
-                            color: "var(--text-primary)",
-                            borderBottom: "1px solid var(--border)",
+                            color: "#e8e6e3",
+                            borderBottom: "1px solid rgba(255,255,255,0.06)",
                           }}
                         >
-                          {session.workflowName}
+                          {session.workflow_id.slice(0, 8)}...
                         </td>
                         <td
                           style={{
                             padding: "0.75rem 1rem",
-                            borderBottom: "1px solid var(--border)",
+                            borderBottom: "1px solid rgba(255,255,255,0.06)",
                           }}
                         >
                           <span
@@ -461,152 +622,207 @@ export function Judge() {
                               borderRadius: "9999px",
                               fontSize: "0.75rem",
                               fontWeight: 600,
-                              fontFamily: "'JetBrains Mono', monospace",
-                              background: "rgba(99,179,237,0.12)",
-                              color: "#63b3ed",
-                              border: "1px solid rgba(99,179,237,0.2)",
+                              ...mono,
+                              background: modelBg,
+                              color: modelColor,
+                              border: `1px solid ${modelColor}33`,
                             }}
                           >
-                            {session.replayModel}
+                            {session.replay_model}
                           </span>
                         </td>
                         <td
                           style={{
                             padding: "0.75rem 1rem",
-                            borderBottom: "1px solid var(--border)",
+                            borderBottom: "1px solid rgba(255,255,255,0.06)",
+                            ...mono,
+                            fontSize: "0.75rem",
+                            color: "#9a9590",
                           }}
                         >
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                            <div
-                              style={{
-                                flex: 1,
-                                height: 6,
-                                borderRadius: 3,
-                                background: "var(--bg-primary)",
-                                overflow: "hidden",
-                                maxWidth: 100,
-                              }}
-                            >
-                              <div
-                                style={{
-                                  width: `${progressPct}%`,
-                                  height: "100%",
-                                  background:
-                                    progressPct === 100
-                                      ? "#48bb78"
-                                      : "var(--accent)",
-                                  borderRadius: 3,
-                                  transition: "width 0.3s",
-                                }}
-                              />
-                            </div>
-                            <span
-                              style={{
-                                fontSize: "0.75rem",
-                                fontFamily: "'JetBrains Mono', monospace",
-                                color: "var(--text-muted)",
-                              }}
-                            >
-                              {session.progress}/{session.totalEvents}
-                            </span>
-                          </div>
+                          {session.events_actual}/{session.events_expected}
                         </td>
                         <td
                           style={{
                             padding: "0.75rem 1rem",
-                            borderBottom: "1px solid var(--border)",
+                            borderBottom: "1px solid rgba(255,255,255,0.06)",
                           }}
                         >
-                          <Badge label={session.verdict} colors={verdictColors} />
+                          <Badge
+                            label={verdictKey.toUpperCase()}
+                            colors={verdictColors}
+                          />
                         </td>
                         <td
                           style={{
                             padding: "0.75rem 1rem",
                             fontSize: "0.875rem",
-                            fontFamily: "'JetBrains Mono', monospace",
-                            color: session.divergences.length > 0 ? "#d97757" : "var(--text-muted)",
-                            borderBottom: "1px solid var(--border)",
+                            ...mono,
+                            color: divCount > 0 ? "#d97757" : "#9a9590",
+                            borderBottom: "1px solid rgba(255,255,255,0.06)",
                           }}
                         >
-                          {session.divergences.length}
+                          {divCount}
                         </td>
                         <td
                           style={{
                             padding: "0.75rem 1rem",
                             textAlign: "right",
-                            borderBottom: "1px solid var(--border)",
+                            borderBottom: "1px solid rgba(255,255,255,0.06)",
                             fontSize: "0.75rem",
-                            color: "var(--text-muted)",
+                            color: "#9a9590",
                           }}
                         >
                           {isExpanded ? "\u25B2" : "\u25BC"}
                         </td>
                       </tr>
 
-                      {/* Expanded detail row */}
-                      {isExpanded && (
-                        <tr key={`${session.id}_detail`}>
+                      {/* Expanded detail */}
+                      {isExpanded && expandedDetail && (
+                        <tr>
                           <td
                             colSpan={6}
                             style={{
                               padding: "1.25rem 1.5rem",
-                              borderBottom: "1px solid var(--border)",
-                              background: "var(--bg-primary)",
+                              borderBottom: "1px solid rgba(255,255,255,0.06)",
+                              background: "#0a0a0b",
                             }}
                           >
-                            {/* Attention heatmap */}
+                            {/* Heatmap */}
                             <div style={{ marginBottom: "1.25rem" }}>
-                              <AttentionHeatmap statuses={session.eventStatuses} />
+                              <AttentionHeatmap
+                                statuses={buildEventStatuses(expandedDetail)}
+                              />
                             </div>
 
                             {/* Divergences */}
-                            <div
-                              style={{
-                                fontSize: "0.6875rem",
-                                fontWeight: 600,
-                                textTransform: "uppercase",
-                                letterSpacing: "0.08em",
-                                color: "var(--text-muted)",
-                                marginBottom: "0.625rem",
-                              }}
-                            >
-                              Divergences ({session.divergences.length})
-                            </div>
-                            {session.divergences.map((div) => (
-                              <DivergenceCard
-                                key={div.id}
-                                div={div}
-                                nudges={session.nudges}
-                              />
-                            ))}
+                            {expandedDetail.verdict?.divergences &&
+                              expandedDetail.verdict.divergences.length > 0 && (
+                                <>
+                                  <div
+                                    style={{
+                                      fontSize: "0.6875rem",
+                                      fontWeight: 600,
+                                      textTransform: "uppercase",
+                                      letterSpacing: "0.08em",
+                                      color: "#9a9590",
+                                      marginBottom: "0.625rem",
+                                    }}
+                                  >
+                                    Divergences (
+                                    {expandedDetail.verdict.divergences.length})
+                                  </div>
+                                  {expandedDetail.verdict.divergences.map(
+                                    (div, i) => (
+                                      <DivergenceCard
+                                        key={i}
+                                        div={div}
+                                        nudges={expandedDetail.nudges}
+                                      />
+                                    ),
+                                  )}
+                                </>
+                              )}
 
-                            {/* Session metadata */}
+                            {(!expandedDetail.verdict?.divergences ||
+                              expandedDetail.verdict.divergences.length ===
+                                0) && (
+                              <div
+                                style={{
+                                  fontSize: "0.8125rem",
+                                  color: "#48bb78",
+                                  padding: "0.75rem 0",
+                                }}
+                              >
+                                No divergences -- all{" "}
+                                {expandedDetail.events_expected.length} events
+                                followed the canonical workflow.
+                              </div>
+                            )}
+
+                            {/* Metadata */}
                             <div
                               style={{
                                 display: "flex",
                                 gap: "2rem",
                                 marginTop: "1rem",
                                 fontSize: "0.75rem",
-                                color: "var(--text-muted)",
+                                color: "#9a9590",
                               }}
                             >
-                              <span>Started: {formatDate(session.startedAt)}</span>
                               <span>
-                                Nudges: {session.nudges.length} (
-                                {session.nudges.filter((n) => n.status === "accepted").length}{" "}
-                                accepted)
+                                Started:{" "}
+                                {new Date(
+                                  expandedDetail.started_at,
+                                ).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                              <span>
+                                Nudges: {expandedDetail.nudges.length}
                               </span>
                             </div>
                           </td>
                         </tr>
                       )}
-                    </>
+                    </tbody>
                   );
                 })}
               </tbody>
             </table>
           </div>
         )}
+
+        {/* How the judge works */}
+        <div style={{ marginTop: "2rem" }}>
+          <div
+            style={{
+              fontSize: "0.6875rem",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.15em",
+              color: "#9a9590",
+              marginBottom: "0.75rem",
+            }}
+          >
+            How the judge works
+          </div>
+          <div
+            style={{
+              padding: "1rem 1.25rem",
+              borderRadius: "0.625rem",
+              border: "1px solid rgba(255,255,255,0.06)",
+              background: "#141415",
+              ...mono,
+              fontSize: "0.8125rem",
+              color: "#9a9590",
+              lineHeight: 2,
+            }}
+          >
+            <div>
+              <span style={{ color: "#d97757" }}>1.</span> Start{" "}
+              <span style={{ color: "#e8e6e3" }}>bp.judge.start</span>{" "}
+              {"{"} workflow_id, replay_model {"}"}
+            </div>
+            <div>
+              <span style={{ color: "#d97757" }}>2.</span> Each tool call{" "}
+              <span style={{ color: "#e8e6e3" }}>bp.judge.event</span>{" "}
+              {"{"} actual_event {"}"}
+            </div>
+            <div>
+              <span style={{ color: "#d97757" }}>3.</span> Divergence? Nudge
+              returned to agent
+            </div>
+            <div>
+              <span style={{ color: "#d97757" }}>4.</span> Done{" "}
+              <span style={{ color: "#e8e6e3" }}>bp.judge.verdict</span>{" "}
+              {"{"} session_id {"}"} {"\u2192"} CORRECT / PARTIAL / FAILED
+            </div>
+          </div>
+        </div>
       </div>
     </Layout>
   );

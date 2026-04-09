@@ -1,56 +1,35 @@
+import { useState, useEffect } from "react";
 import { Layout } from "../components/Layout";
+import {
+  getBenchmarkResults,
+  type BenchmarkResults,
+  type BenchmarkTask,
+  type BenchmarkSummary,
+} from "../lib/api";
 
-/* ── Benchmark task data (seeded from YAML expected values) ──────── */
+/* ── Fallback data (YAML estimates, shown when API returns no data) ── */
 
-interface TaskResult {
-  name: string;
-  category: string;
-  complexity: "simple" | "medium" | "complex";
-  tokensWithout: number;
-  tokensWith: number;
-  timeWithoutMin: number;
-  timeWithMin: number;
-  completionWithout: number;
-  completionWith: number;
-}
-
-const TASKS: TaskResult[] = [
-  { name: "add-dark-mode",           category: "feature",  complexity: "medium",  tokensWithout: 32000, tokensWith: 21000, timeWithoutMin: 12, timeWithMin: 8,  completionWithout: 0.56, completionWith: 0.94 },
-  { name: "fix-login-validation",    category: "bugfix",   complexity: "simple",  tokensWithout: 18000, tokensWith: 12000, timeWithoutMin: 6,  timeWithMin: 4,  completionWithout: 0.63, completionWith: 0.95 },
-  { name: "refactor-async-client",   category: "refactor", complexity: "complex", tokensWithout: 52000, tokensWith: 34000, timeWithoutMin: 20, timeWithMin: 13, completionWithout: 0.44, completionWith: 0.88 },
-  { name: "add-auth-tests",          category: "testing",  complexity: "medium",  tokensWithout: 35000, tokensWith: 22000, timeWithoutMin: 14, timeWithMin: 9,  completionWithout: 0.50, completionWith: 0.92 },
-  { name: "update-landing-deploy",   category: "workflow", complexity: "complex", tokensWithout: 48000, tokensWith: 32000, timeWithoutMin: 18, timeWithMin: 12, completionWithout: 0.44, completionWith: 0.88 },
-  { name: "add-api-endpoint",        category: "feature",  complexity: "medium",  tokensWithout: 30000, tokensWith: 20000, timeWithoutMin: 11, timeWithMin: 7,  completionWithout: 0.56, completionWith: 0.94 },
-  { name: "fix-css-layout",          category: "bugfix",   complexity: "simple",  tokensWithout: 16000, tokensWith: 11000, timeWithoutMin: 5,  timeWithMin: 4,  completionWithout: 0.63, completionWith: 0.95 },
-  { name: "migrate-database-schema", category: "refactor", complexity: "complex", tokensWithout: 55000, tokensWith: 36000, timeWithoutMin: 22, timeWithMin: 14, completionWithout: 0.44, completionWith: 0.88 },
-  { name: "implement-search",        category: "feature",  complexity: "complex", tokensWithout: 50000, tokensWith: 33000, timeWithoutMin: 20, timeWithMin: 13, completionWithout: 0.44, completionWith: 0.88 },
-  { name: "security-audit-fix",      category: "workflow", complexity: "complex", tokensWithout: 45000, tokensWith: 30000, timeWithoutMin: 18, timeWithMin: 12, completionWithout: 0.44, completionWith: 0.88 },
+const FALLBACK_TASKS: BenchmarkTask[] = [
+  { task_name: "add-dark-mode",           category: "feature",  complexity: "medium",  with_attrition: false, total_tokens: 32000, time_minutes: 12, corrections: 3, completion_score: 0.56, estimated_cost_usd: 0.23, model: "claude-sonnet-4-6", simulated: true },
+  { task_name: "add-dark-mode",           category: "feature",  complexity: "medium",  with_attrition: true,  total_tokens: 21000, time_minutes: 8,  corrections: 0, completion_score: 0.94, estimated_cost_usd: 0.15, model: "claude-sonnet-4-6", simulated: true },
+  { task_name: "fix-login-validation",    category: "bugfix",   complexity: "simple",  with_attrition: false, total_tokens: 18000, time_minutes: 6,  corrections: 1, completion_score: 0.63, estimated_cost_usd: 0.13, model: "claude-sonnet-4-6", simulated: true },
+  { task_name: "fix-login-validation",    category: "bugfix",   complexity: "simple",  with_attrition: true,  total_tokens: 12000, time_minutes: 4,  corrections: 0, completion_score: 0.95, estimated_cost_usd: 0.09, model: "claude-sonnet-4-6", simulated: true },
+  { task_name: "refactor-async-client",   category: "refactor", complexity: "complex", with_attrition: false, total_tokens: 52000, time_minutes: 20, corrections: 4, completion_score: 0.44, estimated_cost_usd: 0.37, model: "claude-sonnet-4-6", simulated: true },
+  { task_name: "refactor-async-client",   category: "refactor", complexity: "complex", with_attrition: true,  total_tokens: 34000, time_minutes: 13, corrections: 1, completion_score: 0.88, estimated_cost_usd: 0.24, model: "claude-sonnet-4-6", simulated: true },
 ];
 
-/* ── Aggregate stats ─────────────────────────────────────────────── */
-
-function computeStats() {
-  const n = TASKS.length;
-  const avgTokenSavings = TASKS.reduce(
-    (sum, t) => sum + (1 - t.tokensWith / t.tokensWithout) * 100, 0
-  ) / n;
-  const avgTimeSavings = TASKS.reduce(
-    (sum, t) => sum + (1 - t.timeWithMin / t.timeWithoutMin) * 100, 0
-  ) / n;
-  const avgCompletionWith = TASKS.reduce((sum, t) => sum + t.completionWith, 0) / n;
-  const avgCompletionWithout = TASKS.reduce((sum, t) => sum + t.completionWithout, 0) / n;
-  const firstPassSuccess = TASKS.filter(t => t.completionWith >= 0.875).length / n * 100;
-
+function computeFallbackSummary(): BenchmarkSummary {
   return {
-    tokenSavingsPct: Math.round(avgTokenSavings * 10) / 10,
-    timeSavingsPct: Math.round(avgTimeSavings * 10) / 10,
-    completionWith: Math.round(avgCompletionWith * 1000) / 10,
-    completionWithout: Math.round(avgCompletionWithout * 1000) / 10,
-    firstPassSuccess: Math.round(firstPassSuccess),
+    total_tasks: 3,
+    token_savings_pct: 33.9,
+    time_savings_pct: 33.2,
+    completion_with: 92.3,
+    completion_without: 54.3,
+    first_pass_success_pct: 100,
+    avg_corrections_with: 0.3,
+    avg_corrections_without: 2.7,
   };
 }
-
-const stats = computeStats();
 
 /* ── Provider comparison data ────────────────────────────────────── */
 
@@ -125,9 +104,47 @@ const complexityColor = (c: string) => {
   return "#f87171";
 };
 
+/* ── Helpers ─────────────────────────────────────────────────────── */
+
+/** Pair tasks into rows: one without + one with attrition per task name */
+function pairTasks(tasks: BenchmarkTask[]): Array<{ name: string; category: string; complexity: string; without: BenchmarkTask | null; with_: BenchmarkTask | null }> {
+  const map = new Map<string, { without: BenchmarkTask | null; with_: BenchmarkTask | null; category: string; complexity: string }>();
+  for (const t of tasks) {
+    const entry = map.get(t.task_name) ?? { without: null, with_: null, category: t.category, complexity: t.complexity };
+    if (t.with_attrition) entry.with_ = t;
+    else entry.without = t;
+    map.set(t.task_name, entry);
+  }
+  return [...map.entries()].map(([name, v]) => ({ name, ...v }));
+}
+
 /* ── Component ───────────────────────────────────────────────────── */
 
 export function Benchmark() {
+  const [results, setResults] = useState<BenchmarkResults | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getBenchmarkResults()
+      .then((data) => {
+        setResults(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "Failed to load");
+        setLoading(false);
+      });
+  }, []);
+
+  // Use real data or fallback
+  const isServerDown = !!error;
+  const hasRealData = results !== null && results.tasks.length > 0;
+  const tasks = hasRealData ? results.tasks : FALLBACK_TASKS;
+  const summary = hasRealData ? results.summary : computeFallbackSummary();
+  const source = hasRealData ? results.source : "projected";
+  const paired = pairTasks(tasks);
+
   return (
     <Layout>
       <div
@@ -155,7 +172,8 @@ export function Benchmark() {
             marginBottom: "0.25rem",
           }}
         >
-          10 standardized tasks. Measured with and without attrition enforcement.
+          {summary.total_tasks} standardized tasks. Measured with and without
+          attrition enforcement.
         </p>
         <p
           style={{
@@ -164,447 +182,354 @@ export function Benchmark() {
             marginBottom: "2.5rem",
           }}
         >
+          {isServerDown && (
+            <span style={{ color: "#ef4444", marginRight: "0.5rem" }}>
+              Server unreachable -- showing projected data.
+            </span>
+          )}
+          {!isServerDown && source === "simulated" && (
+            <span style={{ color: "#ecc94b", marginRight: "0.5rem" }}>
+              Simulated data -- run real benchmarks to replace.
+            </span>
+          )}
+          {!isServerDown && source === "no_data" && (
+            <span style={{ color: "#ecc94b", marginRight: "0.5rem" }}>
+              No benchmark results on disk -- showing projected data.
+            </span>
+          )}
+          {!isServerDown && source === "benchmark_results" && (
+            <span style={{ color: "#48bb78", marginRight: "0.5rem" }}>
+              Live benchmark data.
+            </span>
+          )}
           <a
             href="#methodology"
             style={{ color: "var(--accent)", textDecoration: "none" }}
           >
             Methodology
-          </a>{" "}
-          &middot; All numbers from simulated runs seeded from task complexity profiles
+          </a>
         </p>
 
-        {/* ═══ Summary Cards ═══ */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: "1rem",
-            marginBottom: "3rem",
-          }}
-        >
-          <div style={glassCard}>
-            <div style={statLabel}>Token Savings</div>
-            <div style={statValue}>{stats.tokenSavingsPct}%</div>
+        {loading && (
+          <div style={{ padding: "3rem", textAlign: "center", color: "var(--text-muted)" }}>
+            Loading benchmark data...
           </div>
-          <div style={glassCard}>
-            <div style={statLabel}>Time Savings</div>
-            <div style={statValue}>{stats.timeSavingsPct}%</div>
-          </div>
-          <div style={glassCard}>
-            <div style={statLabel}>Completion Rate</div>
-            <div style={statValue}>{stats.completionWith}%</div>
-          </div>
-          <div style={glassCard}>
-            <div style={statLabel}>First-Pass Success</div>
-            <div style={statValue}>{stats.firstPassSuccess}%</div>
-          </div>
-        </div>
+        )}
 
-        {/* ═══ Task-by-Task Table ═══ */}
-        <div style={{ marginBottom: "3rem" }}>
-          <h2 style={sectionHeading}>Task-by-Task Results</h2>
-          <div
-            style={{
-              borderRadius: "0.75rem",
-              border: "1px solid var(--border)",
-              overflow: "hidden",
-            }}
-          >
-            <table
+        {/* Summary Cards */}
+        {!loading && (
+          <>
+            <div
               style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                fontSize: "0.8125rem",
+                display: "grid",
+                gridTemplateColumns: "repeat(4, 1fr)",
+                gap: "1rem",
+                marginBottom: "3rem",
               }}
             >
-              <thead>
-                <tr style={{ background: "var(--bg-elevated)" }}>
-                  <th style={thStyle}>Task</th>
-                  <th style={thStyle}>Category</th>
-                  <th style={{ ...thStyle, textAlign: "center" }}>Complexity</th>
-                  <th style={{ ...thStyle, textAlign: "right" }}>Tokens (w/o)</th>
-                  <th style={{ ...thStyle, textAlign: "right" }}>Tokens (with)</th>
-                  <th style={{ ...thStyle, textAlign: "right" }}>Delta</th>
-                  <th style={{ ...thStyle, textAlign: "right" }}>Time (w/o)</th>
-                  <th style={{ ...thStyle, textAlign: "right" }}>Time (with)</th>
-                  <th style={{ ...thStyle, textAlign: "center" }}>Complete (w/o)</th>
-                  <th style={{ ...thStyle, textAlign: "center" }}>Complete (with)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {TASKS.map((t, i) => {
-                  const tokenDelta = Math.round(
-                    (1 - t.tokensWith / t.tokensWithout) * 100 * 10
-                  ) / 10;
-                  return (
-                    <tr
-                      key={t.name}
-                      style={{
-                        background:
-                          i % 2 === 0 ? "var(--bg-surface)" : "var(--bg-primary)",
-                      }}
-                    >
-                      <td style={{ ...tdStyle, fontWeight: 500, color: "var(--text-primary)" }}>
-                        {t.name}
-                      </td>
-                      <td style={tdStyle}>{t.category}</td>
-                      <td style={{ ...tdStyle, textAlign: "center" }}>
-                        <span
-                          style={{
-                            padding: "0.125rem 0.5rem",
-                            borderRadius: "2rem",
-                            fontSize: "0.6875rem",
-                            fontWeight: 600,
-                            color: complexityColor(t.complexity),
-                            background: `${complexityColor(t.complexity)}15`,
-                            border: `1px solid ${complexityColor(t.complexity)}30`,
-                          }}
-                        >
-                          {t.complexity}
-                        </span>
-                      </td>
-                      <td
-                        style={{
-                          ...tdStyle,
-                          textAlign: "right",
-                          fontFamily: "'JetBrains Mono', monospace",
-                          fontSize: "0.75rem",
-                        }}
-                      >
-                        {t.tokensWithout.toLocaleString()}
-                      </td>
-                      <td
-                        style={{
-                          ...tdStyle,
-                          textAlign: "right",
-                          fontFamily: "'JetBrains Mono', monospace",
-                          fontSize: "0.75rem",
-                        }}
-                      >
-                        {t.tokensWith.toLocaleString()}
-                      </td>
-                      <td
-                        style={{
-                          ...tdStyle,
-                          textAlign: "right",
-                          fontFamily: "'JetBrains Mono', monospace",
-                          fontSize: "0.75rem",
-                          fontWeight: 600,
-                          color: "var(--accent)",
-                        }}
-                      >
-                        -{tokenDelta}%
-                      </td>
-                      <td
-                        style={{
-                          ...tdStyle,
-                          textAlign: "right",
-                          fontFamily: "'JetBrains Mono', monospace",
-                          fontSize: "0.75rem",
-                        }}
-                      >
-                        {t.timeWithoutMin}m
-                      </td>
-                      <td
-                        style={{
-                          ...tdStyle,
-                          textAlign: "right",
-                          fontFamily: "'JetBrains Mono', monospace",
-                          fontSize: "0.75rem",
-                        }}
-                      >
-                        {t.timeWithMin}m
-                      </td>
-                      <td
-                        style={{
-                          ...tdStyle,
-                          textAlign: "center",
-                          color: "var(--text-muted)",
-                        }}
-                      >
-                        {Math.round(t.completionWithout * 100)}%
-                      </td>
-                      <td
-                        style={{
-                          ...tdStyle,
-                          textAlign: "center",
-                          fontWeight: 600,
-                          color: t.completionWith >= 0.9 ? "#4ade80" : "var(--text-secondary)",
-                        }}
-                      >
-                        {Math.round(t.completionWith * 100)}%
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* ═══ Provider Comparison ═══ */}
-        <div style={{ marginBottom: "3rem" }}>
-          <h2 style={sectionHeading}>Provider Compatibility</h2>
-          <p
-            style={{
-              fontSize: "0.875rem",
-              color: "var(--text-secondary)",
-              marginBottom: "1rem",
-            }}
-          >
-            Attrition works across agent runtimes. Same enforcement, different
-            integration surfaces.
-          </p>
-          <div
-            style={{
-              borderRadius: "0.75rem",
-              border: "1px solid var(--border)",
-              overflow: "hidden",
-            }}
-          >
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                fontSize: "0.8125rem",
-              }}
-            >
-              <thead>
-                <tr style={{ background: "var(--bg-elevated)" }}>
-                  <th style={thStyle}>Feature</th>
-                  <th style={thStyle}>Claude Code</th>
-                  <th style={thStyle}>Cursor</th>
-                  <th style={thStyle}>OpenAI Agents</th>
-                </tr>
-              </thead>
-              <tbody>
-                {PROVIDER_ROWS.map((row, i) => (
-                  <tr
-                    key={row.feature}
-                    style={{
-                      background:
-                        i % 2 === 0 ? "var(--bg-surface)" : "var(--bg-primary)",
-                    }}
-                  >
-                    <td style={{ ...tdStyle, fontWeight: 500, color: "var(--text-primary)" }}>
-                      {row.feature}
-                    </td>
-                    <td style={tdStyle}>{row.claudeCode}</td>
-                    <td style={tdStyle}>{row.cursor}</td>
-                    <td style={tdStyle}>{row.openaiAgents}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* ═══ Methodology ═══ */}
-        <div id="methodology" style={{ marginBottom: "3rem" }}>
-          <h2 style={sectionHeading}>Methodology</h2>
-          <div
-            style={{
-              ...glassCard,
-              display: "flex",
-              flexDirection: "column",
-              gap: "1rem",
-            }}
-          >
-            <div>
-              <h3
-                style={{
-                  fontSize: "0.875rem",
-                  fontWeight: 600,
-                  color: "var(--text-primary)",
-                  marginBottom: "0.375rem",
-                }}
-              >
-                How benchmarks are run
-              </h3>
-              <p
-                style={{
-                  fontSize: "0.8125rem",
-                  color: "var(--text-secondary)",
-                  lineHeight: 1.6,
-                }}
-              >
-                Each task is defined as a YAML file specifying the prompt, required
-                workflow steps, and complexity level. Tasks are run twice: once
-                without attrition (baseline) and once with enforcement hooks active.
-                The session recorder analyzes the resulting JSONL transcript to
-                extract token counts, wall clock time, tool call evidence, and
-                correction patterns.
-              </p>
+              <div style={glassCard}>
+                <div style={statLabel}>Token Savings</div>
+                <div style={statValue}>{summary.token_savings_pct}%</div>
+              </div>
+              <div style={glassCard}>
+                <div style={statLabel}>Time Savings</div>
+                <div style={statValue}>{summary.time_savings_pct}%</div>
+              </div>
+              <div style={glassCard}>
+                <div style={statLabel}>Completion Rate</div>
+                <div style={statValue}>{summary.completion_with}%</div>
+              </div>
+              <div style={glassCard}>
+                <div style={statLabel}>First-Pass Success</div>
+                <div style={statValue}>{summary.first_pass_success_pct}%</div>
+              </div>
             </div>
 
-            <div>
-              <h3
-                style={{
-                  fontSize: "0.875rem",
-                  fontWeight: 600,
-                  color: "var(--text-primary)",
-                  marginBottom: "0.375rem",
-                }}
-              >
-                What is measured
-              </h3>
-              <ul
-                style={{
-                  fontSize: "0.8125rem",
-                  color: "var(--text-secondary)",
-                  lineHeight: 1.8,
-                  paddingLeft: "1.25rem",
-                  margin: 0,
-                }}
-              >
-                <li>
-                  <strong>Tokens</strong> &mdash; total input + output tokens from
-                  the session JSONL usage blocks
-                </li>
-                <li>
-                  <strong>Time</strong> &mdash; wall clock from first to last
-                  timestamp in the session
-                </li>
-                <li>
-                  <strong>Corrections</strong> &mdash; pattern-matched human messages
-                  indicating agent mistakes
-                </li>
-                <li>
-                  <strong>Completion</strong> &mdash; 8-step workflow evidence score
-                  (search, read, edit, test, build, preview, commit, QA)
-                </li>
-                <li>
-                  <strong>Cost</strong> &mdash; estimated from model pricing tables
-                  (claude-sonnet-4-6: $3/$15 per MTok)
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3
-                style={{
-                  fontSize: "0.875rem",
-                  fontWeight: 600,
-                  color: "var(--text-primary)",
-                  marginBottom: "0.375rem",
-                }}
-              >
-                Task categories
-              </h3>
-              <p
-                style={{
-                  fontSize: "0.8125rem",
-                  color: "var(--text-secondary)",
-                  lineHeight: 1.6,
-                }}
-              >
-                10 tasks across 5 categories: feature (3), bugfix (2), refactor (2),
-                testing (1), workflow (2). Complexity ranges from simple (15-25K
-                baseline tokens) to complex (40-60K). Each task has a detailed prompt
-                and expected step requirements.
-              </p>
-            </div>
-
-            <div>
-              <h3
-                style={{
-                  fontSize: "0.875rem",
-                  fontWeight: 600,
-                  color: "var(--text-primary)",
-                  marginBottom: "0.375rem",
-                }}
-              >
-                Reproducibility
-              </h3>
-              <p
-                style={{
-                  fontSize: "0.8125rem",
-                  color: "var(--text-secondary)",
-                  lineHeight: 1.6,
-                  marginBottom: "0.5rem",
-                }}
-              >
-                All task definitions and benchmark scripts are open source. Run the
-                suite yourself:
-              </p>
+            {/* Task-by-Task Table */}
+            <div style={{ marginBottom: "3rem" }}>
+              <h2 style={sectionHeading}>Task-by-Task Results</h2>
               <div
                 style={{
-                  padding: "0.75rem 1rem",
-                  borderRadius: "0.5rem",
-                  background: "var(--bg-primary)",
+                  borderRadius: "0.75rem",
                   border: "1px solid var(--border)",
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: "0.75rem",
-                  color: "var(--text-secondary)",
-                  lineHeight: 1.8,
+                  overflow: "hidden",
+                }}
+              >
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    fontSize: "0.8125rem",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ background: "var(--bg-elevated)" }}>
+                      <th style={thStyle}>Task</th>
+                      <th style={thStyle}>Category</th>
+                      <th style={{ ...thStyle, textAlign: "center" }}>Complexity</th>
+                      <th style={{ ...thStyle, textAlign: "right" }}>Tokens (w/o)</th>
+                      <th style={{ ...thStyle, textAlign: "right" }}>Tokens (with)</th>
+                      <th style={{ ...thStyle, textAlign: "right" }}>Delta</th>
+                      <th style={{ ...thStyle, textAlign: "right" }}>Time (w/o)</th>
+                      <th style={{ ...thStyle, textAlign: "right" }}>Time (with)</th>
+                      <th style={{ ...thStyle, textAlign: "center" }}>Done (w/o)</th>
+                      <th style={{ ...thStyle, textAlign: "center" }}>Done (with)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paired.map((row, i) => {
+                      const wo = row.without;
+                      const wi = row.with_;
+                      const tokenDelta =
+                        wo && wi && wo.total_tokens > 0
+                          ? Math.round(
+                              (1 - wi.total_tokens / wo.total_tokens) * 1000,
+                            ) / 10
+                          : 0;
+                      return (
+                        <tr
+                          key={row.name}
+                          style={{
+                            background:
+                              i % 2 === 0
+                                ? "var(--bg-surface)"
+                                : "var(--bg-primary)",
+                          }}
+                        >
+                          <td
+                            style={{
+                              ...tdStyle,
+                              fontWeight: 500,
+                              color: "var(--text-primary)",
+                            }}
+                          >
+                            {row.name}
+                          </td>
+                          <td style={tdStyle}>{row.category}</td>
+                          <td style={{ ...tdStyle, textAlign: "center" }}>
+                            <span
+                              style={{
+                                padding: "0.125rem 0.5rem",
+                                borderRadius: "2rem",
+                                fontSize: "0.6875rem",
+                                fontWeight: 600,
+                                color: complexityColor(row.complexity),
+                                background: `${complexityColor(row.complexity)}15`,
+                                border: `1px solid ${complexityColor(row.complexity)}30`,
+                              }}
+                            >
+                              {row.complexity}
+                            </span>
+                          </td>
+                          <td
+                            style={{
+                              ...tdStyle,
+                              textAlign: "right",
+                              fontFamily: "'JetBrains Mono', monospace",
+                              fontSize: "0.75rem",
+                            }}
+                          >
+                            {wo ? wo.total_tokens.toLocaleString() : "-"}
+                          </td>
+                          <td
+                            style={{
+                              ...tdStyle,
+                              textAlign: "right",
+                              fontFamily: "'JetBrains Mono', monospace",
+                              fontSize: "0.75rem",
+                            }}
+                          >
+                            {wi ? wi.total_tokens.toLocaleString() : "-"}
+                          </td>
+                          <td
+                            style={{
+                              ...tdStyle,
+                              textAlign: "right",
+                              fontFamily: "'JetBrains Mono', monospace",
+                              fontSize: "0.75rem",
+                              fontWeight: 600,
+                              color: "var(--accent)",
+                            }}
+                          >
+                            {tokenDelta > 0 ? `-${tokenDelta}%` : "-"}
+                          </td>
+                          <td
+                            style={{
+                              ...tdStyle,
+                              textAlign: "right",
+                              fontFamily: "'JetBrains Mono', monospace",
+                              fontSize: "0.75rem",
+                            }}
+                          >
+                            {wo ? `${wo.time_minutes}m` : "-"}
+                          </td>
+                          <td
+                            style={{
+                              ...tdStyle,
+                              textAlign: "right",
+                              fontFamily: "'JetBrains Mono', monospace",
+                              fontSize: "0.75rem",
+                            }}
+                          >
+                            {wi ? `${wi.time_minutes}m` : "-"}
+                          </td>
+                          <td
+                            style={{
+                              ...tdStyle,
+                              textAlign: "center",
+                              color: "var(--text-muted)",
+                            }}
+                          >
+                            {wo ? `${Math.round(wo.completion_score * 100)}%` : "-"}
+                          </td>
+                          <td
+                            style={{
+                              ...tdStyle,
+                              textAlign: "center",
+                              fontWeight: 600,
+                              color:
+                                wi && wi.completion_score >= 0.9
+                                  ? "#4ade80"
+                                  : "var(--text-secondary)",
+                            }}
+                          >
+                            {wi ? `${Math.round(wi.completion_score * 100)}%` : "-"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Provider Comparison */}
+            <div style={{ marginBottom: "3rem" }}>
+              <h2 style={sectionHeading}>Provider Compatibility</h2>
+              <div
+                style={{
+                  borderRadius: "0.75rem",
+                  border: "1px solid var(--border)",
+                  overflow: "hidden",
+                }}
+              >
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    fontSize: "0.8125rem",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ background: "var(--bg-elevated)" }}>
+                      <th style={thStyle}>Feature</th>
+                      <th style={thStyle}>Claude Code</th>
+                      <th style={thStyle}>Cursor</th>
+                      <th style={thStyle}>OpenAI Agents</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {PROVIDER_ROWS.map((row, i) => (
+                      <tr
+                        key={row.feature}
+                        style={{
+                          background:
+                            i % 2 === 0
+                              ? "var(--bg-surface)"
+                              : "var(--bg-primary)",
+                        }}
+                      >
+                        <td
+                          style={{
+                            ...tdStyle,
+                            fontWeight: 500,
+                            color: "var(--text-primary)",
+                          }}
+                        >
+                          {row.feature}
+                        </td>
+                        <td style={tdStyle}>{row.claudeCode}</td>
+                        <td style={tdStyle}>{row.cursor}</td>
+                        <td style={tdStyle}>{row.openaiAgents}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Methodology */}
+            <div id="methodology" style={{ marginBottom: "3rem" }}>
+              <h2 style={sectionHeading}>Methodology</h2>
+              <div
+                style={{
+                  ...glassCard,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "1rem",
                 }}
               >
                 <div>
-                  <span style={{ color: "var(--accent)" }}>$</span> python
-                  benchmarks/runner.py --all --seed 42
+                  <h3
+                    style={{
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      color: "var(--text-primary)",
+                      marginBottom: "0.375rem",
+                    }}
+                  >
+                    How benchmarks are run
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: "0.8125rem",
+                      color: "var(--text-secondary)",
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    Each task is defined as a YAML file specifying the prompt,
+                    required workflow steps, and complexity level. Tasks are run
+                    twice: once without attrition (baseline) and once with
+                    enforcement hooks active.
+                  </p>
                 </div>
                 <div>
-                  <span style={{ color: "var(--accent)" }}>$</span> python
-                  benchmarks/report.py --summary
-                </div>
-                <div>
-                  <span style={{ color: "var(--accent)" }}>$</span> python
-                  benchmarks/compare.py --sample --markdown
+                  <h3
+                    style={{
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      color: "var(--text-primary)",
+                      marginBottom: "0.375rem",
+                    }}
+                  >
+                    Reproducibility
+                  </h3>
+                  <div
+                    style={{
+                      padding: "0.75rem 1rem",
+                      borderRadius: "0.5rem",
+                      background: "var(--bg-primary)",
+                      border: "1px solid var(--border)",
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: "0.75rem",
+                      color: "var(--text-secondary)",
+                      lineHeight: 1.8,
+                    }}
+                  >
+                    <div>
+                      <span style={{ color: "var(--accent)" }}>$</span> python
+                      benchmarks/runner.py --all --seed 42
+                    </div>
+                    <div>
+                      <span style={{ color: "var(--accent)" }}>$</span> python
+                      benchmarks/report.py --summary
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* ═══ Run Your Own ═══ */}
-        <div style={{ marginBottom: "2rem" }}>
-          <h2 style={sectionHeading}>Run Your Own</h2>
-          <div
-            style={{
-              ...glassCard,
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: "0.8125rem",
-              color: "var(--text-secondary)",
-              lineHeight: 2,
-            }}
-          >
-            <div style={{ color: "var(--text-muted)", marginBottom: "0.25rem" }}>
-              # Install attrition
-            </div>
-            <div>
-              <span style={{ color: "var(--accent)" }}>$</span> curl -sL
-              attrition.sh/install | bash
-            </div>
-            <div
-              style={{ marginTop: "0.75rem", color: "var(--text-muted)" }}
-            >
-              # Record a real session
-            </div>
-            <div>
-              <span style={{ color: "var(--accent)" }}>$</span> python
-              benchmarks/record_session.py --path ~/.claude/sessions/latest.jsonl
-            </div>
-            <div
-              style={{ marginTop: "0.75rem", color: "var(--text-muted)" }}
-            >
-              # Compare baseline vs attrition
-            </div>
-            <div>
-              <span style={{ color: "var(--accent)" }}>$</span> python
-              benchmarks/compare.py --baseline without.jsonl --attrition
-              with.jsonl --markdown
-            </div>
-            <div
-              style={{ marginTop: "0.75rem", color: "var(--text-muted)" }}
-            >
-              # Generate full report
-            </div>
-            <div>
-              <span style={{ color: "var(--accent)" }}>$</span> python
-              benchmarks/report.py --markdown
-            </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </Layout>
   );

@@ -28,6 +28,11 @@ impl JudgeEngine {
         }
     }
 
+    /// Return all sessions as a Vec (for REST listing).
+    pub fn sessions(&self) -> Vec<&JudgeSession> {
+        self.sessions.values().collect()
+    }
+
     /// Start a new judge session for a workflow replay.
     ///
     /// `expected_events` is the canonical event stream from the captured workflow.

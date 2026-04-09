@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Layout } from "../components/Layout";
+import {
+  listWorkflows,
+  getWorkflow,
+  type WorkflowDetail,
+  type WorkflowSummary,
+  type CanonicalEventRaw,
+} from "../lib/api";
 
-/* ── Types ───────────────────────────────────────────────── */
-
-interface ToolCall {
-  ts: string;
-  tool: string;
-  type: ToolType;
-  args: string;
-}
+/* ── Types ───────────────────────────────────────────── */
 
 type ToolType =
   | "search"
@@ -18,107 +19,13 @@ type ToolType =
   | "preview"
   | "agent"
   | "meta"
-  | "write";
+  | "write"
+  | "think"
+  | "assert"
+  | "decision"
+  | "other";
 
-interface StepEvidence {
-  name: string;
-  evidence: number;
-  tools: string[];
-}
-
-interface TopTool {
-  name: string;
-  count: number;
-  type: ToolType;
-}
-
-/* ── Demo data from real dogfood session ─────────────────── */
-
-const DEMO_SESSION = {
-  id: "aa625586",
-  model: "claude-opus-4-6",
-  duration_min: 1806,
-  tool_calls: 544,
-  steps_completed: 8,
-  total_steps: 8,
-  corrections: 1,
-  cost_usd: 4131,
-  input_tokens: 274551833,
-  output_tokens: 175512,
-  top_tools: [
-    { name: "Chrome.computer", count: 139, type: "preview" as ToolType },
-    { name: "Bash", count: 94, type: "bash" as ToolType },
-    { name: "Write", count: 67, type: "edit" as ToolType },
-    { name: "Read", count: 32, type: "read" as ToolType },
-    { name: "TodoWrite", count: 31, type: "meta" as ToolType },
-    { name: "Edit", count: 31, type: "edit" as ToolType },
-    { name: "Chrome.navigate", count: 28, type: "preview" as ToolType },
-    { name: "Agent", count: 21, type: "agent" as ToolType },
-    { name: "Chrome.javascript", count: 17, type: "preview" as ToolType },
-    { name: "context-mode.execute", count: 10, type: "bash" as ToolType },
-  ] satisfies TopTool[],
-  steps: [
-    { name: "search", evidence: 5, tools: ["Grep", "Glob", "WebSearch"] },
-    { name: "read", evidence: 32, tools: ["Read"] },
-    { name: "edit", evidence: 98, tools: ["Edit", "Write"] },
-    { name: "test", evidence: 3, tools: ["Bash (cargo test)"] },
-    { name: "build", evidence: 8, tools: ["Bash (cargo check)", "Bash (cargo build)"] },
-    { name: "preview", evidence: 184, tools: ["Chrome.computer", "Chrome.navigate"] },
-    { name: "commit", evidence: 12, tools: ["Bash (git commit)", "Bash (git push)"] },
-    { name: "qa_check", evidence: 5, tools: ["Bash (cargo check)"] },
-  ] satisfies StepEvidence[],
-};
-
-/* Generate timeline entries from top_tools distribution */
-function generateTimelineEntries(): ToolCall[] {
-  const entries: ToolCall[] = [];
-  const startTime = new Date("2026-04-07T02:14:00Z");
-  const toolPool: { tool: string; type: ToolType; args: string }[] = [
-    { tool: "Chrome.computer", type: "preview", args: "screenshot" },
-    { tool: "Chrome.computer", type: "preview", args: "left_click [640, 320]" },
-    { tool: "Chrome.computer", type: "preview", args: "scroll down" },
-    { tool: "Bash", type: "bash", args: "cargo check" },
-    { tool: "Bash", type: "bash", args: "cargo build --release" },
-    { tool: "Bash", type: "bash", args: "cargo test" },
-    { tool: "Bash", type: "bash", args: "git add -A && git commit" },
-    { tool: "Bash", type: "bash", args: "ls src/pages/" },
-    { tool: "Write", type: "edit", args: "src/pages/Landing.tsx" },
-    { tool: "Write", type: "edit", args: "src/components/Layout.tsx" },
-    { tool: "Write", type: "edit", args: "src/lib/hooks.ts" },
-    { tool: "Read", type: "read", args: "src/main.tsx" },
-    { tool: "Read", type: "read", args: "Cargo.toml" },
-    { tool: "Read", type: "read", args: "README.md" },
-    { tool: "TodoWrite", type: "meta", args: "Update task: build landing page" },
-    { tool: "TodoWrite", type: "meta", args: "Mark complete: setup routing" },
-    { tool: "Edit", type: "edit", args: "src/pages/Judge.tsx [line 42]" },
-    { tool: "Edit", type: "edit", args: "src/lib/api.ts [line 118]" },
-    { tool: "Chrome.navigate", type: "preview", args: "http://localhost:5173/" },
-    { tool: "Chrome.navigate", type: "preview", args: "http://localhost:5173/judge" },
-    { tool: "Agent", type: "agent", args: "Explore: find auth implementation" },
-    { tool: "Agent", type: "agent", args: "Plan: architecture for hook system" },
-    { tool: "Chrome.javascript", type: "preview", args: "document.querySelector('.card')" },
-    { tool: "context-mode.execute", type: "bash", args: "analyze build output" },
-    { tool: "Grep", type: "search", args: "pattern: 'useEffect' in src/" },
-    { tool: "Glob", type: "search", args: "**/*.test.ts" },
-    { tool: "WebSearch", type: "search", args: "react router v6 lazy loading" },
-  ];
-
-  for (let i = 0; i < DEMO_SESSION.tool_calls; i++) {
-    const entry = toolPool[i % toolPool.length];
-    const ts = new Date(startTime.getTime() + i * 200_000);
-    entries.push({
-      ts: ts.toISOString(),
-      tool: entry.tool,
-      type: entry.type,
-      args: entry.args,
-    });
-  }
-  return entries;
-}
-
-const TIMELINE_ENTRIES = generateTimelineEntries();
-
-/* ── Color map ───────────────────────────────────────────── */
+/* ── Color map ───────────────────────────────────────── */
 
 const TOOL_COLORS: Record<ToolType, string> = {
   search: "#eab308",
@@ -129,6 +36,10 @@ const TOOL_COLORS: Record<ToolType, string> = {
   preview: "#f97316",
   agent: "#ef4444",
   meta: "#6b7280",
+  think: "#a0a0a0",
+  assert: "#ef4444",
+  decision: "#a882ff",
+  other: "#6b7280",
 };
 
 const TOOL_BG: Record<ToolType, string> = {
@@ -140,9 +51,54 @@ const TOOL_BG: Record<ToolType, string> = {
   preview: "rgba(249,115,22,0.1)",
   agent: "rgba(239,68,68,0.1)",
   meta: "rgba(107,114,128,0.1)",
+  think: "rgba(160,160,160,0.1)",
+  assert: "rgba(239,68,68,0.1)",
+  decision: "rgba(168,130,255,0.1)",
+  other: "rgba(107,114,128,0.1)",
 };
 
-/* ── Styles ──────────────────────────────────────────────── */
+function classifyEvent(event: CanonicalEventRaw): ToolType {
+  const t = (event.type as string).toLowerCase();
+  if (t === "think") return "think";
+  if (t === "search") return "search";
+  if (t === "file_edit") return "edit";
+  if (t === "file_create") return "write";
+  if (t === "tool_call") {
+    const tool = String(event.tool ?? "").toLowerCase();
+    if (tool.includes("bash")) return "bash";
+    if (tool.includes("read")) return "read";
+    if (tool.includes("edit") || tool.includes("write")) return "edit";
+    if (tool.includes("grep") || tool.includes("glob") || tool.includes("search")) return "search";
+    if (tool.includes("chrome") || tool.includes("preview")) return "preview";
+    if (tool.includes("agent")) return "agent";
+    if (tool.includes("todo")) return "meta";
+    return "bash";
+  }
+  if (t === "assert") return "assert";
+  if (t === "decision") return "decision";
+  if (t === "checkpoint") return "meta";
+  if (t === "nudge") return "meta";
+  return "other";
+}
+
+function eventSummary(event: CanonicalEventRaw): string {
+  const t = (event.type as string).toLowerCase();
+  if (t === "think") return String(event.content ?? "").slice(0, 100);
+  if (t === "tool_call") return `${event.tool}: ${JSON.stringify(event.args ?? {}).slice(0, 80)}`;
+  if (t === "file_edit") return `Edit ${event.path ?? "unknown"}`;
+  if (t === "file_create") return `Create ${event.path ?? "unknown"}`;
+  if (t === "search") return `Search: ${event.query ?? ""}`;
+  if (t === "assert") return `Assert: ${event.condition ?? ""}`;
+  if (t === "decision") return `Decision: ${event.content ?? ""}`;
+  if (t === "checkpoint") return `Checkpoint: ${event.label ?? event.state_hash ?? ""}`;
+  return JSON.stringify(event).slice(0, 100);
+}
+
+function eventDuration(event: CanonicalEventRaw): number {
+  return Number(event.duration_ms ?? 0);
+}
+
+/* ── Styles ──────────────────────────────────────────── */
 
 const glassCard: React.CSSProperties = {
   padding: "1rem 1.25rem",
@@ -163,7 +119,7 @@ const monoText: React.CSSProperties = {
   fontFamily: "'JetBrains Mono', monospace",
 };
 
-/* ── Components ──────────────────────────────────────────── */
+/* ── Components ──────────────────────────────────────── */
 
 function SummaryCard({
   value,
@@ -232,15 +188,17 @@ function ToolBadge({ tool, type }: { tool: string; type: ToolType }) {
 }
 
 function TimelineEntry({
-  entry,
+  event,
   index,
 }: {
-  entry: ToolCall;
+  event: CanonicalEventRaw;
   index: number;
 }) {
-  const time = new Date(entry.ts);
-  const hours = time.getUTCHours().toString().padStart(2, "0");
-  const mins = time.getUTCMinutes().toString().padStart(2, "0");
+  const type = classifyEvent(event);
+  const summary = eventSummary(event);
+  const dur = eventDuration(event);
+  const durStr = dur > 0 ? `${(dur / 1000).toFixed(1)}s` : "";
+  const label = event.type === "tool_call" ? String(event.tool ?? event.type) : String(event.type);
 
   return (
     <div
@@ -249,13 +207,12 @@ function TimelineEntry({
         alignItems: "flex-start",
         gap: "0.75rem",
         padding: "0.5rem 0",
-        borderLeft: `2px solid ${TOOL_COLORS[entry.type]}`,
+        borderLeft: `2px solid ${TOOL_COLORS[type]}`,
         paddingLeft: "1rem",
         marginLeft: "2.5rem",
         position: "relative",
       }}
     >
-      {/* Dot on the timeline line */}
       <div
         style={{
           position: "absolute",
@@ -264,11 +221,9 @@ function TimelineEntry({
           width: 8,
           height: 8,
           borderRadius: "50%",
-          background: TOOL_COLORS[entry.type],
+          background: TOOL_COLORS[type],
         }}
       />
-
-      {/* Index + timestamp */}
       <div
         style={{
           position: "absolute",
@@ -283,7 +238,6 @@ function TimelineEntry({
       >
         #{index + 1}
       </div>
-
       <div
         style={{
           fontSize: "0.6875rem",
@@ -293,11 +247,9 @@ function TimelineEntry({
           paddingTop: "0.125rem",
         }}
       >
-        {hours}:{mins}
+        {durStr}
       </div>
-
-      <ToolBadge tool={entry.tool} type={entry.type} />
-
+      <ToolBadge tool={label} type={type} />
       <div
         style={{
           fontSize: "0.75rem",
@@ -309,95 +261,179 @@ function TimelineEntry({
           whiteSpace: "nowrap",
         }}
       >
-        {entry.args}
+        {summary}
       </div>
     </div>
   );
 }
 
-function StepCard({ step }: { step: StepEvidence }) {
+function ServerDownBanner() {
   return (
     <div
       style={{
-        ...glassCard,
-        padding: "1rem",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.5rem",
+        padding: "3rem 2rem",
+        textAlign: "center",
+        borderRadius: "0.75rem",
+        border: "1px solid rgba(239,68,68,0.15)",
+        background: "rgba(239,68,68,0.04)",
       }}
     >
+      <h3 style={{ fontSize: "1.125rem", fontWeight: 600, color: "#ef4444", marginBottom: "0.5rem" }}>
+        Backend unreachable
+      </h3>
+      <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginBottom: "1rem" }}>
+        Start the server to load workflow data:
+      </p>
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div
-          style={{
-            fontSize: "0.8125rem",
-            fontWeight: 600,
-            color: "var(--text-primary)",
-            textTransform: "capitalize",
-          }}
-        >
-          {step.name.replace("_", " ")}
-        </div>
-        <span
-          style={{
-            color: "#22c55e",
-            fontSize: "1rem",
-            fontWeight: 700,
-          }}
-        >
-          &#10003;
-        </span>
-      </div>
-
-      <div
-        style={{
-          fontSize: "0.6875rem",
-          color: "var(--text-muted)",
+          display: "inline-block",
+          padding: "0.75rem 1.25rem",
+          borderRadius: "0.5rem",
+          background: "var(--bg-primary)",
+          border: "1px solid var(--border)",
           ...monoText,
+          fontSize: "0.8125rem",
+          color: "var(--text-secondary)",
         }}
       >
-        {step.evidence} evidence calls
-      </div>
-
-      <div style={{ display: "flex", gap: "0.375rem", flexWrap: "wrap" }}>
-        {step.tools.map((t) => (
-          <span
-            key={t}
-            style={{
-              padding: "0.125rem 0.375rem",
-              borderRadius: "0.25rem",
-              fontSize: "0.625rem",
-              color: "var(--text-secondary)",
-              background: "var(--bg-elevated)",
-              border: "1px solid var(--border)",
-              ...monoText,
-            }}
-          >
-            {t}
-          </span>
-        ))}
+        <span style={{ color: "var(--accent)" }}>$</span> bp serve --port 8100
       </div>
     </div>
   );
 }
 
-/* ── Page ─────────────────────────────────────────────────── */
+function EmptyState() {
+  return (
+    <div
+      style={{
+        padding: "4rem 2rem",
+        textAlign: "center",
+        borderRadius: "0.75rem",
+        border: "1px solid var(--border)",
+        background: "var(--bg-surface)",
+      }}
+    >
+      <h3 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.75rem" }}>
+        No workflows to analyze
+      </h3>
+      <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", maxWidth: 480, margin: "0 auto 1.5rem", lineHeight: 1.6 }}>
+        Capture a session first, then navigate here to see the full event timeline, tool breakdown, and cost analysis.
+      </p>
+      <div
+        style={{
+          display: "inline-block",
+          padding: "0.75rem 1.25rem",
+          borderRadius: "0.5rem",
+          background: "var(--bg-elevated)",
+          border: "1px solid var(--border)",
+          ...monoText,
+          fontSize: "0.8125rem",
+          color: "var(--text-secondary)",
+        }}
+      >
+        <span style={{ color: "var(--accent)" }}>$</span> bp capture {"<session.jsonl>"}
+      </div>
+    </div>
+  );
+}
+
+/* ── Page ─────────────────────────────────────────────── */
 
 export function RunAnatomy() {
-  const [showAll, setShowAll] = useState(false);
-  const visibleEntries = showAll
-    ? TIMELINE_ENTRIES
-    : TIMELINE_ENTRIES.slice(0, 50);
+  const [searchParams] = useSearchParams();
+  const workflowId = searchParams.get("workflow");
 
-  const inputCost = (DEMO_SESSION.input_tokens / 1_000_000) * 15;
-  const outputCost = (DEMO_SESSION.output_tokens / 1_000_000) * 75;
+  const [workflow, setWorkflow] = useState<WorkflowDetail | null>(null);
+  const [allWorkflows, setAllWorkflows] = useState<WorkflowSummary[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        if (workflowId) {
+          const wf = await getWorkflow(workflowId);
+          setWorkflow(wf);
+        } else {
+          // No ID provided -- try loading the latest workflow
+          const wfs = await listWorkflows();
+          setAllWorkflows(wfs);
+          if (wfs.length > 0) {
+            const latest = await getWorkflow(wfs[0].id);
+            setWorkflow(latest);
+          }
+        }
+        setLoading(false);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load");
+        setLoading(false);
+      }
+    }
+    load();
+  }, [workflowId]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div style={{ maxWidth: 960, margin: "0 auto", padding: "3rem 1.5rem", textAlign: "center", color: "var(--text-muted)" }}>
+          Loading workflow...
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div style={{ maxWidth: 960, margin: "0 auto", padding: "2rem 1.5rem" }}>
+          <h1 style={{ fontSize: "2rem", fontWeight: 700, marginBottom: "1.5rem" }}>Run Anatomy</h1>
+          <ServerDownBanner />
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!workflow) {
+    return (
+      <Layout>
+        <div style={{ maxWidth: 960, margin: "0 auto", padding: "2rem 1.5rem" }}>
+          <h1 style={{ fontSize: "2rem", fontWeight: 700, marginBottom: "1.5rem" }}>Run Anatomy</h1>
+          <EmptyState />
+        </div>
+      </Layout>
+    );
+  }
+
+  // Compute stats from real data
+  const events = workflow.events;
+  const totalEvents = events.length;
+  const totalDurationMs = events.reduce((sum, e) => sum + eventDuration(e), 0);
+  const durationMin = Math.round(totalDurationMs / 60000);
+
+  // Build tool frequency map
+  const toolFreq: Record<string, { count: number; type: ToolType }> = {};
+  for (const event of events) {
+    const type = classifyEvent(event);
+    const label = event.type === "tool_call" ? String(event.tool ?? "ToolCall") : String(event.type);
+    if (!toolFreq[label]) toolFreq[label] = { count: 0, type };
+    toolFreq[label].count++;
+  }
+  const topTools = Object.entries(toolFreq)
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, 10);
+
+  // Token cost from metadata
+  const meta = workflow.metadata;
+  const inputTokens = meta.total_tokens.input_tokens;
+  const outputTokens = meta.total_tokens.output_tokens;
+  const inputCost = (inputTokens / 1_000_000) * 15;
+  const outputCost = (outputTokens / 1_000_000) * 75;
   const totalCost = inputCost + outputCost;
-  const inputPct = (inputCost / totalCost) * 100;
+  const hasCostData = inputTokens > 0 || outputTokens > 0;
+  const inputPct = totalCost > 0 ? (inputCost / totalCost) * 100 : 50;
+
+  const visibleEntries = showAll ? events : events.slice(0, 50);
 
   return (
     <Layout>
@@ -408,7 +444,7 @@ export function RunAnatomy() {
           padding: "2rem 1.5rem 4rem",
         }}
       >
-        {/* ═══ Header ═══ */}
+        {/* Header */}
         <div
           style={{
             display: "flex",
@@ -439,7 +475,7 @@ export function RunAnatomy() {
               ...monoText,
             }}
           >
-            {DEMO_SESSION.model}
+            {workflow.source_model}
           </span>
         </div>
 
@@ -459,29 +495,27 @@ export function RunAnatomy() {
               ...monoText,
             }}
           >
-            Session {DEMO_SESSION.id}
+            {workflow.name}
           </span>
-          <span
-            style={{
-              fontSize: "0.8125rem",
-              color: "var(--text-secondary)",
-            }}
-          >
-            {Math.floor(DEMO_SESSION.duration_min / 60)}h{" "}
-            {DEMO_SESSION.duration_min % 60}m
-          </span>
-          <span
-            style={{
-              fontSize: "0.75rem",
-              color: "var(--text-muted)",
-              fontStyle: "italic",
-            }}
-          >
-            30-hour dogfood session building attrition.sh
-          </span>
+          {durationMin > 0 && (
+            <span style={{ fontSize: "0.8125rem", color: "var(--text-secondary)" }}>
+              {Math.floor(durationMin / 60)}h {durationMin % 60}m
+            </span>
+          )}
+          {!workflowId && allWorkflows && allWorkflows.length > 1 && (
+            <span
+              style={{
+                fontSize: "0.75rem",
+                color: "var(--text-muted)",
+                fontStyle: "italic",
+              }}
+            >
+              Showing latest of {allWorkflows.length} workflows
+            </span>
+          )}
         </div>
 
-        {/* ═══ Summary Cards ═══ */}
+        {/* Summary Cards */}
         <div
           style={{
             display: "grid",
@@ -490,85 +524,79 @@ export function RunAnatomy() {
             marginBottom: "2.5rem",
           }}
         >
-          <SummaryCard value="544" label="Tool Calls" accent />
-          <SummaryCard value="8/8" label="Steps Complete" accent />
-          <SummaryCard value="1" label="Corrections" />
+          <SummaryCard value={String(totalEvents)} label="Events" accent />
           <SummaryCard
-            value={`$${DEMO_SESSION.cost_usd.toLocaleString()}`}
-            label="Total Cost"
+            value={`${topTools.length}`}
+            label="Unique Tools"
           />
+          <SummaryCard
+            value={hasCostData ? `$${totalCost.toFixed(2)}` : "N/A"}
+            label="Est. Cost"
+          />
+          <SummaryCard value={workflow.fingerprint.slice(0, 8)} label="Fingerprint" />
         </div>
 
-        {/* ═══ Tool Breakdown ═══ */}
-        <div style={{ marginBottom: "2.5rem" }}>
-          <h2 style={sectionHeading}>Top Tools</h2>
-          <div
-            style={{
-              ...glassCard,
-              padding: "1rem 1.25rem",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.5rem",
-              }}
-            >
-              {DEMO_SESSION.top_tools.map((t) => {
-                const pct = (t.count / DEMO_SESSION.tool_calls) * 100;
-                return (
-                  <div
-                    key={t.name}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.75rem",
-                    }}
-                  >
-                    <div style={{ width: 140 }}>
-                      <ToolBadge tool={t.name} type={t.type} />
-                    </div>
+        {/* Top Tools */}
+        {topTools.length > 0 && (
+          <div style={{ marginBottom: "2.5rem" }}>
+            <h2 style={sectionHeading}>Top Tools</h2>
+            <div style={{ ...glassCard, padding: "1rem 1.25rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                {topTools.map(([name, { count, type }]) => {
+                  const pct = (count / totalEvents) * 100;
+                  return (
                     <div
+                      key={name}
                       style={{
-                        flex: 1,
-                        height: 6,
-                        borderRadius: 3,
-                        background: "var(--bg-elevated)",
-                        overflow: "hidden",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.75rem",
                       }}
                     >
+                      <div style={{ width: 140 }}>
+                        <ToolBadge tool={name} type={type} />
+                      </div>
                       <div
                         style={{
-                          width: `${pct}%`,
-                          height: "100%",
+                          flex: 1,
+                          height: 6,
                           borderRadius: 3,
-                          background: TOOL_COLORS[t.type],
-                          opacity: 0.7,
+                          background: "var(--bg-elevated)",
+                          overflow: "hidden",
                         }}
-                      />
+                      >
+                        <div
+                          style={{
+                            width: `${pct}%`,
+                            height: "100%",
+                            borderRadius: 3,
+                            background: TOOL_COLORS[type],
+                            opacity: 0.7,
+                          }}
+                        />
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "0.6875rem",
+                          color: "var(--text-muted)",
+                          ...monoText,
+                          minWidth: 32,
+                          textAlign: "right",
+                        }}
+                      >
+                        {count}
+                      </div>
                     </div>
-                    <div
-                      style={{
-                        fontSize: "0.6875rem",
-                        color: "var(--text-muted)",
-                        ...monoText,
-                        minWidth: 32,
-                        textAlign: "right",
-                      }}
-                    >
-                      {t.count}
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* ═══ Tool Timeline ═══ */}
+        {/* Event Timeline */}
         <div style={{ marginBottom: "2.5rem" }}>
-          <h2 style={sectionHeading}>Tool Timeline</h2>
+          <h2 style={sectionHeading}>Event Timeline</h2>
           <p
             style={{
               fontSize: "0.75rem",
@@ -576,8 +604,7 @@ export function RunAnatomy() {
               marginBottom: "1rem",
             }}
           >
-            Every tool call in execution order. This is exactly what the agent
-            did.
+            Every event in execution order from the canonical workflow.
           </p>
 
           <div
@@ -589,11 +616,11 @@ export function RunAnatomy() {
               position: "relative",
             }}
           >
-            {visibleEntries.map((entry, i) => (
-              <TimelineEntry key={i} entry={entry} index={i} />
+            {visibleEntries.map((event, i) => (
+              <TimelineEntry key={i} event={event} index={i} />
             ))}
 
-            {!showAll && (
+            {!showAll && totalEvents > 50 && (
               <div
                 style={{
                   position: "absolute",
@@ -601,8 +628,7 @@ export function RunAnatomy() {
                   left: 0,
                   right: 0,
                   height: 80,
-                  background:
-                    "linear-gradient(transparent, var(--bg-surface))",
+                  background: "linear-gradient(transparent, var(--bg-surface))",
                   display: "flex",
                   alignItems: "flex-end",
                   justifyContent: "center",
@@ -623,13 +649,13 @@ export function RunAnatomy() {
                     ...monoText,
                   }}
                 >
-                  Show all {DEMO_SESSION.tool_calls} tool calls
+                  Show all {totalEvents} events
                 </button>
               </div>
             )}
           </div>
 
-          {showAll && (
+          {showAll && totalEvents > 50 && (
             <div style={{ textAlign: "center", marginTop: "0.75rem" }}>
               <button
                 onClick={() => setShowAll(false)}
@@ -649,192 +675,65 @@ export function RunAnatomy() {
           )}
         </div>
 
-        {/* ═══ Step Evidence Grid ═══ */}
-        <div style={{ marginBottom: "2.5rem" }}>
-          <h2 style={sectionHeading}>Step Evidence</h2>
-          <p
-            style={{
-              fontSize: "0.75rem",
-              color: "var(--text-muted)",
-              marginBottom: "1rem",
-            }}
-          >
-            8 workflow steps, each verified by tool call evidence.
-          </p>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "0.75rem",
-            }}
-          >
-            {DEMO_SESSION.steps.map((step) => (
-              <StepCard key={step.name} step={step} />
-            ))}
-          </div>
-        </div>
-
-        {/* ═══ Cost Breakdown ═══ */}
-        <div style={{ marginBottom: "2.5rem" }}>
-          <h2 style={sectionHeading}>Cost Breakdown</h2>
-          <div style={{ ...glassCard, padding: "1.25rem 1.5rem" }}>
-            {/* Bar */}
-            <div
-              style={{
-                display: "flex",
-                height: 24,
-                borderRadius: 6,
-                overflow: "hidden",
-                marginBottom: "1rem",
-              }}
-            >
+        {/* Cost Breakdown (only if metadata has tokens) */}
+        {hasCostData && (
+          <div style={{ marginBottom: "2.5rem" }}>
+            <h2 style={sectionHeading}>Cost Breakdown</h2>
+            <div style={{ ...glassCard, padding: "1.25rem 1.5rem" }}>
               <div
                 style={{
-                  width: `${inputPct}%`,
-                  background: "var(--accent)",
-                  opacity: 0.8,
+                  display: "flex",
+                  height: 24,
+                  borderRadius: 6,
+                  overflow: "hidden",
+                  marginBottom: "1rem",
                 }}
-                title={`Input: $${Math.round(inputCost).toLocaleString()}`}
-              />
+              >
+                <div
+                  style={{ width: `${inputPct}%`, background: "var(--accent)", opacity: 0.8 }}
+                  title={`Input: $${inputCost.toFixed(2)}`}
+                />
+                <div
+                  style={{ width: `${100 - inputPct}%`, background: "#3b82f6", opacity: 0.8 }}
+                  title={`Output: $${outputCost.toFixed(2)}`}
+                />
+              </div>
               <div
                 style={{
-                  width: `${100 - inputPct}%`,
-                  background: "#3b82f6",
-                  opacity: 0.8,
+                  display: "flex",
+                  gap: "2rem",
+                  justifyContent: "center",
+                  flexWrap: "wrap",
                 }}
-                title={`Output: $${Math.round(outputCost).toLocaleString()}`}
-              />
-            </div>
-
-            {/* Legend */}
-            <div
-              style={{
-                display: "flex",
-                gap: "2rem",
-                justifyContent: "center",
-                flexWrap: "wrap",
-              }}
-            >
-              <div style={{ textAlign: "center" }}>
-                <div
-                  style={{
-                    fontSize: "1.25rem",
-                    fontWeight: 700,
-                    color: "var(--accent)",
-                    ...monoText,
-                  }}
-                >
-                  ${Math.round(inputCost).toLocaleString()}
+              >
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--accent)", ...monoText }}>
+                    ${inputCost.toFixed(2)}
+                  </div>
+                  <div style={{ fontSize: "0.6875rem", color: "var(--text-muted)" }}>
+                    Input ({(inputTokens / 1000).toFixed(0)}K tokens)
+                  </div>
                 </div>
-                <div
-                  style={{
-                    fontSize: "0.6875rem",
-                    color: "var(--text-muted)",
-                  }}
-                >
-                  Input (274M tokens x $15/MTok)
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "#3b82f6", ...monoText }}>
+                    ${outputCost.toFixed(2)}
+                  </div>
+                  <div style={{ fontSize: "0.6875rem", color: "var(--text-muted)" }}>
+                    Output ({(outputTokens / 1000).toFixed(0)}K tokens)
+                  </div>
                 </div>
-              </div>
-              <div style={{ textAlign: "center" }}>
-                <div
-                  style={{
-                    fontSize: "1.25rem",
-                    fontWeight: 700,
-                    color: "#3b82f6",
-                    ...monoText,
-                  }}
-                >
-                  ${Math.round(outputCost).toLocaleString()}
-                </div>
-                <div
-                  style={{
-                    fontSize: "0.6875rem",
-                    color: "var(--text-muted)",
-                  }}
-                >
-                  Output (175K tokens x $75/MTok)
-                </div>
-              </div>
-              <div style={{ textAlign: "center" }}>
-                <div
-                  style={{
-                    fontSize: "1.25rem",
-                    fontWeight: 700,
-                    color: "var(--text-primary)",
-                    ...monoText,
-                  }}
-                >
-                  ${Math.round(totalCost).toLocaleString()}
-                </div>
-                <div
-                  style={{
-                    fontSize: "0.6875rem",
-                    color: "var(--text-muted)",
-                  }}
-                >
-                  Total
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--text-primary)", ...monoText }}>
+                    ${totalCost.toFixed(2)}
+                  </div>
+                  <div style={{ fontSize: "0.6875rem", color: "var(--text-muted)" }}>Total</div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* ═══ Corrections ═══ */}
-        <div style={{ marginBottom: "2.5rem" }}>
-          <h2 style={sectionHeading}>Corrections</h2>
-          <div
-            style={{
-              ...glassCard,
-              padding: "1rem 1.25rem",
-              borderLeft: "3px solid var(--accent)",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-                marginBottom: "0.5rem",
-              }}
-            >
-              <span
-                style={{
-                  padding: "0.125rem 0.5rem",
-                  borderRadius: "0.25rem",
-                  fontSize: "0.625rem",
-                  fontWeight: 600,
-                  color: "var(--accent)",
-                  background: "rgba(217,119,87,0.1)",
-                  ...monoText,
-                }}
-              >
-                CORRECTION #1
-              </span>
-              <span
-                style={{
-                  fontSize: "0.6875rem",
-                  color: "var(--text-muted)",
-                  ...monoText,
-                }}
-              >
-                ~18h into session
-              </span>
-            </div>
-            <p
-              style={{
-                fontSize: "0.8125rem",
-                color: "var(--text-secondary)",
-                lineHeight: 1.6,
-              }}
-            >
-              User corrected a UI layout choice mid-session. Agent adjusted and
-              continued without requiring re-prompting of the full context. This
-              was the only human intervention across 544 tool calls.
-            </p>
-          </div>
-        </div>
-
-        {/* ═══ Try it yourself ═══ */}
+        {/* Analyze your own */}
         <div
           style={{
             padding: "1.25rem 1.5rem",
@@ -844,13 +743,7 @@ export function RunAnatomy() {
             textAlign: "center",
           }}
         >
-          <p
-            style={{
-              fontSize: "0.875rem",
-              color: "var(--text-secondary)",
-              marginBottom: "0.75rem",
-            }}
-          >
+          <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
             Analyze your own sessions:
           </p>
           <div
@@ -865,8 +758,7 @@ export function RunAnatomy() {
               display: "inline-block",
             }}
           >
-            <span style={{ color: "var(--accent)" }}>$</span> python
-            benchmarks/record_session.py --path &lt;session.jsonl&gt;
+            <span style={{ color: "var(--accent)" }}>$</span> bp capture {"<session.jsonl>"} --name my-workflow
           </div>
         </div>
       </div>
