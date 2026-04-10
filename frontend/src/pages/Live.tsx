@@ -1,0 +1,883 @@
+import { useEffect, useState, useRef, useCallback } from "react";
+import { Layout } from "../components/Layout";
+
+/* ── Types matching /api/live/* responses ────────────────────── */
+
+interface HookInfo {
+  name: string;
+  detail: string;
+}
+
+interface WorkflowStep {
+  name: string;
+  has_evidence: boolean;
+  evidence_tools: string[];
+}
+
+interface WorkflowStatus {
+  name: string;
+  steps: WorkflowStep[];
+  completion_pct: number;
+}
+
+interface ActivityEvent {
+  ts: string;
+  tool: string;
+  keys: string[];
+  scrubbed: string;
+  was_blocked: boolean;
+}
+
+interface LiveStatus {
+  hooks_installed: number;
+  hooks: HookInfo[];
+  active_workflow: WorkflowStatus | null;
+  recent_activity: ActivityEvent[];
+  blocked_searches: number;
+  total_events: number;
+  session_duration_sec: number;
+  verdict_if_stopped_now: string;
+}
+
+/* ── Styles ────────────────────────────────────────────────── */
+
+const glass: React.CSSProperties = {
+  borderRadius: "0.625rem",
+  border: "1px solid rgba(255,255,255,0.06)",
+  background: "#141415",
+};
+
+const mono: React.CSSProperties = {
+  fontFamily: "'JetBrains Mono', monospace",
+};
+
+const label: React.CSSProperties = {
+  fontSize: "0.6875rem",
+  textTransform: "uppercase",
+  letterSpacing: "0.1em",
+  color: "#9a9590",
+  marginBottom: "0.5rem",
+};
+
+/* ── Helpers ────────────────────────────────────────────────── */
+
+const API_BASE = "http://localhost:8100";
+
+function formatDuration(secs: number): string {
+  if (secs < 60) return `${secs}s`;
+  if (secs < 3600) return `${Math.floor(secs / 60)}m`;
+  return `${Math.floor(secs / 3600)}h ${Math.floor((secs % 3600) / 60)}m`;
+}
+
+function formatTime(ts: string): string {
+  if (ts.length >= 19) return ts.slice(11, 19);
+  return ts;
+}
+
+function verdictColor(verdict: string): string {
+  switch (verdict) {
+    case "BLOCK":
+      return "#ef4444";
+    case "ESCALATE":
+      return "#eab308";
+    case "ALLOW":
+      return "#22c55e";
+    default:
+      return "#9a9590";
+  }
+}
+
+function verdictBg(verdict: string): string {
+  switch (verdict) {
+    case "BLOCK":
+      return "rgba(239,68,68,0.08)";
+    case "ESCALATE":
+      return "rgba(234,179,8,0.08)";
+    case "ALLOW":
+      return "rgba(34,197,94,0.08)";
+    default:
+      return "rgba(255,255,255,0.04)";
+  }
+}
+
+/* ── StatusCard ──────────────────────────────────────────────── */
+
+function StatusCard({
+  title,
+  value,
+  color,
+  bg,
+}: {
+  title: string;
+  value: string | number;
+  color: string;
+  bg?: string;
+}) {
+  return (
+    <div
+      style={{
+        ...glass,
+        padding: "1rem 1.25rem",
+        background: bg || "#141415",
+        flex: 1,
+        minWidth: 180,
+      }}
+    >
+      <div style={label}>{title}</div>
+      <div
+        style={{
+          ...mono,
+          fontSize: "1.5rem",
+          fontWeight: 700,
+          color,
+          lineHeight: 1.2,
+        }}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+/* ── ProgressBar ─────────────────────────────────────────────── */
+
+function ProgressBar({ pct }: { pct: number }) {
+  const barColor =
+    pct >= 80 ? "#22c55e" : pct >= 50 ? "#eab308" : "#ef4444";
+  return (
+    <div
+      style={{
+        width: "100%",
+        height: 8,
+        borderRadius: 4,
+        background: "rgba(255,255,255,0.06)",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          width: `${Math.min(pct, 100)}%`,
+          height: "100%",
+          borderRadius: 4,
+          background: barColor,
+          transition: "width 0.3s ease",
+        }}
+      />
+    </div>
+  );
+}
+
+/* ── Main Component ──────────────────────────────────────────── */
+
+export function Live() {
+  const [status, setStatus] = useState<LiveStatus | null>(null);
+  const [activity, setActivity] = useState<ActivityEvent[]>([]);
+  const [connected, setConnected] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const feedRef = useRef<HTMLDivElement>(null);
+
+  const fetchStatus = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/live/status`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data: LiveStatus = await res.json();
+      setStatus(data);
+      setConnected(true);
+      setError(null);
+    } catch {
+      setConnected(false);
+      setError("Cannot reach server");
+    }
+  }, []);
+
+  const fetchActivity = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/live/activity?limit=50`);
+      if (!res.ok) return;
+      const data: ActivityEvent[] = await res.json();
+      setActivity(data);
+    } catch {
+      // silent — status fetch handles connection state
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStatus();
+    fetchActivity();
+    const interval = setInterval(() => {
+      fetchStatus();
+      fetchActivity();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [fetchStatus, fetchActivity]);
+
+  // Auto-scroll activity feed
+  useEffect(() => {
+    if (feedRef.current) {
+      feedRef.current.scrollTop = feedRef.current.scrollHeight;
+    }
+  }, [activity]);
+
+  const workflow = status?.active_workflow ?? null;
+  const verdict = status?.verdict_if_stopped_now ?? "UNKNOWN";
+
+  return (
+    <Layout>
+      <div
+        style={{
+          maxWidth: 1100,
+          margin: "0 auto",
+          padding: "2rem 1.5rem 2rem",
+        }}
+      >
+        {/* ── Header ──────────────────────────────────────────── */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+            marginBottom: "1.5rem",
+          }}
+        >
+          <h1
+            style={{
+              fontSize: "1.75rem",
+              fontWeight: 700,
+              letterSpacing: "-0.025em",
+              color: "#e8e6e3",
+              margin: 0,
+            }}
+          >
+            Live Status
+          </h1>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.375rem",
+              padding: "0.25rem 0.75rem",
+              borderRadius: "1rem",
+              background: connected
+                ? "rgba(34,197,94,0.1)"
+                : "rgba(239,68,68,0.1)",
+              border: `1px solid ${
+                connected
+                  ? "rgba(34,197,94,0.2)"
+                  : "rgba(239,68,68,0.2)"
+              }`,
+            }}
+          >
+            <div
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background: connected ? "#22c55e" : "#ef4444",
+              }}
+            />
+            <span
+              style={{
+                ...mono,
+                fontSize: "0.6875rem",
+                color: connected ? "#22c55e" : "#ef4444",
+              }}
+            >
+              {connected ? "Connected" : "Disconnected"}
+            </span>
+          </div>
+        </div>
+
+        {/* ── Not connected state ─────────────────────────────── */}
+        {!connected && (
+          <div
+            style={{
+              ...glass,
+              padding: "2rem",
+              textAlign: "center",
+              marginBottom: "1.5rem",
+              border: "1px solid rgba(239,68,68,0.15)",
+              background: "rgba(239,68,68,0.02)",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "1rem",
+                color: "#ef4444",
+                marginBottom: "0.75rem",
+                fontWeight: 600,
+              }}
+            >
+              {error || "Not connected"}
+            </div>
+            <p
+              style={{
+                fontSize: "0.875rem",
+                color: "#9a9590",
+                marginBottom: "1rem",
+                lineHeight: 1.6,
+              }}
+            >
+              Start the attrition server to see live status:
+            </p>
+            <div
+              style={{
+                ...glass,
+                ...mono,
+                padding: "0.75rem 1.25rem",
+                fontSize: "0.8125rem",
+                maxWidth: 400,
+                margin: "0 auto 1rem",
+                border: "1px solid rgba(217,119,87,0.25)",
+                background: "rgba(217,119,87,0.03)",
+                textAlign: "center",
+              }}
+            >
+              <span style={{ color: "#d97757" }}>$</span>{" "}
+              <span style={{ color: "#e8e6e3" }}>
+                bp serve --port 8100
+              </span>
+            </div>
+            <p
+              style={{
+                fontSize: "0.8125rem",
+                color: "#6b6560",
+                lineHeight: 1.5,
+              }}
+            >
+              Install hooks:{" "}
+              <code
+                style={{
+                  ...mono,
+                  fontSize: "0.75rem",
+                  color: "#d97757",
+                }}
+              >
+                bp install
+              </code>{" "}
+              or{" "}
+              <code
+                style={{
+                  ...mono,
+                  fontSize: "0.75rem",
+                  color: "#d97757",
+                }}
+              >
+                curl -sL attrition.sh/install | bash
+              </code>
+            </p>
+          </div>
+        )}
+
+        {/* ── Row 1: Status Cards ─────────────────────────────── */}
+        {status && (
+          <>
+            <div
+              style={{
+                display: "flex",
+                gap: "0.75rem",
+                marginBottom: "1.5rem",
+                flexWrap: "wrap",
+              }}
+            >
+              <StatusCard
+                title="Hooks Active"
+                value={status.hooks_installed}
+                color={
+                  status.hooks_installed > 0
+                    ? "#22c55e"
+                    : "#ef4444"
+                }
+                bg={
+                  status.hooks_installed > 0
+                    ? "rgba(34,197,94,0.04)"
+                    : "rgba(239,68,68,0.04)"
+                }
+              />
+              <StatusCard
+                title="Active Workflow"
+                value={workflow?.name ?? "None"}
+                color={workflow ? "#e8e6e3" : "#6b6560"}
+              />
+              <StatusCard
+                title="Events This Session"
+                value={status.total_events}
+                color="#e8e6e3"
+              />
+              <StatusCard
+                title="Verdict If Stopped Now"
+                value={verdict}
+                color={verdictColor(verdict)}
+                bg={verdictBg(verdict)}
+              />
+            </div>
+
+            {/* ── Row 2: Workflow Progress ───────────────────── */}
+            {workflow && (
+              <div
+                style={{
+                  ...glass,
+                  padding: "1.25rem",
+                  marginBottom: "1.5rem",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    justifyContent: "space-between",
+                    marginBottom: "0.75rem",
+                  }}
+                >
+                  <div style={label}>
+                    Workflow Progress
+                  </div>
+                  <span
+                    style={{
+                      ...mono,
+                      fontSize: "0.8125rem",
+                      color: verdictColor(verdict),
+                    }}
+                  >
+                    {workflow.completion_pct}%
+                  </span>
+                </div>
+
+                <ProgressBar pct={workflow.completion_pct} />
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns:
+                      "repeat(auto-fill, minmax(200px, 1fr))",
+                    gap: "0.5rem",
+                    marginTop: "1rem",
+                  }}
+                >
+                  {workflow.steps.map((step, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: "0.5rem",
+                        padding: "0.5rem 0.625rem",
+                        borderRadius: "0.375rem",
+                        background: step.has_evidence
+                          ? "rgba(34,197,94,0.04)"
+                          : "rgba(239,68,68,0.04)",
+                        border: `1px solid ${
+                          step.has_evidence
+                            ? "rgba(34,197,94,0.12)"
+                            : "rgba(239,68,68,0.12)"
+                        }`,
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: step.has_evidence
+                            ? "#22c55e"
+                            : "#ef4444",
+                          fontSize: "0.875rem",
+                          flexShrink: 0,
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {step.has_evidence ? "\u2713" : "\u2717"}
+                      </span>
+                      <div>
+                        <div
+                          style={{
+                            fontSize: "0.8125rem",
+                            color: step.has_evidence
+                              ? "#e8e6e3"
+                              : "#9a9590",
+                            lineHeight: 1.4,
+                          }}
+                        >
+                          {i + 1}. {step.name}
+                        </div>
+                        {step.evidence_tools.length > 0 && (
+                          <div
+                            style={{
+                              ...mono,
+                              fontSize: "0.625rem",
+                              color: "#6b6560",
+                              marginTop: "0.125rem",
+                            }}
+                          >
+                            {step.evidence_tools.join(
+                              ", "
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── Row 3: Live Activity Feed ──────────────────── */}
+            <div
+              style={{
+                ...glass,
+                padding: "1.25rem",
+                marginBottom: "1.5rem",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: "0.75rem",
+                }}
+              >
+                <div style={label}>
+                  Live Activity Feed
+                </div>
+                <span
+                  style={{
+                    ...mono,
+                    fontSize: "0.625rem",
+                    color: "#6b6560",
+                  }}
+                >
+                  auto-refresh 5s |{" "}
+                  {formatDuration(
+                    status.session_duration_sec
+                  )}
+                </span>
+              </div>
+
+              {/* Column headers */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "80px 160px 1fr",
+                  gap: "0.5rem",
+                  padding: "0.375rem 0.5rem",
+                  borderBottom:
+                    "1px solid rgba(255,255,255,0.06)",
+                  marginBottom: "0.25rem",
+                }}
+              >
+                <span
+                  style={{
+                    ...mono,
+                    fontSize: "0.625rem",
+                    color: "#6b6560",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  Time
+                </span>
+                <span
+                  style={{
+                    ...mono,
+                    fontSize: "0.625rem",
+                    color: "#6b6560",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  Tool
+                </span>
+                <span
+                  style={{
+                    ...mono,
+                    fontSize: "0.625rem",
+                    color: "#6b6560",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  Args
+                </span>
+              </div>
+
+              {/* Scrollable feed */}
+              <div
+                ref={feedRef}
+                style={{
+                  maxHeight: 400,
+                  overflowY: "auto",
+                  scrollbarWidth: "thin",
+                  scrollbarColor:
+                    "rgba(255,255,255,0.1) transparent",
+                }}
+              >
+                {activity.length === 0 && (
+                  <div
+                    style={{
+                      padding: "2rem",
+                      textAlign: "center",
+                      color: "#6b6560",
+                      fontSize: "0.8125rem",
+                    }}
+                  >
+                    No activity recorded yet. Start a
+                    Claude Code session with hooks
+                    installed.
+                  </div>
+                )}
+                {activity.map((event, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "80px 160px 1fr",
+                      gap: "0.5rem",
+                      padding: "0.375rem 0.5rem",
+                      borderRadius: "0.25rem",
+                      background: event.was_blocked
+                        ? "rgba(239,68,68,0.06)"
+                        : i % 2 === 0
+                          ? "transparent"
+                          : "rgba(255,255,255,0.01)",
+                      borderLeft: event.was_blocked
+                        ? "2px solid #ef4444"
+                        : "2px solid transparent",
+                    }}
+                  >
+                    {/* Time */}
+                    <span
+                      style={{
+                        ...mono,
+                        fontSize: "0.75rem",
+                        color: "#6b6560",
+                      }}
+                    >
+                      {formatTime(event.ts)}
+                    </span>
+
+                    {/* Tool badge */}
+                    <span>
+                      {event.was_blocked ? (
+                        <span
+                          style={{
+                            ...mono,
+                            fontSize: "0.6875rem",
+                            padding:
+                              "0.1rem 0.5rem",
+                            borderRadius: "0.25rem",
+                            background:
+                              "rgba(239,68,68,0.15)",
+                            color: "#ef4444",
+                            fontWeight: 600,
+                          }}
+                        >
+                          BLOCKED
+                        </span>
+                      ) : (
+                        <span
+                          style={{
+                            ...mono,
+                            fontSize: "0.6875rem",
+                            padding:
+                              "0.1rem 0.5rem",
+                            borderRadius: "0.25rem",
+                            background:
+                              toolBadgeBg(
+                                event.tool
+                              ),
+                            color: toolBadgeColor(
+                              event.tool
+                            ),
+                          }}
+                        >
+                          {event.tool}
+                        </span>
+                      )}
+                    </span>
+
+                    {/* Scrubbed args */}
+                    <span
+                      style={{
+                        ...mono,
+                        fontSize: "0.75rem",
+                        color: event.was_blocked
+                          ? "#ef4444"
+                          : "#9a9590",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {event.was_blocked
+                        ? `${event.tool}("${event.scrubbed}") \u2014 duplicate search`
+                        : event.scrubbed || "\u2014"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Row 4: Blocked Searches (if any) ──────────── */}
+            {status.blocked_searches > 0 && (
+              <div
+                style={{
+                  ...glass,
+                  padding: "1.25rem",
+                  marginBottom: "1.5rem",
+                  border: "1px solid rgba(239,68,68,0.15)",
+                  background: "rgba(239,68,68,0.02)",
+                }}
+              >
+                <div
+                  style={{
+                    ...label,
+                    color: "#ef4444",
+                  }}
+                >
+                  Blocked Searches ({status.blocked_searches})
+                </div>
+                <p
+                  style={{
+                    fontSize: "0.8125rem",
+                    color: "#9a9590",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {status.blocked_searches} duplicate
+                  search{status.blocked_searches !== 1 ? "es" : ""}{" "}
+                  blocked this session. The agent attempted
+                  to re-run searches it already performed.
+                </p>
+              </div>
+            )}
+
+            {/* ── Hooks detail ─────────────────────────────── */}
+            <div
+              style={{
+                ...glass,
+                padding: "1.25rem",
+                marginBottom: "1.5rem",
+              }}
+            >
+              <div style={label}>
+                Installed Hooks
+              </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    "repeat(auto-fill, minmax(220px, 1fr))",
+                  gap: "0.375rem",
+                }}
+              >
+                {ALL_HOOK_NAMES.map((hookName) => {
+                  const installed = status.hooks.find(
+                    (h) => h.name === hookName
+                  );
+                  return (
+                    <div
+                      key={hookName}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        padding: "0.375rem 0.5rem",
+                        borderRadius: "0.25rem",
+                        background: installed
+                          ? "rgba(34,197,94,0.04)"
+                          : "rgba(255,255,255,0.02)",
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: installed
+                            ? "#22c55e"
+                            : "#6b6560",
+                          fontSize: "0.8125rem",
+                        }}
+                      >
+                        {installed
+                          ? "\u2713"
+                          : "\u00b7"}
+                      </span>
+                      <span
+                        style={{
+                          ...mono,
+                          fontSize: "0.75rem",
+                          color: installed
+                            ? "#e8e6e3"
+                            : "#6b6560",
+                        }}
+                      >
+                        {hookName}
+                      </span>
+                      {installed &&
+                        installed.detail && (
+                          <span
+                            style={{
+                              ...mono,
+                              fontSize: "0.625rem",
+                              color: "#6b6560",
+                            }}
+                          >
+                            (
+                            {installed.detail}
+                            )
+                          </span>
+                        )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </Layout>
+  );
+}
+
+/* ── Constants ──────────────────────────────────────────────── */
+
+const ALL_HOOK_NAMES = [
+  "SessionStart",
+  "UserPromptSubmit",
+  "PreToolUse",
+  "PostToolUse",
+  "Stop",
+  "SubagentStop",
+  "InstructionsLoaded",
+  "PreCompact",
+  "SessionEnd",
+  "FileChanged",
+];
+
+/* ── Tool badge colors ──────────────────────────────────────── */
+
+function toolBadgeColor(tool: string): string {
+  if (tool.startsWith("mcp__")) return "#a78bfa"; // purple for MCP
+  switch (tool) {
+    case "Grep":
+    case "Glob":
+      return "#60a5fa"; // blue for search
+    case "Read":
+      return "#9a9590"; // muted for read
+    case "Edit":
+    case "Write":
+      return "#d97757"; // terracotta for mutations
+    case "Bash":
+      return "#22c55e"; // green for shell
+    case "WebSearch":
+    case "WebFetch":
+      return "#eab308"; // yellow for web
+    default:
+      return "#9a9590";
+  }
+}
+
+function toolBadgeBg(tool: string): string {
+  const color = toolBadgeColor(tool);
+  // Extract hex to rgba
+  const r = parseInt(color.slice(1, 3), 16);
+  const g = parseInt(color.slice(3, 5), 16);
+  const b = parseInt(color.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},0.1)`;
+}

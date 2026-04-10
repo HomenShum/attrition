@@ -165,6 +165,16 @@ enum Commands {
 
     /// Install attrition hooks into Claude Code settings.json
     Install,
+
+    /// Show live attrition status: hooks, active workflow, recent activity
+    Status,
+
+    /// Show recent tool call activity from the log
+    Activity {
+        /// Number of recent entries to show
+        #[arg(long, default_value_t = 20)]
+        limit: usize,
+    },
 }
 
 /// Resolve the workflow database path (~/.attrition/workflows.db).
@@ -615,6 +625,18 @@ async fn main() -> Result<()> {
         Commands::Install => {
             run_install()?;
         }
+
+        // ── Status ───────────────────────────────────────────────────
+
+        Commands::Status => {
+            run_status(cli.json)?;
+        }
+
+        // ── Activity ─────────────────────────────────────────────────
+
+        Commands::Activity { limit } => {
+            run_activity(limit, cli.json)?;
+        }
     }
 
     Ok(())
@@ -815,6 +837,486 @@ fn run_install() -> Result<()> {
     println!("  To uninstall, remove the hooks from {}", settings_path.display());
 
     Ok(())
+}
+
+// ── ANSI color helpers ────────────────────────────────────────────────────
+
+fn green(s: &str) -> String { format!("\x1b[32m{}\x1b[0m", s) }
+fn red(s: &str) -> String { format!("\x1b[31m{}\x1b[0m", s) }
+fn yellow(s: &str) -> String { format!("\x1b[33m{}\x1b[0m", s) }
+fn dim(s: &str) -> String { format!("\x1b[2m{}\x1b[0m", s) }
+fn bold(s: &str) -> String { format!("\x1b[1m{}\x1b[0m", s) }
+
+// ── Status implementation ─────────────────────────────────────────────────
+
+fn run_status(json: bool) -> Result<()> {
+    let attrition_dir = dirs_fallback();
+    let home = std::env::var("HOME")
+        .or_else(|_| std::env::var("USERPROFILE"))
+        .unwrap_or_else(|_| ".".to_string());
+
+    // ── 1. Check hooks installed ──────────────────────────────────────
+    let hooks_path = PathBuf::from(&home)
+        .join(".claude")
+        .join("settings.json");
+
+    let installed_hooks = read_installed_hooks(&hooks_path);
+
+    // ── 2. Check active workflow ──────────────────────────────────────
+    let workflow_path = attrition_dir.join("active_workflow.json");
+    let active_workflow = read_active_workflow(&workflow_path);
+
+    // ── 3. Read recent activity ───────────────────────────────────────
+    let activity_path = attrition_dir.join("activity.jsonl");
+    let (recent_activity, total_events) = read_recent_activity(&activity_path, 10);
+
+    // ── 4. Count blocked searches ─────────────────────────────────────
+    let search_log_path = attrition_dir.join("search_log.jsonl");
+    let blocked_count = count_blocked_searches(&search_log_path);
+
+    // ── 5. Count workflows in DB ──────────────────────────────────────
+    let db_path = workflow_db_path()?;
+    let workflow_count = if db_path.exists() {
+        attrition_workflow::storage::WorkflowStore::new(&db_path)
+            .ok()
+            .and_then(|store| store.list_workflows().ok())
+            .map(|wfs| wfs.len())
+            .unwrap_or(0)
+    } else {
+        0
+    };
+
+    // ── 6. Compute verdict if stopped now ─────────────────────────────
+    let verdict = compute_verdict_now(&active_workflow, &recent_activity);
+
+    // ── 7. Session duration ───────────────────────────────────────────
+    let session_duration_sec = compute_session_duration(&recent_activity);
+
+    if json {
+        let hooks_json: Vec<serde_json::Value> = installed_hooks
+            .iter()
+            .map(|(name, detail)| serde_json::json!({ "name": name, "detail": detail }))
+            .collect();
+
+        let workflow_json = active_workflow.as_ref().map(|wf| {
+            let steps_json: Vec<serde_json::Value> = wf.steps.iter().map(|s| {
+                serde_json::json!({ "name": s.name, "has_evidence": s.has_evidence })
+            }).collect();
+            let completed = wf.steps.iter().filter(|s| s.has_evidence).count();
+            let total = wf.steps.len();
+            let pct = if total > 0 { (completed as f64 / total as f64 * 100.0) as u32 } else { 0 };
+            serde_json::json!({
+                "name": wf.name,
+                "steps": steps_json,
+                "completion_pct": pct,
+            })
+        });
+
+        println!("{}", serde_json::to_string_pretty(&serde_json::json!({
+            "hooks_installed": installed_hooks.len(),
+            "hooks": hooks_json,
+            "active_workflow": workflow_json,
+            "total_events": total_events,
+            "blocked_searches": blocked_count,
+            "stored_workflows": workflow_count,
+            "session_duration_sec": session_duration_sec,
+            "verdict_if_stopped_now": verdict,
+        }))?);
+        return Ok(());
+    }
+
+    // ── Pretty print ──────────────────────────────────────────────────
+
+    println!();
+    println!("  {}", bold("attrition status"));
+    println!("  {}", dim(&"═".repeat(48)));
+    println!();
+
+    // Hooks
+    println!("  {}:", bold("Hooks"));
+
+    let all_hooks = [
+        ("SessionStart", ""),
+        ("UserPromptSubmit", ""),
+        ("PreToolUse", "Grep|Glob|WebSearch"),
+        ("PostToolUse", ""),
+        ("Stop", "hard-block enabled"),
+        ("SubagentStop", ""),
+        ("InstructionsLoaded", ""),
+        ("PreCompact", ""),
+        ("SessionEnd", ""),
+        ("FileChanged", ""),
+    ];
+
+    for (hook_name, default_detail) in &all_hooks {
+        let is_installed = installed_hooks.iter().any(|(n, _)| n == hook_name);
+        if is_installed {
+            let detail = installed_hooks.iter()
+                .find(|(n, _)| n == hook_name)
+                .map(|(_, d)| d.as_str())
+                .unwrap_or(default_detail);
+            let detail_str = if detail.is_empty() {
+                "installed".to_string()
+            } else {
+                format!("installed ({})", detail)
+            };
+            println!("    {} {:<22} {}", green("✓"), hook_name, dim(&detail_str));
+        } else {
+            println!("    {} {:<22} {}", dim("·"), hook_name, dim("not installed"));
+        }
+    }
+
+    println!();
+
+    // Active workflow
+    if let Some(ref wf) = active_workflow {
+        let completed = wf.steps.iter().filter(|s| s.has_evidence).count();
+        let total = wf.steps.len();
+        let pct = if total > 0 { completed * 100 / total } else { 0 };
+
+        println!("  {}: {} ({} steps)", bold("Active Workflow"), &wf.name, total);
+        for (i, step) in wf.steps.iter().enumerate() {
+            let mark = if step.has_evidence {
+                green("✓")
+            } else {
+                red("✗")
+            };
+            let evidence_str = if step.has_evidence {
+                "evidence found".to_string()
+            } else {
+                "no evidence yet".to_string()
+            };
+            println!(
+                "    {}. {:<24} {} {}",
+                i + 1,
+                step.name,
+                mark,
+                dim(&evidence_str),
+            );
+        }
+        println!();
+
+        let verdict_color = match verdict.as_str() {
+            "BLOCK" => red(&format!("Completion: {}/{} ({}%) — Stop hook will BLOCK", completed, total, pct)),
+            "ESCALATE" => yellow(&format!("Completion: {}/{} ({}%) — Stop hook will ESCALATE", completed, total, pct)),
+            _ => green(&format!("Completion: {}/{} ({}%) — Stop hook will ALLOW", completed, total, pct)),
+        };
+        println!("  {}", verdict_color);
+    } else {
+        println!("  {}: {}", bold("Active Workflow"), dim("None"));
+    }
+    println!();
+
+    // Recent activity
+    if !recent_activity.is_empty() {
+        println!("  {} (last {}):", bold("Recent Activity"), recent_activity.len());
+        for entry in &recent_activity {
+            let time_str = &entry.time_short;
+            let tool_display = if entry.was_blocked {
+                red(&format!("{:<14}", "BLOCKED"))
+            } else {
+                format!("{:<14}", entry.tool)
+            };
+            let detail = if entry.was_blocked {
+                red(&format!("Duplicate search: {}(\"{}\")", entry.tool, entry.scrubbed))
+            } else {
+                dim(&entry.scrubbed)
+            };
+            println!("    {}  {}  {}", dim(time_str), tool_display, detail);
+        }
+    }
+    println!();
+
+    // Footer
+    println!("  Session: {} ({} events)", dim(&activity_path.display().to_string()), total_events);
+    println!("  Workflows: {} ({} stored)", dim(&db_path.display().to_string()), workflow_count);
+    if blocked_count > 0 {
+        println!("  Blocked searches: {}", red(&blocked_count.to_string()));
+    }
+    println!();
+
+    Ok(())
+}
+
+// ── Activity implementation ───────────────────────────────────────────────
+
+fn run_activity(limit: usize, json: bool) -> Result<()> {
+    let attrition_dir = dirs_fallback();
+    let activity_path = attrition_dir.join("activity.jsonl");
+
+    let (entries, total_events) = read_recent_activity(&activity_path, limit);
+    let blocked = entries.iter().filter(|e| e.was_blocked).count();
+    let session_duration_sec = compute_session_duration(&entries);
+
+    if json {
+        let entries_json: Vec<serde_json::Value> = entries.iter().map(|e| {
+            serde_json::json!({
+                "ts": e.ts,
+                "tool": e.tool,
+                "scrubbed": e.scrubbed,
+                "was_blocked": e.was_blocked,
+            })
+        }).collect();
+        println!("{}", serde_json::to_string_pretty(&serde_json::json!({
+            "entries": entries_json,
+            "total": total_events,
+            "blocked": blocked,
+            "session_duration_sec": session_duration_sec,
+        }))?);
+        return Ok(());
+    }
+
+    println!();
+    println!("  {} (last {})", bold("Recent Activity"), limit);
+    println!("  {}", dim(&"═".repeat(48)));
+    println!();
+    println!("  {:<12} {:<24} {}", dim("TIME"), dim("TOOL"), dim("ARGS (scrubbed)"));
+
+    for entry in &entries {
+        let time_str = &entry.time_short;
+        if entry.was_blocked {
+            println!(
+                "  {:<12} {:<24} {}",
+                dim(time_str),
+                red(&format!("■ BLOCKED")),
+                red(&format!("{}(\"{}\") — duplicate search", entry.tool, entry.scrubbed)),
+            );
+        } else {
+            println!(
+                "  {:<12} {:<24} {}",
+                dim(time_str),
+                entry.tool,
+                dim(&entry.scrubbed),
+            );
+        }
+    }
+
+    let duration_str = format_duration(session_duration_sec);
+    println!();
+    println!(
+        "  Total: {} events | Blocked: {} | Session duration: {}",
+        total_events,
+        blocked,
+        duration_str,
+    );
+    println!();
+
+    Ok(())
+}
+
+// ── Shared data structures & helpers ──────────────────────────────────────
+
+struct WorkflowStep {
+    name: String,
+    has_evidence: bool,
+}
+
+struct ActiveWorkflow {
+    name: String,
+    steps: Vec<WorkflowStep>,
+}
+
+struct ActivityEntry {
+    ts: String,
+    time_short: String,
+    tool: String,
+    scrubbed: String,
+    was_blocked: bool,
+}
+
+fn read_installed_hooks(settings_path: &PathBuf) -> Vec<(String, String)> {
+    if !settings_path.exists() {
+        return Vec::new();
+    }
+
+    let content = match std::fs::read_to_string(settings_path) {
+        Ok(c) => c,
+        Err(_) => return Vec::new(),
+    };
+
+    let settings: serde_json::Value = match serde_json::from_str(&content) {
+        Ok(v) => v,
+        Err(_) => return Vec::new(),
+    };
+
+    let mut hooks = Vec::new();
+    if let Some(hooks_obj) = settings.get("hooks").and_then(|h| h.as_object()) {
+        for (name, _value) in hooks_obj {
+            let detail = match name.as_str() {
+                "PreToolUse" => "Grep|Glob|WebSearch".to_string(),
+                "Stop" => "hard-block enabled".to_string(),
+                _ => String::new(),
+            };
+            hooks.push((name.clone(), detail));
+        }
+    }
+
+    hooks
+}
+
+fn read_active_workflow(workflow_path: &PathBuf) -> Option<ActiveWorkflow> {
+    if !workflow_path.exists() {
+        return None;
+    }
+
+    let content = std::fs::read_to_string(workflow_path).ok()?;
+    let value: serde_json::Value = serde_json::from_str(&content).ok()?;
+
+    let name = value.get("name")?.as_str()?.to_string();
+    let steps_arr = value.get("steps")?.as_array()?;
+
+    let steps = steps_arr
+        .iter()
+        .filter_map(|s| {
+            let step_name = s.get("name")?.as_str()?.to_string();
+            let has_evidence = s.get("has_evidence").and_then(|v| v.as_bool()).unwrap_or(false);
+            Some(WorkflowStep { name: step_name, has_evidence })
+        })
+        .collect();
+
+    Some(ActiveWorkflow { name, steps })
+}
+
+fn read_recent_activity(activity_path: &PathBuf, limit: usize) -> (Vec<ActivityEntry>, usize) {
+    if !activity_path.exists() {
+        return (Vec::new(), 0);
+    }
+
+    let content = match std::fs::read_to_string(activity_path) {
+        Ok(c) => c,
+        Err(_) => return (Vec::new(), 0),
+    };
+
+    let lines: Vec<&str> = content.lines().filter(|l| !l.trim().is_empty()).collect();
+    let total = lines.len();
+
+    let start = if lines.len() > limit { lines.len() - limit } else { 0 };
+    let recent_lines = &lines[start..];
+
+    let entries: Vec<ActivityEntry> = recent_lines
+        .iter()
+        .filter_map(|line| {
+            let v: serde_json::Value = serde_json::from_str(line).ok()?;
+            let ts = v.get("ts").and_then(|t| t.as_str()).unwrap_or("").to_string();
+            let tool = v.get("tool").and_then(|t| t.as_str()).unwrap_or("unknown").to_string();
+            let was_blocked = v.get("blocked").and_then(|b| b.as_bool()).unwrap_or(false);
+
+            // Build a scrubbed representation from input_keys
+            let scrubbed = if let Some(keys) = v.get("input_keys").and_then(|k| k.as_array()) {
+                let key_strs: Vec<&str> = keys.iter().filter_map(|k| k.as_str()).collect();
+                if key_strs.is_empty() {
+                    String::new()
+                } else {
+                    key_strs.join(", ")
+                }
+            } else {
+                String::new()
+            };
+
+            // Extract time portion from ISO timestamp (HH:MM:SS)
+            let time_short = if ts.len() >= 19 {
+                ts[11..19].to_string()
+            } else {
+                ts.clone()
+            };
+
+            Some(ActivityEntry { ts, time_short, tool, scrubbed, was_blocked })
+        })
+        .collect();
+
+    (entries, total)
+}
+
+fn count_blocked_searches(search_log_path: &PathBuf) -> usize {
+    if !search_log_path.exists() {
+        return 0;
+    }
+
+    let content = match std::fs::read_to_string(search_log_path) {
+        Ok(c) => c,
+        Err(_) => return 0,
+    };
+
+    content
+        .lines()
+        .filter(|l| !l.trim().is_empty())
+        .filter(|l| l.contains("\"blocked\":true") || l.contains("\"blocked\": true"))
+        .count()
+}
+
+fn compute_verdict_now(workflow: &Option<ActiveWorkflow>, activity: &[ActivityEntry]) -> String {
+    if let Some(wf) = workflow {
+        let completed = wf.steps.iter().filter(|s| s.has_evidence).count();
+        let total = wf.steps.len();
+        if total == 0 {
+            return "ALLOW".to_string();
+        }
+        let pct = completed * 100 / total;
+        if pct >= 80 {
+            "ALLOW".to_string()
+        } else if pct >= 50 {
+            "ESCALATE".to_string()
+        } else {
+            "BLOCK".to_string()
+        }
+    } else if activity.is_empty() {
+        "ALLOW".to_string()
+    } else {
+        // No workflow loaded — use heuristic from on-stop judge
+        let has_build = activity.iter().any(|e| {
+            e.tool.contains("Bash") && (e.scrubbed.contains("build") || e.scrubbed.contains("tsc"))
+        });
+        let has_test = activity.iter().any(|e| {
+            e.tool.contains("Bash") && (e.scrubbed.contains("test") || e.scrubbed.contains("vitest"))
+        });
+        if has_build && has_test {
+            "ALLOW".to_string()
+        } else if has_build || has_test {
+            "ESCALATE".to_string()
+        } else if activity.len() < 5 {
+            "ALLOW".to_string()
+        } else {
+            "ESCALATE".to_string()
+        }
+    }
+}
+
+fn compute_session_duration(activity: &[ActivityEntry]) -> u64 {
+    if activity.len() < 2 {
+        return 0;
+    }
+
+    // Parse first and last timestamps
+    let parse_ts = |ts: &str| -> Option<u64> {
+        // Try to parse HH:MM:SS from the time_short field
+        let parts: Vec<&str> = ts.split(':').collect();
+        if parts.len() == 3 {
+            let h: u64 = parts[0].parse().ok()?;
+            let m: u64 = parts[1].parse().ok()?;
+            let s: u64 = parts[2].parse().ok()?;
+            Some(h * 3600 + m * 60 + s)
+        } else {
+            None
+        }
+    };
+
+    let first = parse_ts(&activity[0].time_short);
+    let last = parse_ts(&activity[activity.len() - 1].time_short);
+
+    match (first, last) {
+        (Some(f), Some(l)) if l >= f => l - f,
+        _ => 0,
+    }
+}
+
+fn format_duration(secs: u64) -> String {
+    if secs < 60 {
+        format!("{}s", secs)
+    } else if secs < 3600 {
+        format!("{}m", secs / 60)
+    } else {
+        format!("{}h {}m", secs / 3600, (secs % 3600) / 60)
+    }
 }
 
 /// Truncate a string with ellipsis if it exceeds max length.

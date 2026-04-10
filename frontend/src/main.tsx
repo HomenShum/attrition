@@ -13,6 +13,7 @@ import { Compare } from "./pages/Compare";
 import { Benchmark } from "./pages/Benchmark";
 import { RunAnatomy } from "./pages/RunAnatomy";
 import { Proof } from "./pages/Proof";
+import { Live } from "./pages/Live";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -20,6 +21,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/live" element={<Live />} />
         <Route path="/workflows" element={<Workflows />} />
         <Route path="/distill/:id" element={<Distill />} />
         <Route path="/judge" element={<Judge />} />
