@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { to: "/judge", label: "Judge" },
   { to: "/anatomy", label: "Anatomy" },
   { to: "/benchmark", label: "Benchmark" },
+  { to: "/get-started", label: "Get Started" },
 ] as const;
 
 const navStyle: React.CSSProperties = {

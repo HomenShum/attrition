@@ -9,6 +9,9 @@
   ],
   "rewrites": [
     { "source": "/install", "destination": "/install" },
+    { "source": "/api/:path*", "destination": "https://attrition-7xtb75zi5q-uc.a.run.app/api/:path*" },
+    { "source": "/health", "destination": "https://attrition-7xtb75zi5q-uc.a.run.app/health" },
+    { "source": "/mcp", "destination": "https://attrition-7xtb75zi5q-uc.a.run.app/mcp" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

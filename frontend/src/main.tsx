@@ -15,6 +15,7 @@ import { Benchmark } from "./pages/Benchmark";
 import { RunAnatomy } from "./pages/RunAnatomy";
 import { Proof } from "./pages/Proof";
 import { Live } from "./pages/Live";
+import { GetStarted } from "./pages/GetStarted";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -31,6 +32,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="/anatomy" element={<RunAnatomy />} />
           <Route path="/benchmark" element={<Benchmark />} />
           <Route path="/proof" element={<Proof />} />
+          <Route path="/get-started" element={<GetStarted />} />
           {/* Legacy QA routes (kept for backward compatibility) */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/results/:id" element={<Results />} />

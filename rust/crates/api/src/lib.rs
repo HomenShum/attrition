@@ -6,6 +6,7 @@
 //! In production (Cloud Run), the same binary serves the React frontend
 //! as static files — no separate web server needed.
 
+pub mod middleware;
 pub mod routes;
 pub mod state;
 
@@ -24,6 +25,9 @@ use tower_http::trace::TraceLayer;
 /// falls back to serving the React frontend for any path that doesn't match
 /// an API route. This lets a single `bp serve` process handle both the API
 /// and the SPA in production.
+///
+/// Auth: When `BP_ADMIN_KEY` env var is set, all `/api/*` routes require a
+/// valid bearer token. Health, MCP, and static file routes are always open.
 pub fn build_router(config: &AppConfig) -> Router {
     let state = Arc::new(AppState::new(config.clone()));
 
@@ -35,6 +39,10 @@ pub fn build_router(config: &AppConfig) -> Router {
     let router = Router::new()
         .nest("/api", routes::api_routes())
         .nest("/health", routes::health_routes())
+        .layer(axum::middleware::from_fn_with_state(
+            state.clone(),
+            middleware::auth::require_auth,
+        ))
         .with_state(state)
         .layer(cors)
         .layer(TraceLayer::new_for_http());
