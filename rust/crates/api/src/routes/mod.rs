@@ -4,6 +4,7 @@ pub mod judge;
 pub mod judge_api;
 pub mod live;
 pub mod qa;
+pub mod retention;
 pub mod stats;
 pub mod workflows;
 
@@ -25,6 +26,7 @@ pub fn api_routes() -> Router<Arc<AppState>> {
         .nest("/workflows", workflows::routes())
         .nest("/benchmark", benchmark_api::routes())
         .nest("/live", live::routes())
+        .nest("/retention", retention::routes())
 }
 
 pub fn health_routes() -> Router<Arc<AppState>> {

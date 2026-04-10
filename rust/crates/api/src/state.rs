@@ -6,6 +6,36 @@ use tokio::sync::Mutex;
 
 use crate::routes::judge::HookSession;
 
+// ── Retention Bridge types ───────────────────────────────────────────────────
+
+/// Active NodeBench team connection state.
+pub struct RetentionConnection {
+    pub team_code: String,
+    pub peer_id: String,
+    pub connected_at: String,
+    pub last_sync: Option<String>,
+    pub qa_score: Option<u8>,
+    pub tokens_saved: Option<u64>,
+    pub member_count: Option<u32>,
+    pub version: Option<String>,
+}
+
+/// A single event in the retention event log.
+pub struct RetentionEvent {
+    pub event: String,
+    pub data: serde_json::Value,
+    pub timestamp: String,
+}
+
+/// An ingested delta packet from NodeBench.
+pub struct RetentionPacket {
+    pub packet_type: String,
+    pub subject: String,
+    pub summary: String,
+    pub data: serde_json::Value,
+    pub timestamp: String,
+}
+
 /// Shared application state across all request handlers
 pub struct AppState {
     pub config: AppConfig,
@@ -21,6 +51,12 @@ pub struct AppState {
     pub admin_key: Option<String>,
     /// Valid API keys (BP_API_KEYS env var, comma-separated). All get standard access.
     pub api_keys: Vec<String>,
+    /// Active NodeBench retention bridge connection.
+    pub retention_connection: Mutex<Option<RetentionConnection>>,
+    /// Bounded event log for retention bridge (max 500 entries).
+    pub retention_events: Mutex<Vec<RetentionEvent>>,
+    /// Bounded packet store for ingested delta packets (max 1000 entries).
+    pub retention_packets: Mutex<Vec<RetentionPacket>>,
 }
 
 impl AppState {
@@ -55,6 +91,9 @@ impl AppState {
             judge_engine: Mutex::new(attrition_judge::engine::JudgeEngine::new()),
             admin_key,
             api_keys,
+            retention_connection: Mutex::new(None),
+            retention_events: Mutex::new(Vec::new()),
+            retention_packets: Mutex::new(Vec::new()),
         }
     }
 
