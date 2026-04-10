@@ -1,0 +1,10 @@
+{
+  "_comment": "Add this to your ~/.mcp.json (Claude Code) or .mcp.json (project-level) to connect to a deployed attrition instance. Replace XXXXX with your Cloud Run service hash.",
+  "mcpServers": {
+    "attrition": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-remote", "https://attrition-XXXXX.run.app/mcp"],
+      "env": {}
+    }
+  }
+}

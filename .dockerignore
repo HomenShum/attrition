@@ -1,0 +1,25 @@
+# Build artifacts
+target/
+frontend/node_modules/
+frontend/dist/
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Docs (not needed at runtime)
+docs/
+*.md
+!README.md
+
+# CI / local configs
+.env
+.env.*
+.claude/
+.cursor/
+.windsurf/
