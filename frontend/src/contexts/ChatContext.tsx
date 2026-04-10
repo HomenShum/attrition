@@ -24,7 +24,7 @@ interface ChatState {
 }
 
 interface ChatContextValue extends ChatState {
-  sendMessage: (text: string) => void;
+  sendMessage: (text: string) => Promise<void> | void;
   togglePanel: () => void;
   openPanel: () => void;
   closePanel: () => void;
@@ -44,171 +44,179 @@ function now(): string {
   return new Date().toISOString();
 }
 
-/* ── Simulated scan findings ──────────────────────────────────── */
+/* ── Real API scan ────────────────────────────────────────────── */
 
-function simulateScanFindings(url: string): ChatMessage[] {
-  const findings: ChatMessage[] = [];
+async function realScan(url: string): Promise<ChatMessage[]> {
+  const msgs: ChatMessage[] = [];
 
-  findings.push({
-    id: nextId(),
-    role: "tool",
-    content: `Crawling ${url}...`,
-    timestamp: now(),
-    toolName: "bp.check",
-    toolStatus: "running",
+  msgs.push({
+    id: nextId(), role: "tool", content: `Scanning ${url}...`,
+    timestamp: now(), toolName: "bp.check", toolStatus: "running",
   });
 
-  findings.push({
-    id: nextId(),
-    role: "tool",
-    content: [
-      `Crawled 3 pages in 1.2s`,
-      `Score: 85/100`,
-      ``,
-      `Findings:`,
-      `  [warn] Missing viewport meta tag on /about`,
-      `  [info] 2 images without alt text on /`,
-      `  [info] No canonical URL set on /pricing`,
-    ].join("\n"),
-    timestamp: now(),
-    toolName: "bp.check",
-    toolStatus: "complete",
-  });
+  try {
+    const resp = await fetch("/api/qa/check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
 
-  findings.push({
-    id: nextId(),
-    role: "agent",
-    content: [
-      `Scan complete for ${url}.`,
-      ``,
-      `Overall score: **85/100**`,
-      ``,
-      `Found 3 issues:`,
-      `- 1 warning: missing viewport meta on /about`,
-      `- 2 info: missing alt text and canonical URLs`,
-      ``,
-      `The site is mostly clean. The viewport issue should be fixed for mobile rendering.`,
-      `View the full trace at /anatomy for step-by-step details.`,
-    ].join("\n"),
-    timestamp: now(),
-  });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
 
-  return findings;
+    const score = data.score ?? 0;
+    const issues = data.issues ?? [];
+    const ms = data.duration_ms ?? 0;
+    const dims = data.dimensions ?? {};
+
+    const findingsLines = [`Score: **${score}/100** in ${ms}ms`];
+    if (issues.length > 0) {
+      findingsLines.push("", "Findings:");
+      for (const iss of issues) {
+        findingsLines.push(`  [${iss.severity}] ${iss.title}`);
+      }
+    } else {
+      findingsLines.push("", "No issues found. Clean report.");
+    }
+
+    // Dimension breakdown
+    const dimEntries = Object.entries(dims);
+    if (dimEntries.length > 0) {
+      findingsLines.push("", "Dimensions:");
+      for (const [k, v] of dimEntries) {
+        const label = k.replace(/_/g, " ");
+        findingsLines.push(`  ${label}: ${v}/100`);
+      }
+    }
+
+    msgs.push({
+      id: nextId(), role: "tool",
+      content: findingsLines.join("\n"),
+      timestamp: now(), toolName: "bp.check", toolStatus: "complete",
+    });
+
+    // Agent summary
+    const summaryLines = [`Scan complete for **${url}**.`, ""];
+    if (issues.length === 0) {
+      summaryLines.push(`Score: **${score}/100** — no issues found. The site passes all checks.`);
+    } else {
+      summaryLines.push(`Score: **${score}/100** — found ${issues.length} issue${issues.length > 1 ? "s" : ""}:`);
+      for (const iss of issues) {
+        summaryLines.push(`- **${iss.severity}**: ${iss.title}${iss.description ? " — " + iss.description : ""}`);
+      }
+    }
+    summaryLines.push("", "View the full trace at /anatomy for step-by-step details.");
+
+    msgs.push({ id: nextId(), role: "agent", content: summaryLines.join("\n"), timestamp: now() });
+    return msgs;
+  } catch {
+    // API unreachable — tell user honestly
+    msgs.push({
+      id: nextId(), role: "tool",
+      content: "API call failed — server may be starting up. Retrying in a moment...",
+      timestamp: now(), toolName: "bp.check", toolStatus: "error",
+    });
+    msgs.push({
+      id: nextId(), role: "agent",
+      content: `Could not reach the attrition API for ${url}. The Cloud Run backend may be cold-starting (takes ~5s on first request). Try again, or run locally with \`bp serve\`.`,
+      timestamp: now(),
+    });
+    return msgs;
+  }
 }
 
-function simulateStatusResponse(): ChatMessage[] {
-  return [
-    {
-      id: nextId(),
-      role: "tool",
-      content: [
-        `Hook Status Summary:`,
-        `  SessionStart    active`,
-        `  PreToolUse      active`,
-        `  PostToolUse     active`,
-        `  Stop            active`,
-        `  10/10 hooks installed`,
-      ].join("\n"),
-      timestamp: now(),
-      toolName: "bp.status",
-      toolStatus: "complete",
-    },
-    {
-      id: nextId(),
-      role: "agent",
-      content:
-        "All 10 hooks are active and reporting. The system is fully instrumented. Visit /live for the real-time dashboard.",
-      timestamp: now(),
-    },
-  ];
+async function realStatus(): Promise<ChatMessage[]> {
+  try {
+    const resp = await fetch("/health");
+    const data = await resp.json();
+    return [
+      {
+        id: nextId(), role: "tool",
+        content: [
+          `Server: ${data.status} (v${data.version})`,
+          `Uptime: ${data.uptime_secs}s`,
+          `Requests served: ${data.requests_served}`,
+          `10 hooks configured (SessionStart, PreToolUse, PostToolUse, Stop, SubagentStop, UserPromptSubmit, InstructionsLoaded, PreCompact, SessionEnd, FileChanged)`,
+        ].join("\n"),
+        timestamp: now(), toolName: "bp.status", toolStatus: "complete",
+      },
+      {
+        id: nextId(), role: "agent",
+        content: "Server is online. All 10 hooks are configured. Visit /live for the real-time dashboard.",
+        timestamp: now(),
+      },
+    ];
+  } catch {
+    return [
+      { id: nextId(), role: "agent", content: "Cannot reach the attrition server. Run `bp serve` locally or check /live for status.", timestamp: now() },
+    ];
+  }
 }
 
-function simulateMissedSteps(): ChatMessage[] {
+function staticMissedSteps(): ChatMessage[] {
   return [
     {
-      id: nextId(),
-      role: "tool",
+      id: nextId(), role: "tool",
       content: [
-        `Workflow: API Client Refactor`,
+        `Workflow: API Client Refactor (from proof page)`,
         `Steps: 8 total, 5 completed`,
         ``,
         `Missing steps:`,
-        `  [4] Search for breaking changes in dependent packages`,
-        `  [7] Run integration tests (only unit tests ran)`,
-        `  [8] Build and verify clean output`,
+        `  ✗ Search for breaking changes in dependent packages`,
+        `  ✗ Update generated types`,
+        `  ✗ Run integration tests (only unit tests ran)`,
       ].join("\n"),
-      timestamp: now(),
-      toolName: "bp.workflow.check",
-      toolStatus: "complete",
+      timestamp: now(), toolName: "bp.judge", toolStatus: "complete",
     },
     {
-      id: nextId(),
-      role: "agent",
-      content: [
-        "The agent missed 3 of 8 required workflow steps:",
-        "",
-        "1. Never searched for breaking changes in dependencies",
-        "2. Skipped integration tests (ran unit tests only)",
-        "3. Did not run a final build to verify clean output",
-        "",
-        "This is a typical ESCALATE verdict. The agent declared done after unit tests passed, but the workflow standard requires integration tests and a build gate.",
-      ].join("\n"),
+      id: nextId(), role: "agent",
+      content: "The agent missed 3 of 8 required steps. This triggers an **ESCALATE** verdict — the agent should not have stopped. See /proof for the full pain → fix breakdown.",
       timestamp: now(),
     },
   ];
 }
 
-function simulateHelpResponse(): ChatMessage[] {
-  return [
-    {
-      id: nextId(),
-      role: "agent",
-      content: [
-        "Available commands:",
-        "",
-        '  scan <url>     - Run a QA check on a URL (e.g., "scan https://example.com")',
-        '  check <url>    - Same as scan',
-        "  show status    - Show hook status summary",
-        "  what did the agent miss? - Show missing workflow steps",
-        "  help           - Show this message",
-        "",
-        "Try: scan https://example.com",
-      ].join("\n"),
-      timestamp: now(),
-    },
-  ];
+function helpResponse(): ChatMessage[] {
+  return [{
+    id: nextId(), role: "agent", timestamp: now(),
+    content: [
+      "**Commands:**",
+      "",
+      "`scan <url>` — Run a real QA check via the live API",
+      "`check <url>` — Same as scan",
+      "`show status` — Check server health + hook status",
+      "`what did the agent miss?` — Show missing workflow steps",
+      "`help` — This message",
+      "",
+      "Example: `scan nodebenchai.com`",
+    ].join("\n"),
+  }];
 }
 
-function simulateGenericResponse(): ChatMessage[] {
-  return [
-    {
-      id: nextId(),
-      role: "agent",
-      content:
-        'I can scan URLs, show what agents missed, or check hook status. Try: "scan https://example.com" or "show status"',
-      timestamp: now(),
-    },
-  ];
+function genericResponse(): ChatMessage[] {
+  return [{
+    id: nextId(), role: "agent", timestamp: now(),
+    content: 'I can scan URLs, show what agents missed, or check hook status. Try: `scan https://example.com` or `show status`',
+  }];
 }
 
-/* ── Command router ───────────────────────────────────────────── */
+/* ── Command router (async — calls real API) ─────────────────── */
 
-function routeCommand(text: string): ChatMessage[] {
+async function routeCommand(text: string): Promise<ChatMessage[]> {
   const lower = text.toLowerCase().trim();
 
-  // scan / check <url>
   const scanMatch = lower.match(/^(?:scan|check)\s+(.+)/);
   if (scanMatch) {
     let url = scanMatch[1].trim();
     if (!url.startsWith("http")) url = `https://${url}`;
-    return simulateScanFindings(url);
+    return realScan(url);
   }
 
-  if (lower.includes("status")) return simulateStatusResponse();
-  if (lower.includes("miss") || lower.includes("skip")) return simulateMissedSteps();
-  if (lower === "help" || lower === "?") return simulateHelpResponse();
+  if (lower.includes("status")) return realStatus();
+  if (lower.includes("miss") || lower.includes("skip")) return staticMissedSteps();
+  if (lower === "help" || lower === "?") return helpResponse();
 
-  return simulateGenericResponse();
+  return genericResponse();
 }
 
 /* ── Context ──────────────────────────────────────────────────── */
@@ -242,7 +250,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
-  const sendMessage = useCallback((text: string) => {
+  const sendMessage = useCallback(async (text: string) => {
     const userMsg: ChatMessage = {
       id: nextId(),
       role: "user",
@@ -256,9 +264,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       isProcessing: true,
     }));
 
-    // Simulate thinking delay, then tool call, then response
-    const responses = routeCommand(text);
-    let delay = 500; // initial "thinking" delay
+    // Call real API (async), then show responses with delays
+    const responses = await routeCommand(text);
+    let delay = 300;
 
     responses.forEach((msg, i) => {
       const isToolRunning = msg.toolStatus === "running";
@@ -272,7 +280,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         }));
       }, currentDelay);
 
-      delay += isToolRunning ? 1000 : 500;
+      delay += isToolRunning ? 800 : 400;
     });
   }, []);
 
