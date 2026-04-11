@@ -107,7 +107,6 @@ async fn handle_tools_call(
     // Check if it's a stateful tool that needs McpState access
     let result = match tool_name {
         "bp.capture" => crate::tools::tool_capture(state, tool_args).await,
-        "bp.workflows" => crate::tools::tool_workflows(state).await,
         "bp.distill" => crate::tools::tool_distill(state, tool_args).await,
         "bp.judge.start" => crate::tools::tool_judge_start(state, tool_args).await,
         "bp.judge.event" => crate::tools::tool_judge_event(state, tool_args).await,

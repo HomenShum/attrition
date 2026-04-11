@@ -17,6 +17,8 @@ import { Proof } from "./pages/Proof";
 import { Improvements } from "./pages/Improvements";
 import { Live } from "./pages/Live";
 import { GetStarted } from "./pages/GetStarted";
+import { ScanResult } from "./pages/ScanResult";
+import { Docs } from "./pages/Docs";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -25,6 +27,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <ChatProvider>
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/scan/:id" element={<ScanResult />} />
+          <Route path="/docs" element={<Docs />} />
           <Route path="/live" element={<Live />} />
           <Route path="/workflows" element={<Workflows />} />
           <Route path="/distill/:id" element={<Distill />} />

@@ -5,9 +5,7 @@ import { ChatPanel } from "./ChatPanel";
 
 const NAV_LINKS = [
   { to: "/", label: "Home" },
-  { to: "/proof", label: "Proof" },
-  { to: "/improvements", label: "How It Works" },
-  { to: "/get-started", label: "Get Started" },
+  { to: "/docs", label: "Docs" },
 ] as const;
 
 const navStyle: React.CSSProperties = {

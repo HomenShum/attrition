@@ -11,19 +11,19 @@ pub struct McpTool {
     pub handler: fn(serde_json::Value) -> Pin<Box<dyn Future<Output = attrition_core::Result<serde_json::Value>> + Send>>,
 }
 
-/// Register all available MCP tools
+/// Register all available MCP tools — exactly 6
 pub fn register_all() -> Vec<McpTool> {
     vec![
-        // ── QA tools (stateless) ──────────────────────────────────────
+        // ── bp.check (stateless) ─────────────────────────────────────
         McpTool {
             name: "bp.check",
-            description: "Run a full QA check on a URL — JS errors, accessibility, rendering, performance",
+            description: "Scan any URL. Get score, issues, and recommendations in under 2 seconds.",
             input_schema: serde_json::json!({
                 "type": "object",
                 "properties": {
                     "url": {
                         "type": "string",
-                        "description": "The URL to QA check"
+                        "description": "The URL to scan"
                     },
                     "timeout_ms": {
                         "type": "integer",
@@ -35,111 +35,17 @@ pub fn register_all() -> Vec<McpTool> {
             }),
             handler: |args| Box::pin(tool_qa_check(args)),
         },
-        McpTool {
-            name: "bp.sitemap",
-            description: "Crawl a website and generate an interactive sitemap with screenshots",
-            input_schema: serde_json::json!({
-                "type": "object",
-                "properties": {
-                    "url": {
-                        "type": "string",
-                        "description": "Root URL to crawl"
-                    },
-                    "max_depth": {
-                        "type": "integer",
-                        "description": "Maximum crawl depth (default: 3)",
-                        "default": 3
-                    },
-                    "max_pages": {
-                        "type": "integer",
-                        "description": "Maximum pages to crawl (default: 50)",
-                        "default": 50
-                    }
-                },
-                "required": ["url"]
-            }),
-            handler: |args| Box::pin(tool_sitemap(args)),
-        },
-        McpTool {
-            name: "bp.ux_audit",
-            description: "Run a 21-rule UX audit with scoring and actionable recommendations",
-            input_schema: serde_json::json!({
-                "type": "object",
-                "properties": {
-                    "url": {
-                        "type": "string",
-                        "description": "URL to audit"
-                    }
-                },
-                "required": ["url"]
-            }),
-            handler: |args| Box::pin(tool_ux_audit(args)),
-        },
-        McpTool {
-            name: "bp.diff_crawl",
-            description: "Compare current site state against a previous baseline crawl",
-            input_schema: serde_json::json!({
-                "type": "object",
-                "properties": {
-                    "url": {
-                        "type": "string",
-                        "description": "URL to diff crawl"
-                    },
-                    "baseline_id": {
-                        "type": "string",
-                        "description": "ID of the baseline crawl to compare against"
-                    }
-                },
-                "required": ["url"]
-            }),
-            handler: |args| Box::pin(tool_diff_crawl(args)),
-        },
-        McpTool {
-            name: "bp.workflow",
-            description: "Start a workflow recording for trajectory replay (60-70% token savings on reruns)",
-            input_schema: serde_json::json!({
-                "type": "object",
-                "properties": {
-                    "url": {
-                        "type": "string",
-                        "description": "URL to start workflow on"
-                    },
-                    "name": {
-                        "type": "string",
-                        "description": "Name for this workflow"
-                    }
-                },
-                "required": ["url"]
-            }),
-            handler: |args| Box::pin(tool_workflow(args)),
-        },
-        McpTool {
-            name: "bp.pipeline",
-            description: "Run the full QA pipeline: crawl, analyze, test, verify, report",
-            input_schema: serde_json::json!({
-                "type": "object",
-                "properties": {
-                    "url": {
-                        "type": "string",
-                        "description": "URL to run the full pipeline on"
-                    }
-                },
-                "required": ["url"]
-            }),
-            handler: |args| Box::pin(tool_pipeline(args)),
-        },
 
-        // ── Workflow & judge tools (schemas only — handlers are stateful) ──
-        // These are registered for tools/list but dispatched via McpState in protocol.rs.
+        // ── bp.capture (stateful — routed via protocol.rs) ───────────
         McpTool {
             name: "bp.capture",
-            description: "Parse a Claude Code JSONL session file and save as a replayable workflow",
+            description: "Save this Claude Code session as a replayable workflow. List saved workflows with no args.",
             input_schema: serde_json::json!({
                 "type": "object",
                 "properties": {
                     "session_path": {
                         "type": "string",
-                        "description": "Absolute path to the Claude Code .jsonl session file"
+                        "description": "Absolute path to the Claude Code .jsonl session file. Omit to list saved workflows."
                     },
                     "name": {
                         "type": "string",
@@ -150,25 +56,15 @@ pub fn register_all() -> Vec<McpTool> {
                         "description": "Source model (default: claude-opus-4-6)",
                         "default": "claude-opus-4-6"
                     }
-                },
-                "required": ["session_path"]
-            }),
-            // Placeholder handler — actual dispatch goes through protocol.rs
-            handler: |_| Box::pin(async { Ok(serde_json::json!({"error": "routed via stateful handler"})) }),
-        },
-        McpTool {
-            name: "bp.workflows",
-            description: "List all captured workflows with ID, name, model, event count, and date",
-            input_schema: serde_json::json!({
-                "type": "object",
-                "properties": {},
-                "required": []
+                }
             }),
             handler: |_| Box::pin(async { Ok(serde_json::json!({"error": "routed via stateful handler"})) }),
         },
+
+        // ── bp.distill (stateful — routed via protocol.rs) ──────────
         McpTool {
             name: "bp.distill",
-            description: "Distill a captured workflow for cheaper replay on a target model",
+            description: "Compress a captured workflow for cheaper replay on a target model.",
             input_schema: serde_json::json!({
                 "type": "object",
                 "properties": {
@@ -185,9 +81,11 @@ pub fn register_all() -> Vec<McpTool> {
             }),
             handler: |_| Box::pin(async { Ok(serde_json::json!({"error": "routed via stateful handler"})) }),
         },
+
+        // ── bp.judge.start (stateful — routed via protocol.rs) ──────
         McpTool {
             name: "bp.judge.start",
-            description: "Start a judge session to evaluate a workflow replay — compares expected vs actual events",
+            description: "Start judging a workflow replay. Compares what happens against what should happen.",
             input_schema: serde_json::json!({
                 "type": "object",
                 "properties": {
@@ -204,9 +102,11 @@ pub fn register_all() -> Vec<McpTool> {
             }),
             handler: |_| Box::pin(async { Ok(serde_json::json!({"error": "routed via stateful handler"})) }),
         },
+
+        // ── bp.judge.event (stateful — routed via protocol.rs) ──────
         McpTool {
             name: "bp.judge.event",
-            description: "Report an actual event during replay — returns nudge/correction if divergence detected",
+            description: "Report what the agent actually did. Get a nudge if it diverged from the expected workflow.",
             input_schema: serde_json::json!({
                 "type": "object",
                 "properties": {
@@ -223,9 +123,11 @@ pub fn register_all() -> Vec<McpTool> {
             }),
             handler: |_| Box::pin(async { Ok(serde_json::json!({"error": "routed via stateful handler"})) }),
         },
+
+        // ── bp.judge.verdict (stateful — routed via protocol.rs) ────
         McpTool {
             name: "bp.judge.verdict",
-            description: "Finalize a judge session and produce a verdict (correct/partial/escalate/failed)",
+            description: "Finalize the judge session. Returns: correct, partial, escalate, or failed.",
             input_schema: serde_json::json!({
                 "type": "object",
                 "properties": {
@@ -241,7 +143,7 @@ pub fn register_all() -> Vec<McpTool> {
     ]
 }
 
-// ── Stateless tool handlers (QA engine) ───────────────────────────────────
+// ── Stateless tool handler (QA engine) ──────────────────────────────────
 
 async fn tool_qa_check(args: serde_json::Value) -> attrition_core::Result<serde_json::Value> {
     let url = args.get("url").and_then(|v| v.as_str()).unwrap_or("");
@@ -250,55 +152,25 @@ async fn tool_qa_check(args: serde_json::Value) -> attrition_core::Result<serde_
     serde_json::to_value(result).map_err(|e| attrition_core::Error::Internal(e.to_string()))
 }
 
-async fn tool_sitemap(args: serde_json::Value) -> attrition_core::Result<serde_json::Value> {
-    let url = args.get("url").and_then(|v| v.as_str()).unwrap_or("");
-    let max_depth = args.get("max_depth").and_then(|v| v.as_u64()).unwrap_or(3) as u8;
-    let max_pages = args.get("max_pages").and_then(|v| v.as_u64()).unwrap_or(50) as usize;
-    let result = attrition_engine::crawl::crawl_sitemap(url, max_depth, max_pages).await?;
-    serde_json::to_value(result).map_err(|e| attrition_core::Error::Internal(e.to_string()))
-}
-
-async fn tool_ux_audit(args: serde_json::Value) -> attrition_core::Result<serde_json::Value> {
-    let url = args.get("url").and_then(|v| v.as_str()).unwrap_or("");
-    let result = attrition_engine::audit::run_ux_audit(url).await?;
-    serde_json::to_value(result).map_err(|e| attrition_core::Error::Internal(e.to_string()))
-}
-
-async fn tool_diff_crawl(args: serde_json::Value) -> attrition_core::Result<serde_json::Value> {
-    let url = args.get("url").and_then(|v| v.as_str()).unwrap_or("");
-    let baseline_id = args.get("baseline_id").and_then(|v| v.as_str());
-    let result = attrition_engine::diff::run_diff_crawl(url, baseline_id).await?;
-    serde_json::to_value(result).map_err(|e| attrition_core::Error::Internal(e.to_string()))
-}
-
-async fn tool_workflow(args: serde_json::Value) -> attrition_core::Result<serde_json::Value> {
-    let url = args.get("url").and_then(|v| v.as_str()).unwrap_or("");
-    let name = args.get("name").and_then(|v| v.as_str()).unwrap_or("unnamed");
-    let result = attrition_engine::workflow::start_workflow(url, name).await?;
-    serde_json::to_value(result).map_err(|e| attrition_core::Error::Internal(e.to_string()))
-}
-
-async fn tool_pipeline(args: serde_json::Value) -> attrition_core::Result<serde_json::Value> {
-    let url = args.get("url").and_then(|v| v.as_str()).unwrap_or("");
-    let result = attrition_agents::pipeline::run_pipeline(url).await?;
-    serde_json::to_value(result).map_err(|e| attrition_core::Error::Internal(e.to_string()))
-}
-
 // ── Stateful tool handlers (workflow store + judge engine) ────────────────
 
-/// bp.capture — parse JSONL, save workflow
+/// bp.capture — parse JSONL or list workflows (no args = list)
 pub async fn tool_capture(
     state: &McpState,
     args: serde_json::Value,
 ) -> attrition_core::Result<serde_json::Value> {
+    // If no session_path provided, list workflows instead
+    let session_path = args.get("session_path").and_then(|v| v.as_str());
+
+    if session_path.is_none() {
+        return tool_workflows(state).await;
+    }
+
+    let session_path = session_path.unwrap();
+
     use attrition_workflow::adapters::claude_code::ClaudeCodeAdapter;
     use attrition_workflow::adapters::WorkflowAdapter;
     use attrition_workflow::{Workflow, WorkflowMetadata, TokenCost};
-
-    let session_path = args
-        .get("session_path")
-        .and_then(|v| v.as_str())
-        .ok_or_else(|| attrition_core::Error::Internal("session_path is required".into()))?;
 
     let model = args
         .get("model")
@@ -352,7 +224,7 @@ pub async fn tool_capture(
     }))
 }
 
-/// bp.workflows — list all workflows
+/// bp.capture (no args) — list all workflows
 pub async fn tool_workflows(
     state: &McpState,
 ) -> attrition_core::Result<serde_json::Value> {
