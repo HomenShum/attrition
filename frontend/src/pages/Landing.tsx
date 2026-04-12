@@ -1,7 +1,7 @@
 import { Layout } from "../components/Layout";
 import { useState, useEffect } from "react";
 
-/* ── Palette ──────────────────────────────────────────────────── */
+/* -- Palette --------------------------------------------------------- */
 
 const BG = "#0a0a0b";
 const CARD = "#141415";
@@ -11,7 +11,7 @@ const MUTED = "#6b6560";
 const ACCENT = "#d97757";
 const GREEN = "#22c55e";
 
-/* ── Shared styles ────────────────────────────────────────────── */
+/* -- Shared styles --------------------------------------------------- */
 
 const mono: React.CSSProperties = {
   fontFamily: "'JetBrains Mono', monospace",
@@ -41,7 +41,7 @@ const sectionLabel: React.CSSProperties = {
   marginBottom: "1.25rem",
 };
 
-/* ── Types ────────────────────────────────────────────────────── */
+/* -- Types ----------------------------------------------------------- */
 
 interface Packet {
   entity?: string;
@@ -52,7 +52,7 @@ interface Packet {
   cost?: number;
 }
 
-/* ── Component ────────────────────────────────────────────────── */
+/* -- Component ------------------------------------------------------- */
 
 export function Landing() {
   const [packets, setPackets] = useState<Packet[]>([]);
@@ -74,138 +74,195 @@ export function Landing() {
 
   return (
     <Layout>
-      <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 1.5rem" }}>
+      <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 1.5rem" }}>
 
-        {/* ── HERO: what it is + quickstart ─────────────────────── */}
-        <section style={{ padding: "5rem 0 3rem" }}>
+        {/* ---- S1: THE PROBLEM + WHAT THIS IS ---------------------- */}
+        <section style={{ padding: "5rem 0 2.5rem" }}>
           <h1 style={{
-            fontSize: "2rem",
+            fontSize: "2.25rem",
             fontWeight: 700,
             letterSpacing: "-0.03em",
             color: TEXT,
-            marginBottom: "0.5rem",
+            marginBottom: "2rem",
           }}>
             attrition
           </h1>
-          <p style={{
-            fontSize: "1.125rem",
-            color: MUTED,
-            lineHeight: 1.6,
-            marginBottom: "0.25rem",
-            maxWidth: 480,
-          }}>
-            Measure and replay agent workflows.
-          </p>
-          <p style={{
+
+          <div style={{
             ...mono,
-            fontSize: "0.875rem",
+            fontSize: "0.9375rem",
             color: MUTED,
-            lineHeight: 1.6,
+            lineHeight: 1.8,
             marginBottom: "2.5rem",
           }}>
-            One line to start capturing. One line to replay cheaper.
-          </p>
-
-          {/* Two code blocks side by side */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "0.75rem",
-          }}>
-            <div>
-              <div style={{ ...sectionLabel, marginBottom: "0.5rem" }}>Python</div>
-              <pre style={codeBlock}>{`from attrition import track
-track()
-# Every LLM call is now captured + costed.
-# Supports: OpenAI, Anthropic, LangChain, CrewAI`}</pre>
-            </div>
-            <div>
-              <div style={{ ...sectionLabel, marginBottom: "0.5rem" }}>CLI</div>
-              <pre style={codeBlock}>{`$ curl -sL attrition.sh/install | bash
-$ attrition run claude "refactor the API client"
-$ attrition replay <id> --model sonnet
-# Cost: $1.84 -> $0.27`}</pre>
-            </div>
+            <p style={{ color: TEXT, fontWeight: 600, margin: "0 0 0.75rem" }}>
+              You don't know what your agent sessions cost.
+              <br />
+              You can't replay the good ones.
+            </p>
+            <p style={{ margin: "0 0 1rem" }}>
+              Your Claude Code / Cursor / Codex sessions run expensive frontier
+              models, repeat the same workflows, and you have no idea if $1.84
+              was well spent or if $0.27 would have produced the same result.
+            </p>
+            <p style={{ margin: 0 }}>
+              attrition wraps agent sessions, measures real cost,
+              <br />
+              and replays successful workflows on cheaper models.
+            </p>
           </div>
-        </section>
 
-        {/* ── WHAT YOU GET: 3 cards ────────────────────────────── */}
-        <section style={{ marginBottom: "4rem" }}>
-          <div style={sectionLabel}>What you get</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.75rem" }}>
-            {[
-              {
-                title: "CAPTURE",
-                lines: [
-                  "Wraps any agent session.",
-                  "Tool calls, file edits,",
-                  "searches -- all recorded.",
-                ],
-              },
-              {
-                title: "MEASURE",
-                lines: [
-                  "Real cost per run.",
-                  "Latency, token count,",
-                  "provider spend tracked.",
-                ],
-              },
-              {
-                title: "REPLAY",
-                lines: [
-                  "Replay successful runs",
-                  "on cheaper models.",
-                  "Judge verifies quality.",
-                ],
-              },
-            ].map((card) => (
-              <div key={card.title} style={{
-                borderRadius: "0.5rem",
+          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+            <a
+              href="#example"
+              style={{
+                ...mono,
+                fontSize: "0.8125rem",
+                color: TEXT,
+                textDecoration: "none",
+                padding: "0.5rem 1.25rem",
+                borderRadius: "0.375rem",
                 border: `1px solid ${BORDER}`,
                 background: CARD,
-                padding: "1.25rem",
+              }}
+            >
+              See a real example
+            </a>
+            <a
+              href="#get-started"
+              style={{
+                ...mono,
+                fontSize: "0.8125rem",
+                color: "#0a0a0b",
+                textDecoration: "none",
+                padding: "0.5rem 1.25rem",
+                borderRadius: "0.375rem",
+                background: ACCENT,
+                fontWeight: 600,
+              }}
+            >
+              Get started
+            </a>
+          </div>
+        </section>
+
+        {/* ---- S2: BEFORE / AFTER EXAMPLE -------------------------- */}
+        <section id="example" style={{ marginBottom: "4rem" }}>
+          <div style={sectionLabel}>A real comparison</div>
+          <div style={{
+            borderRadius: "0.5rem",
+            border: `1px solid ${BORDER}`,
+            background: CARD,
+            padding: "1.5rem 1.5rem",
+            ...mono,
+            fontSize: "0.8125rem",
+            lineHeight: 1.8,
+          }}>
+            <div style={{ color: MUTED, marginBottom: "0.25rem" }}>Your session</div>
+            <div style={{ color: TEXT, fontWeight: 500 }}>
+              "Refactor API client to async/await"
+            </div>
+            <div style={{ color: MUTED, marginBottom: "0.75rem" }}>
+              claude-opus-4-6 &middot; 47 tool calls &middot; 8m 12s
+            </div>
+            <div style={{ fontSize: "1.25rem", color: TEXT, fontWeight: 700, marginBottom: "1.25rem" }}>
+              Cost: $1.84
+            </div>
+
+            <div style={{
+              borderTop: `1px solid ${BORDER}`,
+              paddingTop: "1rem",
+            }}>
+              <div style={{ color: ACCENT, fontWeight: 600, marginBottom: "0.25rem" }}>
+                With attrition:
+              </div>
+              <div style={{ color: MUTED }}>
+                Same workflow replayed on claude-sonnet-4-6
+              </div>
+              <div style={{
+                display: "flex",
+                gap: "1.5rem",
+                marginTop: "0.5rem",
+                flexWrap: "wrap",
               }}>
-                <div style={{
-                  ...mono,
-                  fontSize: "0.75rem",
-                  fontWeight: 700,
-                  color: ACCENT,
-                  letterSpacing: "0.1em",
-                  marginBottom: "0.75rem",
-                }}>
-                  {card.title}
-                </div>
-                {card.lines.map((line, i) => (
-                  <div key={i} style={{ fontSize: "0.8125rem", color: MUTED, lineHeight: 1.6 }}>
-                    {line}
-                  </div>
-                ))}
+                <span style={{ color: GREEN, fontWeight: 600 }}>Cost: $0.27</span>
+                <span style={{ color: GREEN }}>Judge: CORRECT</span>
+                <span style={{ color: TEXT, fontWeight: 600 }}>Savings: 85%</span>
               </div>
-            ))}
+            </div>
+          </div>
+          <div style={{ ...mono, fontSize: "0.75rem", color: MUTED, marginTop: "0.625rem" }}>
+            Real comparison from an actual refactoring session.
           </div>
         </section>
 
-        {/* ── INTEGRATION PATHS ────────────────────────────────── */}
+        {/* ---- S3: THREE THINGS IT DOES ---------------------------- */}
         <section style={{ marginBottom: "4rem" }}>
-          <div style={sectionLabel}>Integration paths</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            {([
-              ["Claude Code plugin", `$ curl -sL attrition.sh/install | bash\n# Installs 10 hooks: SessionStart, PreToolUse, PostToolUse, Stop, etc.\n# Every session is automatically captured.`],
-              ["Python SDK", `from attrition import track\ntrack()  # auto-patches OpenAI, Anthropic, LangChain, CrewAI`],
-              ["REST API (any backend)", `POST https://attrition.sh/api/retention/push-packet\n{\n  "type": "delta.pipeline_run",\n  "subject": "Company analysis: Anthropic",\n  "summary": "Confidence: 95, Sources: 6, Duration: 12s"\n}`],
-              ["MCP tools (agent runtimes)", `{\n  "mcpServers": {\n    "attrition": {\n      "command": "npx",\n      "args": ["-y", "attrition@latest"]\n    }\n  }\n}`],
-            ] as const).map(([title, code]) => (
-              <div key={title}>
-                <div style={{ fontSize: "0.9375rem", fontWeight: 600, color: TEXT, marginBottom: "0.5rem" }}>{title}</div>
-                <pre style={codeBlock}>{code}</pre>
+          <div style={sectionLabel}>Three things it does</div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+            {/* Capture */}
+            <div>
+              <div style={{
+                ...mono,
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                color: ACCENT,
+                letterSpacing: "0.1em",
+                marginBottom: "0.5rem",
+              }}>
+                CAPTURE
               </div>
-            ))}
+              <p style={{ fontSize: "0.9375rem", color: TEXT, margin: "0 0 0.75rem", lineHeight: 1.6 }}>
+                Record what happened in your agent session.
+              </p>
+              <pre style={codeBlock}>{`from attrition import track
+track()  # auto-patches OpenAI, Anthropic, LangChain`}</pre>
+            </div>
+
+            {/* Measure */}
+            <div>
+              <div style={{
+                ...mono,
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                color: ACCENT,
+                letterSpacing: "0.1em",
+                marginBottom: "0.5rem",
+              }}>
+                MEASURE
+              </div>
+              <p style={{ fontSize: "0.9375rem", color: TEXT, margin: "0 0 0.75rem", lineHeight: 1.6 }}>
+                Know exactly what it cost.
+              </p>
+              <pre style={codeBlock}>{`$ bp status
+Last session: 47 tool calls  $1.84  8m 12s`}</pre>
+            </div>
+
+            {/* Replay */}
+            <div>
+              <div style={{
+                ...mono,
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                color: ACCENT,
+                letterSpacing: "0.1em",
+                marginBottom: "0.5rem",
+              }}>
+                REPLAY
+              </div>
+              <p style={{ fontSize: "0.9375rem", color: TEXT, margin: "0 0 0.75rem", lineHeight: 1.6 }}>
+                Run it again cheaper.
+              </p>
+              <pre style={codeBlock}>{`$ bp replay <id> --model sonnet
+Replay: $0.27  Judge: CORRECT  Savings: 85%`}</pre>
+            </div>
           </div>
         </section>
 
-        {/* ── LIVE DATA ────────────────────────────────────────── */}
+        {/* ---- S4: LIVE CAPTURED RUNS ------------------------------ */}
         <section style={{ marginBottom: "4rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.25rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
             <div style={{ ...sectionLabel, marginBottom: 0 }}>Live captured runs</div>
             {live && (
               <span style={{
@@ -222,6 +279,14 @@ $ attrition replay <id> --model sonnet
               </span>
             )}
           </div>
+          <p style={{
+            fontSize: "0.8125rem",
+            color: MUTED,
+            lineHeight: 1.6,
+            margin: "0 0 1rem",
+          }}>
+            Real workflow runs captured from NodeBench, a research product that uses attrition.
+          </p>
 
           {packets.length > 0 ? (
             <div style={{
@@ -285,55 +350,43 @@ $ attrition replay <id> --model sonnet
               Start the server to see live data
             </div>
           )}
-          <div style={{ ...mono, fontSize: "0.75rem", color: MUTED, marginTop: "0.5rem" }}>
-            Real data from NodeBench pipeline integration
-          </div>
         </section>
 
-        {/* ── API REFERENCE ────────────────────────────────────── */}
-        <section style={{ marginBottom: "4rem" }}>
-          <div style={sectionLabel}>API reference</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-            <div>
-              <div style={{
-                ...mono,
-                fontSize: "0.75rem",
-                fontWeight: 700,
-                color: TEXT,
-                marginBottom: "0.75rem",
-                letterSpacing: "0.05em",
-              }}>
-                ENDPOINTS
-              </div>
-              <pre style={{ ...codeBlock, fontSize: "0.75rem" }}>{`POST /api/retention/register      Connect your product
-POST /api/retention/push-packet   Push a workflow run
-POST /api/retention/sync          Sync QA findings
-GET  /api/retention/status        Connection health
-GET  /api/retention/packets       List captured runs
-POST /api/retention/webhook       Receive events`}</pre>
-            </div>
-            <div>
-              <div style={{
-                ...mono,
-                fontSize: "0.75rem",
-                fontWeight: 700,
-                color: TEXT,
-                marginBottom: "0.75rem",
-                letterSpacing: "0.05em",
-              }}>
-                MCP TOOLS (6)
-              </div>
-              <pre style={{ ...codeBlock, fontSize: "0.75rem" }}>{`bp.check          Scan any URL
-bp.capture        Save a session as workflow
-bp.distill        Compress for cheaper replay
-bp.judge.start    Start judging a replay
-bp.judge.event    Report what happened
-bp.judge.verdict  Get the verdict`}</pre>
-            </div>
-          </div>
+        {/* ---- S5: GET STARTED ------------------------------------- */}
+        <section id="get-started" style={{ marginBottom: "4rem" }}>
+          <div style={sectionLabel}>Get started</div>
+          <pre style={{ ...codeBlock, marginBottom: "1.25rem" }}>
+{`$ curl -sL attrition.sh/install | bash`}
+          </pre>
+          <p style={{
+            ...mono,
+            fontSize: "0.8125rem",
+            color: MUTED,
+            lineHeight: 1.8,
+            margin: "0 0 1.5rem",
+          }}>
+            Works with: Claude Code &middot; Cursor &middot; Codex &middot; OpenAI &middot; LangChain
+          </p>
+
+          <p style={{
+            fontSize: "0.875rem",
+            color: TEXT,
+            margin: "0 0 0.75rem",
+            fontWeight: 500,
+          }}>
+            Or integrate via API:
+          </p>
+          <pre style={codeBlock}>
+{`POST /api/retention/push-packet
+{
+  "type": "delta.pipeline_run",
+  "subject": "Refactor API client",
+  "summary": "47 tool calls, $1.84, 8m 12s"
+}`}
+          </pre>
         </section>
 
-        {/* ── GITHUB + LINKS ──────────────────────────────────── */}
+        {/* ---- FOOTER ---------------------------------------------- */}
         <section style={{ marginBottom: "4rem", textAlign: "center" }}>
           <a
             href="https://github.com/HomenShum/attrition"
@@ -353,10 +406,10 @@ bp.judge.verdict  Get the verdict`}</pre>
             ...mono,
             fontSize: "0.75rem",
             color: MUTED,
-            marginTop: "0.375rem",
+            marginTop: "0.5rem",
             marginBottom: "1rem",
           }}>
-            12 Rust crates &middot; 87 tests &middot; MIT license
+            MIT license
           </div>
           <div style={{
             ...mono,
