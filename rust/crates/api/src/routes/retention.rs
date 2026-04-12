@@ -15,6 +15,8 @@ use axum::{
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
+use std::io::{BufRead, Write};
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use crate::state::AppState;
@@ -24,6 +26,117 @@ use crate::state::AppState;
 const MAX_EVENTS: usize = 500;
 const MAX_PACKETS: usize = 1000;
 const MAX_FINDINGS_PER_SYNC: usize = 200;
+
+// ── File-backed persistence ─────────────────────────────────────────────────
+
+/// JSONL + JSON file-backed store for retention data.
+/// All I/O is best-effort — never panics on missing/corrupt files.
+pub struct RetentionStore {
+    data_dir: PathBuf,
+}
+
+impl RetentionStore {
+    pub fn new() -> Self {
+        let data_dir = std::env::var("ATTRITION_DATA_DIR")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| {
+                let home = std::env::var("HOME")
+                    .or_else(|_| std::env::var("USERPROFILE"))
+                    .unwrap_or_else(|_| ".".to_string());
+                PathBuf::from(home).join(".attrition")
+            });
+        std::fs::create_dir_all(&data_dir).ok();
+        Self { data_dir }
+    }
+
+    // ── Events (JSONL: one JSON object per line) ────────────────────────────
+
+    pub fn save_event(&self, event: &crate::state::RetentionEvent) {
+        let path = self.data_dir.join("retention_events.jsonl");
+        let Ok(mut file) = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&path)
+        else {
+            return;
+        };
+        if let Ok(line) = serde_json::to_string(event) {
+            let _ = writeln!(file, "{}", line);
+        }
+    }
+
+    pub fn load_events(&self) -> Vec<crate::state::RetentionEvent> {
+        let path = self.data_dir.join("retention_events.jsonl");
+        let Ok(file) = std::fs::File::open(&path) else {
+            return Vec::new();
+        };
+        let reader = std::io::BufReader::new(file);
+        let all: Vec<crate::state::RetentionEvent> = reader
+            .lines()
+            .filter_map(|line| line.ok())
+            .filter_map(|line| serde_json::from_str(&line).ok())
+            .collect();
+        // Return only the last MAX_EVENTS entries
+        if all.len() > MAX_EVENTS {
+            all[all.len() - MAX_EVENTS..].to_vec()
+        } else {
+            all
+        }
+    }
+
+    // ── Packets (JSONL: one JSON object per line) ───────────────────────────
+
+    pub fn save_packet(&self, packet: &crate::state::RetentionPacket) {
+        let path = self.data_dir.join("retention_packets.jsonl");
+        let Ok(mut file) = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&path)
+        else {
+            return;
+        };
+        if let Ok(line) = serde_json::to_string(packet) {
+            let _ = writeln!(file, "{}", line);
+        }
+    }
+
+    pub fn load_packets(&self) -> Vec<crate::state::RetentionPacket> {
+        let path = self.data_dir.join("retention_packets.jsonl");
+        let Ok(file) = std::fs::File::open(&path) else {
+            return Vec::new();
+        };
+        let reader = std::io::BufReader::new(file);
+        let all: Vec<crate::state::RetentionPacket> = reader
+            .lines()
+            .filter_map(|line| line.ok())
+            .filter_map(|line| serde_json::from_str(&line).ok())
+            .collect();
+        // Return only the last MAX_PACKETS entries
+        if all.len() > MAX_PACKETS {
+            all[all.len() - MAX_PACKETS..].to_vec()
+        } else {
+            all
+        }
+    }
+
+    // ── Connection (single JSON file, overwritten each save) ────────────────
+
+    pub fn save_connection(&self, conn: &crate::state::RetentionConnection) {
+        let path = self.data_dir.join("retention_connection.json");
+        let Ok(json) = serde_json::to_string_pretty(conn) else {
+            return;
+        };
+        let _ = std::fs::write(&path, json);
+    }
+
+    pub fn load_connection(&self) -> Option<crate::state::RetentionConnection> {
+        let path = self.data_dir.join("retention_connection.json");
+        let Ok(data) = std::fs::read_to_string(&path) else {
+            return None;
+        };
+        serde_json::from_str(&data).ok()
+    }
+}
 
 // ── Request types ────────────────────────────────────────────────────────────
 
@@ -177,8 +290,7 @@ async fn register(
 
     // Store connection
     {
-        let mut conn = state.retention_connection.lock().await;
-        *conn = Some(crate::state::RetentionConnection {
+        let new_conn = crate::state::RetentionConnection {
             team_code: req.team_code.clone(),
             peer_id: peer_id.clone(),
             connected_at: now.clone(),
@@ -187,20 +299,25 @@ async fn register(
             tokens_saved: None,
             member_count: req.member_count,
             version: req.version,
-        });
+        };
+        state.retention_store.save_connection(&new_conn);
+        let mut conn = state.retention_connection.lock().await;
+        *conn = Some(new_conn);
     }
 
     // Log event (BOUND: evict oldest if at capacity)
     {
-        let mut events = state.retention_events.lock().await;
-        events.push(crate::state::RetentionEvent {
+        let event = crate::state::RetentionEvent {
             event: "registered".to_string(),
             data: serde_json::json!({
                 "teamCode": req.team_code,
                 "peerId": peer_id,
             }),
             timestamp: now,
-        });
+        };
+        state.retention_store.save_event(&event);
+        let mut events = state.retention_events.lock().await;
+        events.push(event);
         if events.len() > MAX_EVENTS {
             let drain_count = events.len() - MAX_EVENTS;
             events.drain(..drain_count);
@@ -283,13 +400,13 @@ async fn sync(
             if let Some(members) = req.team_members {
                 c.member_count = Some(members);
             }
+            state.retention_store.save_connection(c);
         }
     }
 
     // Log event (BOUND)
     {
-        let mut events = state.retention_events.lock().await;
-        events.push(crate::state::RetentionEvent {
+        let event = crate::state::RetentionEvent {
             event: "sync".to_string(),
             data: serde_json::json!({
                 "findingCount": findings_count,
@@ -298,7 +415,10 @@ async fn sync(
                 "workflowsStored": workflows_stored,
             }),
             timestamp: now,
-        });
+        };
+        state.retention_store.save_event(&event);
+        let mut events = state.retention_events.lock().await;
+        events.push(event);
         if events.len() > MAX_EVENTS {
             let drain_count = events.len() - MAX_EVENTS;
             events.drain(..drain_count);
@@ -376,6 +496,7 @@ async fn webhook(
                 let mut conn = state.retention_connection.lock().await;
                 if let Some(ref mut c) = *conn {
                     c.qa_score = Some(score.min(255) as u8);
+                    state.retention_store.save_connection(c);
                 }
             }
         }
@@ -408,12 +529,14 @@ async fn webhook(
 
     // Log event (BOUND)
     {
-        let mut events = state.retention_events.lock().await;
-        events.push(crate::state::RetentionEvent {
+        let event = crate::state::RetentionEvent {
             event: req.event.clone(),
             data: data.clone(),
             timestamp: now,
-        });
+        };
+        state.retention_store.save_event(&event);
+        let mut events = state.retention_events.lock().await;
+        events.push(event);
         if events.len() > MAX_EVENTS {
             let drain_count = events.len() - MAX_EVENTS;
             events.drain(..drain_count);
@@ -452,14 +575,16 @@ async fn push_packet(
 
     // Store packet (BOUND: evict oldest if at capacity)
     {
-        let mut packets = state.retention_packets.lock().await;
-        packets.push(crate::state::RetentionPacket {
+        let packet = crate::state::RetentionPacket {
             packet_type: packet_type.clone(),
             subject: subject.clone(),
             summary: summary.clone(),
             data: data.clone(),
             timestamp: now.clone(),
-        });
+        };
+        state.retention_store.save_packet(&packet);
+        let mut packets = state.retention_packets.lock().await;
+        packets.push(packet);
         if packets.len() > MAX_PACKETS {
             let drain_count = packets.len() - MAX_PACKETS;
             packets.drain(..drain_count);
@@ -468,15 +593,17 @@ async fn push_packet(
 
     // Log event (BOUND)
     {
-        let mut events = state.retention_events.lock().await;
-        events.push(crate::state::RetentionEvent {
+        let event = crate::state::RetentionEvent {
             event: "packet_ingested".to_string(),
             data: serde_json::json!({
                 "type": packet_type,
                 "subject": subject,
             }),
             timestamp: now,
-        });
+        };
+        state.retention_store.save_event(&event);
+        let mut events = state.retention_events.lock().await;
+        events.push(event);
         if events.len() > MAX_EVENTS {
             let drain_count = events.len() - MAX_EVENTS;
             events.drain(..drain_count);
@@ -488,6 +615,7 @@ async fn push_packet(
         let mut conn = state.retention_connection.lock().await;
         if let Some(ref mut c) = *conn {
             c.last_sync = Some(chrono::Utc::now().to_rfc3339());
+            state.retention_store.save_connection(c);
         }
     }
 

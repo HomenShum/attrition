@@ -1,14 +1,17 @@
 use attrition_core::AppConfig;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
 use tokio::sync::Mutex;
 
 use crate::routes::judge::HookSession;
+use crate::routes::retention::RetentionStore;
 
 // ── Retention Bridge types ───────────────────────────────────────────────────
 
 /// Active NodeBench team connection state.
+#[derive(Clone, Serialize, Deserialize)]
 pub struct RetentionConnection {
     pub team_code: String,
     pub peer_id: String,
@@ -21,6 +24,7 @@ pub struct RetentionConnection {
 }
 
 /// A single event in the retention event log.
+#[derive(Clone, Serialize, Deserialize)]
 pub struct RetentionEvent {
     pub event: String,
     pub data: serde_json::Value,
@@ -28,6 +32,7 @@ pub struct RetentionEvent {
 }
 
 /// An ingested delta packet from NodeBench.
+#[derive(Clone, Serialize, Deserialize)]
 pub struct RetentionPacket {
     pub packet_type: String,
     pub subject: String,
@@ -57,6 +62,8 @@ pub struct AppState {
     pub retention_events: Mutex<Vec<RetentionEvent>>,
     /// Bounded packet store for ingested delta packets (max 1000 entries).
     pub retention_packets: Mutex<Vec<RetentionPacket>>,
+    /// File-backed persistence for retention data (survives restarts).
+    pub retention_store: RetentionStore,
 }
 
 impl AppState {
@@ -82,6 +89,21 @@ impl AppState {
             tracing::info!("Auth disabled: BP_ADMIN_KEY not set — open access mode");
         }
 
+        // Load persisted retention data from disk (best-effort)
+        let retention_store = RetentionStore::new();
+        let loaded_connection = retention_store.load_connection();
+        let loaded_events = retention_store.load_events();
+        let loaded_packets = retention_store.load_packets();
+
+        if loaded_connection.is_some() || !loaded_events.is_empty() || !loaded_packets.is_empty() {
+            tracing::info!(
+                "Retention store: loaded {} events, {} packets, connection={}",
+                loaded_events.len(),
+                loaded_packets.len(),
+                if loaded_connection.is_some() { "yes" } else { "no" },
+            );
+        }
+
         Self {
             config,
             request_count: AtomicU64::new(0),
@@ -91,9 +113,10 @@ impl AppState {
             judge_engine: Mutex::new(attrition_judge::engine::JudgeEngine::new()),
             admin_key,
             api_keys,
-            retention_connection: Mutex::new(None),
-            retention_events: Mutex::new(Vec::new()),
-            retention_packets: Mutex::new(Vec::new()),
+            retention_connection: Mutex::new(loaded_connection),
+            retention_events: Mutex::new(loaded_events),
+            retention_packets: Mutex::new(loaded_packets),
+            retention_store,
         }
     }
 
@@ -125,10 +148,13 @@ impl AppState {
         self.start_time.elapsed().as_secs()
     }
 
-    /// Resolve the workflow database path (~/.attrition/workflows.db).
-    /// Shared with the MCP server so both see the same data.
+    /// Resolve the workflow database path.
+    /// Priority: ATTRITION_DATA_DIR env (Cloud Run GCS mount) > ~/.attrition/
     fn workflow_db_path() -> PathBuf {
-        let base = if let Some(proj_dirs) =
+        let base = if let Ok(data_dir) = std::env::var("ATTRITION_DATA_DIR") {
+            // Cloud Run with GCS volume mount at /data
+            PathBuf::from(data_dir)
+        } else if let Some(proj_dirs) =
             directories::ProjectDirs::from("", "", "attrition")
         {
             proj_dirs.data_dir().to_path_buf()
@@ -139,6 +165,7 @@ impl AppState {
             PathBuf::from(home).join(".attrition")
         };
         std::fs::create_dir_all(&base).ok();
+        tracing::info!("Workflow DB path: {}", base.join("workflows.db").display());
         base.join("workflows.db")
     }
 }
