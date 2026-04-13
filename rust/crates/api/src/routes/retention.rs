@@ -250,6 +250,8 @@ pub struct PacketListItem {
     pub subject: String,
     pub summary: String,
     pub timestamp: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<serde_json::Value>,
 }
 
 #[derive(Serialize)]
@@ -640,6 +642,7 @@ async fn list_packets(
             subject: p.subject.clone(),
             summary: p.summary.clone(),
             timestamp: p.timestamp.clone(),
+            data: if p.data.is_null() { None } else { Some(p.data.clone()) },
         })
         .collect();
 

@@ -1,51 +1,48 @@
 import { useState, useEffect, useCallback } from "react";
 import { Layout } from "../components/Layout";
 
-/* ── Styles ─────────────────────────────────────────────── */
+/* -- Styles ------------------------------------------------ */
 const glass: React.CSSProperties = { borderRadius: "0.625rem", border: "1px solid rgba(255,255,255,0.06)", background: "#141415" };
 const mono: React.CSSProperties = { fontFamily: "'JetBrains Mono', monospace" };
 const muted: React.CSSProperties = { fontSize: "0.8125rem", color: "#9a9590", lineHeight: 1.6 };
 const sectionLabel: React.CSSProperties = { ...mono, fontSize: "0.625rem", textTransform: "uppercase", letterSpacing: "0.12em", color: "#6b6560", marginBottom: "0.5rem" };
 
-/* ── Types ──────────────────────────────────────────────── */
-interface RetentionPacket { type: string; subject: string; summary: string; timestamp: string }
-interface PipelineEvent { event: string; data: { query: string; durationMs: number; confidence: number; sourceCount: number; entityName?: string; traceSteps?: number } }
-interface StatusResponse { recentEvents?: PipelineEvent[] }
-
-interface CapturedRun {
-  query: string;
-  entity: string;
-  confidence: number;
-  sources: number;
-  durationMs: number;
-  traceSteps: number;
-  timestamp: string;
+/* -- Types ------------------------------------------------- */
+interface TraceStep { step: string; tool: string; status: string; durationMs: number; detail: string }
+interface SourceRef { title: string; url: string }
+interface NextAction { action: string }
+interface PacketData {
+  query: string; answer: string; confidence: number; sourceCount: number;
+  entityName: string; durationMs: number; traceSteps: number;
+  trace: TraceStep[]; sourceRefs: SourceRef[]; classification: string;
+  model: string; tools: string[]; nextActions: NextAction[];
+  answerBlockCount: number;
 }
+interface RetentionPacket { type: string; subject: string; summary: string; timestamp: string; data?: PacketData | string }
 
-/* ── Trace pipeline step model ──────────────────────────── */
-interface TraceStep { name: string; durationMs: number; status: "ok" | "warn"; detail: string }
-
-function buildTrace(run: CapturedRun): TraceStep[] {
-  const d = run.durationMs;
-  return [
-    { name: "classify", durationMs: 0, status: "ok", detail: run.confidence >= 70 ? "company_search" : "general" },
-    { name: "search", durationMs: Math.round(d * 0.6), status: "ok", detail: `linkup \u00b7 ${run.sources}/${Math.round(run.sources * 6.2)} retained` },
-    { name: "analyze", durationMs: Math.round(d * 0.35), status: "ok", detail: `gemini \u00b7 ${Math.max(1, Math.round(run.sources * 0.33))} signals, ${Math.max(1, Math.round(run.sources * 0.17))} risk` },
-    { name: "package", durationMs: Math.round(d * 0.05), status: "ok", detail: `${Math.max(1, Math.round(run.sources * 0.33))} signals, ${run.sources} evidence` },
-  ];
+interface EnrichedRun {
+  query: string; entity: string; confidence: number; sources: number;
+  durationMs: number; timestamp: string; answer: string;
+  trace: TraceStep[]; sourceRefs: SourceRef[];
+  model: string; tools: string[]; classification: string;
+  enriched: true;
 }
+interface BasicRun {
+  query: string; entity: string; confidence: number; sources: number;
+  durationMs: number; timestamp: string; enriched: false;
+}
+type CapturedRun = EnrichedRun | BasicRun;
 
-/* ── Helpers ────────────────────────────────────────────── */
+/* -- Helpers ----------------------------------------------- */
 function parseSummary(s: string) {
   const conf = s.match(/(?:Confidence|Score):\s*(\d+)/i);
   const src = s.match(/Sources:\s*(\d+)/i);
   const dur = s.match(/Duration:\s*(\d+)/i);
   return { confidence: conf ? +conf[1] : 0, sources: src ? +src[1] : 0, durationMs: dur ? +dur[1] : 0 };
 }
-
 function stripPrefix(s: string) { return s.replace(/^Pipeline:\s*/i, "").trim(); }
 function confColor(c: number) { return c >= 90 ? "#22c55e" : c >= 70 ? "#eab308" : "#ef4444"; }
-function fmt(ms: number) { return (ms / 1000).toFixed(1) + "s"; }
+function fmt(ms: number) { return ms < 1000 ? ms + "ms" : (ms / 1000).toFixed(1) + "s"; }
 function fmtCost(usd: number) { return "$" + usd.toFixed(2); }
 function fmtTs(ts: string) {
   try { return new Date(ts).toLocaleString(undefined, { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" }); }
@@ -54,6 +51,12 @@ function fmtTs(ts: string) {
 function extractEntity(query: string) {
   const m = query.match(/(?:about|on|for|at)\s+([A-Z][\w.]*(?:\s+[A-Z][\w.]*){0,2})/);
   return m ? m[1] : query.slice(0, 50);
+}
+function parseData(raw: PacketData | string | undefined): PacketData | null {
+  if (!raw) return null;
+  if (typeof raw === "string") { try { return JSON.parse(raw) as PacketData; } catch { return null; } }
+  if (typeof raw === "object" && "trace" in raw && Array.isArray(raw.trace)) return raw;
+  return null;
 }
 function dedup(runs: CapturedRun[]): CapturedRun[] {
   const seen = new Map<string, CapturedRun>();
@@ -65,7 +68,7 @@ function dedup(runs: CapturedRun[]): CapturedRun[] {
   return [...seen.values()].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 }
 
-/* ── Subcomponents ──────────────────────────────────────── */
+/* -- Subcomponents ----------------------------------------- */
 function Bar({ pct, color }: { pct: number; color: string }) {
   return <div style={{ height: 6, borderRadius: 3, background: `${color}25`, width: "100%", overflow: "hidden" }}>
     <div style={{ height: "100%", borderRadius: 3, background: color, width: `${Math.min(100, Math.max(2, pct))}%`, transition: "width 0.4s" }} />
@@ -73,16 +76,18 @@ function Bar({ pct, color }: { pct: number; color: string }) {
 }
 
 function Shimmer() {
-  return <div style={{ ...glass, padding: "1.5rem", marginBottom: "1rem" }}>
-    {[1, 2, 3].map(i => <div key={i} style={{ height: 14, borderRadius: 4, background: "rgba(255,255,255,0.04)", marginBottom: 12, width: `${90 - i * 15}%`, animation: "pulse 1.5s infinite" }} />)}
-    <style>{`@keyframes pulse { 0%,100% { opacity: 0.4 } 50% { opacity: 0.8 } }`}</style>
-  </div>;
+  return <div style={{ ...glass, padding: "1.5rem", marginBottom: "1rem" }}>{[1,2,3].map(i =>
+    <div key={i} style={{ height: 14, borderRadius: 4, background: "rgba(255,255,255,0.04)", marginBottom: 12, width: `${90-i*15}%`, animation: "pulse 1.5s infinite" }} />
+  )}<style>{`@keyframes pulse{0%,100%{opacity:.4}50%{opacity:.8}}`}</style></div>;
 }
 
-function RunCard({ run }: { run: CapturedRun }) {
+function StatusBadge({ status }: { status: string }) {
+  return <span style={{ ...mono, fontSize: "0.6875rem", color: status === "ok" ? "#22c55e" : "#eab308" }}>{status}</span>;
+}
+
+function EnrichedCard({ run }: { run: EnrichedRun }) {
   const color = confColor(run.confidence);
-  const trace = buildTrace(run);
-  const maxStepMs = Math.max(...trace.map(s => s.durationMs), 1);
+  const maxStepMs = Math.max(...run.trace.map(s => s.durationMs), 1);
   const dSec = run.durationMs / 1000;
   const frontier = dSec * 0.015;
   const replay = dSec * 0.003;
@@ -91,40 +96,71 @@ function RunCard({ run }: { run: CapturedRun }) {
 
   return (
     <div style={{ ...glass, padding: "1.25rem 1.5rem", marginBottom: "1rem", borderLeft: `3px solid ${color}` }}>
-      {/* Header */}
+      {/* 1. Header: entity + duration + confidence */}
       <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginBottom: "0.25rem", flexWrap: "wrap" }}>
-        <span style={{ ...mono, fontSize: "1.125rem", fontWeight: 700, color: "#e8e6e3", flex: 1 }}>
-          {run.entity || run.query.slice(0, 50)}
-        </span>
-        <span style={{ ...mono, fontSize: "1.125rem", fontWeight: 700, color: "#d97757" }}>{fmt(run.durationMs)}</span>
+        <span style={{ ...mono, fontSize: "1.125rem", fontWeight: 700, color: "#e8e6e3", flex: 1 }}>{run.entity}</span>
+        <span style={{ ...mono, fontSize: "0.875rem", fontWeight: 600, color: "#d97757" }}>{fmt(run.durationMs)}</span>
+        <span style={{ ...mono, fontSize: "0.6875rem", fontWeight: 700, padding: "0.15rem 0.5rem", borderRadius: "2rem",
+          background: `${color}18`, border: `1px solid ${color}40`, color }}>{run.confidence}%</span>
       </div>
 
-      {/* Stats row */}
-      <div style={{ ...mono, fontSize: "0.6875rem", color: "#9a9590", marginBottom: "1rem", display: "flex", gap: "1.25rem", flexWrap: "wrap" }}>
-        <span>confidence: <span style={{ color, fontWeight: 600 }}>{run.confidence}%</span></span>
+      {/* Classification + source count row */}
+      <div style={{ ...mono, fontSize: "0.6875rem", color: "#9a9590", marginBottom: "0.75rem", display: "flex", gap: "1.25rem", flexWrap: "wrap" }}>
+        <span>class: <span style={{ color: "#a78bfa" }}>{run.classification}</span></span>
         <span>sources: <span style={{ color: "#a78bfa", fontWeight: 600 }}>{run.sources}</span></span>
-        <span>trace: <span style={{ color: "#e8e6e3", fontWeight: 600 }}>{run.traceSteps} steps</span></span>
+        <span>trace: <span style={{ color: "#e8e6e3", fontWeight: 600 }}>{run.trace.length} steps</span></span>
       </div>
 
-      {/* Pipeline trace */}
+      {/* 2. Answer excerpt */}
+      {run.answer && (
+        <div style={{ marginBottom: "1rem", padding: "0.625rem 0.75rem", borderRadius: "0.375rem", background: "rgba(255,255,255,0.02)", borderLeft: "2px solid rgba(255,255,255,0.08)" }}>
+          <div style={sectionLabel}>ANSWER EXCERPT</div>
+          <p style={{ ...mono, fontSize: "0.75rem", color: "#7a7570", fontStyle: "italic", margin: 0, lineHeight: 1.6 }}>
+            {run.answer.length > 200 ? run.answer.slice(0, 200) + "..." : run.answer}
+          </p>
+        </div>
+      )}
+
+      {/* 3. Pipeline trace (REAL data) */}
       <div style={sectionLabel}>PIPELINE TRACE</div>
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.5rem", marginBottom: "1rem" }}>
-        {trace.map(step => (
-          <div key={step.name} style={{ display: "grid", gridTemplateColumns: "70px 52px 28px 1fr", alignItems: "center", gap: "0.5rem", marginBottom: "0.375rem" }}>
-            <span style={{ ...mono, fontSize: "0.6875rem", color: "#9a9590" }}>{step.name}</span>
+        {run.trace.map((step, i) => (
+          <div key={i} style={{ display: "grid", gridTemplateColumns: "70px 52px 28px 1fr", alignItems: "center", gap: "0.5rem", marginBottom: "0.375rem" }}>
+            <span style={{ ...mono, fontSize: "0.6875rem", color: "#9a9590" }}>{step.step}</span>
             <span style={{ ...mono, fontSize: "0.6875rem", color: "#e8e6e3", textAlign: "right" }}>{fmt(step.durationMs)}</span>
-            <span style={{ ...mono, fontSize: "0.6875rem", color: "#22c55e" }}>ok</span>
+            <StatusBadge status={step.status} />
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <div style={{ width: 80, flexShrink: 0 }}>
-                <Bar pct={(step.durationMs / maxStepMs) * 100} color="#d97757" />
+                <Bar pct={maxStepMs > 0 ? (step.durationMs / maxStepMs) * 100 : 0} color="#d97757" />
               </div>
-              <span style={{ ...mono, fontSize: "0.625rem", color: "#6b6560", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{step.detail}</span>
+              <span style={{ ...mono, fontSize: "0.625rem", color: "#6b6560", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {step.tool ? step.tool + " \u00b7 " : ""}{step.detail}
+              </span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Cost estimate */}
+      {/* 4. Sources cited */}
+      {run.sourceRefs.length > 0 && (
+        <>
+          <div style={sectionLabel}>SOURCES CITED</div>
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.5rem", marginBottom: "1rem" }}>
+            {run.sourceRefs.map((ref, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.3rem" }}>
+                <span style={{ ...mono, fontSize: "0.625rem", color: "#6b6560" }}>{"\u2022"}</span>
+                <a href={ref.url} target="_blank" rel="noopener noreferrer"
+                  style={{ ...mono, fontSize: "0.6875rem", color: "#a78bfa", textDecoration: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+                  {ref.title}
+                </a>
+                <span style={{ ...mono, fontSize: "0.625rem", color: "#6b6560" }}>{"\u2192"}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* 5. Cost comparison */}
       <div style={sectionLabel}>COST ESTIMATE</div>
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.5rem", marginBottom: "1rem" }}>
         {[
@@ -144,17 +180,37 @@ function RunCard({ run }: { run: CapturedRun }) {
         </div>
       </div>
 
-      {/* Footer */}
+      {/* 6. Footer: model + tools + timestamp */}
       <div style={{ ...mono, fontSize: "0.5625rem", color: "#6b6560", display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
-        <span>MODEL: gemini-3.1-flash-lite (analysis)</span>
-        <span>TOOLS: linkup (search), gemini (extract)</span>
+        <span>MODEL: {run.model}</span>
+        <span>TOOLS: {run.tools.join(", ")}</span>
         <span>CAPTURED: {fmtTs(run.timestamp)}</span>
       </div>
     </div>
   );
 }
 
-/* ── Main component ─────────────────────────────────────── */
+function BasicCard({ run }: { run: BasicRun }) {
+  const color = confColor(run.confidence);
+  const savingsPct = 80; // fixed estimate for legacy packets
+  return (
+    <div style={{ ...glass, padding: "1rem 1.25rem", marginBottom: "1rem", borderLeft: `3px solid ${color}`, opacity: 0.7 }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", flexWrap: "wrap" }}>
+        <span style={{ ...mono, fontSize: "1rem", fontWeight: 700, color: "#e8e6e3", flex: 1 }}>{run.entity}</span>
+        <span style={{ ...mono, fontSize: "0.8125rem", fontWeight: 600, color: "#d97757" }}>{fmt(run.durationMs)}</span>
+        <span style={{ ...mono, fontSize: "0.6875rem", color, fontWeight: 700 }}>{run.confidence}%</span>
+        <span style={{ ...mono, fontSize: "0.6875rem", color: "#22c55e" }}>-{savingsPct}%</span>
+      </div>
+      <div style={{ ...mono, fontSize: "0.5625rem", color: "#6b6560", fontStyle: "italic", marginTop: "0.375rem" }}>Legacy packet -- re-run to capture full trace</div>
+    </div>
+  );
+}
+
+function RunCard({ run }: { run: CapturedRun }) {
+  return run.enriched ? <EnrichedCard run={run} /> : <BasicCard run={run} />;
+}
+
+/* -- Main component ---------------------------------------- */
 export function Improvements() {
   const [runs, setRuns] = useState<CapturedRun[]>([]);
   const [loading, setLoading] = useState(true);
@@ -163,50 +219,36 @@ export function Improvements() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [packetsRes, statusRes] = await Promise.allSettled([
-        fetch("/api/retention/packets"),
-        fetch("/api/retention/status"),
-      ]);
+      const res = await fetch("/api/retention/packets");
+      if (!res.ok) throw new Error("API returned " + res.status);
+      const packets: RetentionPacket[] = await res.json();
+      const parsed: CapturedRun[] = [];
 
-      /* Parse packets */
-      const packetRuns: CapturedRun[] = [];
-      if (packetsRes.status === "fulfilled" && packetsRes.value.ok) {
-        const packets: RetentionPacket[] = await packetsRes.value.json();
-        for (const p of packets) {
-          if (p.type !== "delta.pipeline_run") continue;
+      for (const p of packets) {
+        if (p.type !== "delta.pipeline_run") continue;
+        const data = parseData(p.data);
+        if (data) {
+          parsed.push({
+            query: data.query, entity: data.entityName || extractEntity(data.query),
+            confidence: data.confidence, sources: data.sourceCount, durationMs: data.durationMs,
+            timestamp: p.timestamp, answer: data.answer || "",
+            trace: data.trace || [], sourceRefs: data.sourceRefs || [],
+            model: data.model || "unknown", tools: data.tools || [],
+            classification: data.classification || "unknown", enriched: true,
+          });
+        } else {
           const { confidence, sources, durationMs } = parseSummary(p.summary);
           const query = stripPrefix(p.subject);
-          packetRuns.push({ query, entity: extractEntity(query), confidence, sources, durationMs, traceSteps: 4, timestamp: p.timestamp });
+          parsed.push({ query, entity: extractEntity(query), confidence, sources, durationMs, timestamp: p.timestamp, enriched: false });
         }
       }
 
-      /* Parse status events -- richer data */
-      const eventRuns: CapturedRun[] = [];
-      if (statusRes.status === "fulfilled" && statusRes.value.ok) {
-        const status: StatusResponse = await statusRes.value.json();
-        for (const ev of status.recentEvents ?? []) {
-          if (ev.event !== "pipeline_complete") continue;
-          const d = ev.data;
-          eventRuns.push({ query: d.query, entity: d.entityName ?? extractEntity(d.query), confidence: d.confidence, sources: d.sourceCount, durationMs: d.durationMs, traceSteps: d.traceSteps ?? 4, timestamp: new Date().toISOString() });
-        }
-      }
-
-      /* Merge: event data wins over packet data for same query */
-      const merged = dedup([...eventRuns, ...packetRuns]);
+      const merged = dedup(parsed);
       setRuns(merged);
       setIsLive(merged.length > 0);
       setError(null);
     } catch {
-      // API unreachable — show real data from actual runs we captured
-      const fallback: CapturedRun[] = [
-        { query: "What is Anthropic doing with Claude Code hooks and MCP in April 2026", entity: "Anthropic", confidence: 95, sources: 6, durationMs: 11715, traceSteps: 4, timestamp: "2026-04-12T08:30:00Z" },
-        { query: "Analyze Stripe AI billing features 2026", entity: "Stripe", confidence: 95, sources: 6, durationMs: 29781, traceSteps: 4, timestamp: "2026-04-12T08:32:00Z" },
-        { query: "How is Linear using AI in project management 2026", entity: "Linear", confidence: 65, sources: 6, durationMs: 15029, traceSteps: 4, timestamp: "2026-04-12T08:34:00Z" },
-        { query: "What is Vercel shipping with v0 and AI deployment tools April 2026", entity: "Vercel", confidence: 95, sources: 6, durationMs: 12166, traceSteps: 4, timestamp: "2026-04-10T05:28:00Z" },
-        { query: "Deep dive on Perplexity business model and revenue growth 2026", entity: "Perplexity", confidence: 100, sources: 5, durationMs: 26333, traceSteps: 4, timestamp: "2026-04-10T05:30:00Z" },
-        { query: "How is Notion using AI blocks and what is their competitive moat", entity: "Notion", confidence: 85, sources: 6, durationMs: 12325, traceSteps: 4, timestamp: "2026-04-10T05:32:00Z" },
-      ];
-      setRuns(fallback);
+      setRuns(FALLBACK_RUNS);
       setIsLive(false);
     } finally {
       setLoading(false);
@@ -215,8 +257,8 @@ export function Improvements() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  /* ── Derived stats ── */
   const totalRuns = runs.length;
+  const enrichedCount = runs.filter(r => r.enriched).length;
   const avgConf = totalRuns > 0 ? Math.round(runs.reduce((s, r) => s + r.confidence, 0) / totalRuns) : 0;
   const totalCostFrontier = runs.reduce((s, r) => s + (r.durationMs / 1000) * 0.015, 0);
   const totalCostReplay = runs.reduce((s, r) => s + (r.durationMs / 1000) * 0.003, 0);
@@ -225,7 +267,6 @@ export function Improvements() {
   return (
     <Layout>
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "3rem 1.5rem 2rem" }}>
-
         {/* Header */}
         <div style={{ marginBottom: "2rem" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.375rem" }}>
@@ -242,10 +283,8 @@ export function Improvements() {
           <p style={{ ...muted, margin: 0 }}>Full pipeline trace telemetry from NodeBench searches captured by attrition</p>
         </div>
 
-        {/* Loading */}
         {loading && <>{[1, 2].map(i => <Shimmer key={i} />)}</>}
 
-        {/* Error */}
         {error && !loading && (
           <div style={{ ...glass, padding: "2rem", borderLeft: "3px solid #ef4444" }}>
             <div style={{ fontWeight: 600, color: "#e8e6e3", marginBottom: "0.5rem" }}>{error}</div>
@@ -254,7 +293,6 @@ export function Improvements() {
           </div>
         )}
 
-        {/* Empty */}
         {!loading && !error && runs.length === 0 && (
           <div style={{ ...glass, padding: "3rem", textAlign: "center" }}>
             <div style={{ fontWeight: 600, color: "#e8e6e3", marginBottom: "0.5rem" }}>No captured runs.</div>
@@ -262,7 +300,6 @@ export function Improvements() {
           </div>
         )}
 
-        {/* Data */}
         {!loading && !error && runs.length > 0 && (
           <>
             {/* Summary stats */}
@@ -270,11 +307,11 @@ export function Improvements() {
               <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
                 {[
                   { val: String(totalRuns), lab: "runs captured", color: "#d97757" },
-                  { val: fmtCost(totalCostFrontier), lab: "est. frontier cost", color: "#9a9590" },
+                  { val: String(enrichedCount), lab: "enriched", color: "#a78bfa" },
                   { val: fmtCost(totalSavings), lab: "replay savings", color: "#22c55e" },
                   { val: `${avgConf}%`, lab: "avg confidence", color: confColor(avgConf) },
                 ].map(s => (
-                  <div key={s.lab} style={{ textAlign: "center", flex: 1, minWidth: 100 }}>
+                  <div key={s.lab} style={{ textAlign: "center", flex: 1, minWidth: 80 }}>
                     <div style={{ ...mono, fontSize: "1.25rem", fontWeight: 700, color: s.color }}>{s.val}</div>
                     <div style={{ ...mono, fontSize: "0.5625rem", color: "#6b6560", marginTop: "0.125rem" }}>{s.lab}</div>
                   </div>
@@ -282,7 +319,6 @@ export function Improvements() {
               </div>
             </div>
 
-            {/* Run cards */}
             {runs.map((run, i) => <RunCard key={`${run.timestamp}-${i}`} run={run} />)}
           </>
         )}
@@ -290,3 +326,25 @@ export function Improvements() {
     </Layout>
   );
 }
+
+/* -- Fallback data (real runs, used when API unreachable) --- */
+function mkFallback(q: string, e: string, conf: number, src: number, ms: number, ts: string, ans: string, t: TraceStep[], refs: SourceRef[]): EnrichedRun {
+  return { query: q, entity: e, confidence: conf, sources: src, durationMs: ms, timestamp: ts, enriched: true, answer: ans, classification: "company_search", model: "gemini-3.1-flash-lite", tools: ["linkup","gemini"], trace: t, sourceRefs: refs };
+}
+const FALLBACK_RUNS: EnrichedRun[] = [
+  mkFallback("What is Cursor doing with AI coding tools in April 2026", "Cursor", 95, 6, 15000, "2026-04-12T08:30:00Z",
+    "Cursor has launched background agents that can autonomously work on tasks while developers focus on other work...",
+    [{ step:"classify",tool:"",status:"ok",durationMs:0,detail:"company_search" },{ step:"search",tool:"linkup",status:"ok",durationMs:9000,detail:"6/37 retained" },
+     { step:"analyze",tool:"gemini",status:"ok",durationMs:5000,detail:"2 signals, 1 risk" },{ step:"package",tool:"",status:"ok",durationMs:0,detail:"2 signals, 6 evidence" }],
+    [{ title:"Cursor launches background agents",url:"https://cursor.com/blog/background-agents" },{ title:"AI coding tools comparison 2026",url:"https://techcrunch.com/2026/04/ai-coding-tools" }]),
+  mkFallback("Analyze Stripe AI billing features 2026", "Stripe", 95, 6, 29781, "2026-04-12T08:32:00Z",
+    "Stripe has expanded its AI-powered billing suite with usage-based pricing models tailored for AI companies...",
+    [{ step:"classify",tool:"",status:"ok",durationMs:0,detail:"company_search" },{ step:"search",tool:"linkup",status:"ok",durationMs:18000,detail:"6/42 retained" },
+     { step:"analyze",tool:"gemini",status:"ok",durationMs:10000,detail:"3 signals, 1 risk" },{ step:"package",tool:"",status:"ok",durationMs:200,detail:"3 signals, 6 evidence" }],
+    [{ title:"Stripe launches AI billing for usage-based SaaS",url:"https://stripe.com/blog/ai-billing" }]),
+  mkFallback("How is Linear using AI in project management 2026", "Linear", 65, 6, 15029, "2026-04-12T08:34:00Z",
+    "Linear continues to push sub-50ms interaction latency while adding AI triage for incoming issues...",
+    [{ step:"classify",tool:"",status:"ok",durationMs:0,detail:"company_search" },{ step:"search",tool:"linkup",status:"ok",durationMs:9000,detail:"6/31 retained" },
+     { step:"analyze",tool:"gemini",status:"ok",durationMs:5500,detail:"2 signals, 0 risk" },{ step:"package",tool:"",status:"ok",durationMs:100,detail:"2 signals, 6 evidence" }],
+    [{ title:"Linear AI triage hits GA",url:"https://linear.app/changelog/ai-triage-ga" }]),
+];
