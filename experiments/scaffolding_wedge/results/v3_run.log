@@ -1,1 +1,107 @@
 Fetching MMLU-Pro from HuggingFace (multiple offsets to cover all domains)...
+Cached 1900 questions covering 3 categories: ['business', 'law', 'psychology']
+Loaded 15 questions across 3 domains
+
+70 [business]: Typical advertising regulatory bodies suggest, for example t... (correct=I)
+  weak_alone    :  I OK   560 tok  $0.000166  2176ms
+  mid_alone     :  I OK   196 tok  $0.000015  723ms
+  strong_alone  :  I OK   195 tok  $0.000251  3915ms
+  weak_skill    :  E XX  1245 tok  $0.000365  4012ms
+
+71 [business]: Managers are entrusted to run the company in the best intere... (correct=F)
+  weak_alone    :  F OK  1008 tok  $0.000341  2648ms
+  mid_alone     :  F OK   211 tok  $0.000017  734ms
+  strong_alone  :  F OK   211 tok  $0.000275  6122ms
+  weak_skill    :  F OK  1071 tok  $0.000290  2197ms
+
+72 [business]: There are two main issues associated with _____ sizing. ____... (correct=J)
+  weak_alone    :  A XX  1028 tok  $0.000343  2681ms
+  mid_alone     :  J OK   231 tok  $0.000018  2524ms
+  strong_alone  :  J OK   231 tok  $0.000300  4972ms
+  weak_skill    :  J OK  1280 tok  $0.000368  3460ms
+
+73 [business]: _______ locate morality beyond the sphere of rationality in ... (correct=C)
+  weak_alone    :  H XX   595 tok  $0.000198  1853ms
+  mid_alone     :  C OK   136 tok  $0.000011  928ms
+  strong_alone  :  C OK   136 tok  $0.000181  5580ms
+  weak_skill    :  H XX  1118 tok  $0.000332  2449ms
+
+74 [business]:  Some of key differences between Islamic finance and convent... (correct=G)
+  weak_alone    :  G OK   944 tok  $0.000307  2895ms
+  mid_alone     :  G OK   237 tok  $0.000018  659ms
+  strong_alone  :  G OK   237 tok  $0.000307  3957ms
+  weak_skill    :  G OK  1082 tok  $0.000287  2168ms
+
+866 [law]: A woman was standing in the aisle of a subway car and put he... (correct=D)
+  weak_alone    :  J XX  1129 tok  $0.000353  3395ms
+  mid_alone     :  D OK   332 tok  $0.000026  908ms
+  strong_alone  :  G XX   332 tok  $0.000426  8007ms
+  weak_skill    :  G XX  1358 tok  $0.000376  3027ms
+
+867 [law]: A federal grand jury was investigating a corporation whose t... (correct=B)
+  weak_alone    :  B OK   599 tok  $0.000153  1616ms
+  mid_alone     :  B OK   292 tok  $0.000023  676ms
+  strong_alone  :  B OK   292 tok  $0.000376  3765ms
+  weak_skill    :  H XX  1318 tok  $0.000372  3059ms
+
+868 [law]: A state has recently enacted a statute requiring all prospec... (correct=F)
+  weak_alone    :  D XX  1362 tok  $0.000376  3008ms
+  mid_alone     :  A XX   565 tok  $0.000043  600ms
+  strong_alone  :  F OK   565 tok  $0.000718  8281ms
+  weak_skill    :  F OK  1591 tok  $0.000399  3377ms
+
+869 [law]: The defendant was walking down the street when he saw a woma... (correct=A)
+  weak_alone    :  H XX  1318 tok  $0.000372  2854ms
+  mid_alone     :  A OK   521 tok  $0.000040  763ms
+  strong_alone  :  A OK   521 tok  $0.000663  5791ms
+  weak_skill    :  A OK  1547 tok  $0.000395  3252ms
+
+870 [law]: Two college students were members of the same fraternity. Du... (correct=E)
+  weak_alone    :  H XX  1169 tok  $0.000357  2811ms
+  mid_alone     :  E OK   372 tok  $0.000029  691ms
+  strong_alone  :  E OK   372 tok  $0.000476  7058ms
+  weak_skill    :  F XX  1398 tok  $0.000380  3194ms
+
+1986 [psychology]: A person who received a Level 4 rating on the Rancho Los Ami... (correct=E)
+  weak_alone    :  E OK   859 tok  $0.000266  1978ms
+  mid_alone     :  E OK   262 tok  $0.000020  787ms
+  strong_alone  :  E OK   262 tok  $0.000339  6076ms
+  weak_skill    :  E OK  1147 tok  $0.000302  2399ms
+
+1987 [psychology]: You receive a phone call from Hermann H., age 28, who says h... (correct=I)
+  weak_alone    :  F XX  1086 tok  $0.000349  2737ms
+  mid_alone     :  C XX   289 tok  $0.000022  698ms
+  strong_alone  :  I OK   289 tok  $0.000373  9235ms
+  weak_skill    :  I OK  1237 tok  $0.000330  3040ms
+
+1988 [psychology]: During the second stage of Kohlberg’s preconventional level ... (correct=E)
+  weak_alone    :  E OK   911 tok  $0.000310  2816ms
+  mid_alone     :  E OK   186 tok  $0.000015  1530ms
+  strong_alone  :  E OK   186 tok  $0.000244  5620ms
+  weak_skill    :  E OK  1105 tok  $0.000308  2968ms
+
+1989 [psychology]: The mental retardation associated with PKU is preventable wi... (correct=F)
+  weak_alone    :  D XX   919 tok  $0.000332  3604ms
+  mid_alone     :  D XX   122 tok  $0.000010  900ms
+  strong_alone  :  D XX   122 tok  $0.000164  7711ms
+  weak_skill    :  D XX   996 tok  $0.000284  2355ms
+
+1990 [psychology]: Which of the following item difficulty (p) levels maximizes ... (correct=B)
+  weak_alone    :  B OK   524 tok  $0.000166  1359ms
+  mid_alone     :  B OK   148 tok  $0.000012  912ms
+  strong_alone  :  B OK   148 tok  $0.000196  2577ms
+  weak_skill    :  B OK  1010 tok  $0.000281  2451ms
+
+Saved 15 results to D:\VSCode Projects\cafecorner_nodebench\nodebench-qa\experiments\scaffolding_wedge\results\v3_results.json
+
+============================================================================
+AGGREGATE
+============================================================================
+  weak_alone    : accuracy= 46.7%  total_cost=$0.004388  avg_tok=934
+  mid_alone     : accuracy= 80.0%  total_cost=$0.000318  avg_tok=273
+  strong_alone  : accuracy= 86.7%  total_cost=$0.005289  avg_tok=273
+  weak_skill    : accuracy= 60.0%  total_cost=$0.005067  avg_tok=1234
+
+  Quality retention (weak+skill/strong): 69.2%
+  Cost fraction (weak+skill/strong):      95.8%
+  Accuracy uplift (weak+skill vs weak):   +13.3pp

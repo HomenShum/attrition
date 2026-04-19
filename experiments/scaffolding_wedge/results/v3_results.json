@@ -1,0 +1,957 @@
+[
+  {
+    "question_id": 70,
+    "category": "business",
+    "question": "Typical advertising regulatory bodies suggest, for example that adverts must not: encourage _________, cause unnecessary ________ or _____, and must not cause _______ offence.",
+    "options": [
+      "Safe practices, Fear, Jealousy, Trivial",
+      "Unsafe practices, Distress, Joy, Trivial",
+      "Safe practices, Wants, Jealousy, Trivial",
+      "Safe practices, Distress, Fear, Trivial",
+      "Unsafe practices, Wants, Jealousy, Serious",
+      "Safe practices, Distress, Jealousy, Serious",
+      "Safe practices, Wants, Fear, Serious",
+      "Unsafe practices, Wants, Fear, Trivial",
+      "Unsafe practices, Distress, Fear, Serious"
+    ],
+    "correct_answer": "I",
+    "configs": {
+      "weak_alone": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "The question asks about typical advertising regulations. Let's break down the blanks:\n\n*   **\"encourage _________\"**: Advertisements should not encourage harmful or negative behaviors. Therefore, they should not encourage \"unsafe practices.\" Options A, C, D, F, and G are incorrect because they suggest \"safe practices.\"\n\n*   **\"cause unnecessary ________ or _____\"**: Advertisements should avoid causing undue negative emotions. \"Distress\" and \"fear\" are common examples of negative emotions that regulations aim to prevent. \"Wants\" and \"joy\" are not typically regulated in this negative sense. \"Jealousy\" is a possibility, but \"distress\" and \"fear\" are more universally recognized as things to avoid causing unnecessarily.\n\n*   **\"and must not cause _______ offence.\"**: The level of offense that is prohibited is usually significant, not minor. \"Trivial\" offense is unlikely to be the focus of regulation. \"Serious\" offense is the more appropriate term.\n\nLet's re-evaluate the options based on these deductions:\n\nWe are looking for an option that starts with \"Unsafe practices\" and has \"distress\" and \"fear\" as potential causes, and \"serious\" offense.\n\n*   Option B: Unsafe practices, Distress, Joy, Trivial (Joy is not a negative emotion to avoid causing)\n*   Option E: Unsafe practices, Wants, Jealousy, Serious (Wants is not a negative emotion to avoid causing)\n*   Option I: Unsafe practices, Distress, Fear, Serious (This fits all the criteria: encouraging unsafe practices, causing unnecessary distress or fear, and causing serious offense.)\n\nTherefore, option I seems to be the most fitting.\n\nThe final answer is $\\boxed{I}$.",
+        "input_tokens": 193,
+        "output_tokens": 367,
+        "total_tokens": 560,
+        "cost_usd": 0.0001661,
+        "latency_ms": 2176,
+        "predicted": "I",
+        "correct": true
+      },
+      "mid_alone": {
+        "model": "gemini-3.1-flash-lite-preview",
+        "text": "Answer: I",
+        "input_tokens": 193,
+        "output_tokens": 3,
+        "total_tokens": 196,
+        "cost_usd": 1.5375e-05,
+        "latency_ms": 723,
+        "predicted": "I",
+        "correct": true
+      },
+      "strong_alone": {
+        "model": "gemini-3.1-pro-preview",
+        "text": "Answer: I",
+        "input_tokens": 193,
+        "output_tokens": 2,
+        "total_tokens": 195,
+        "cost_usd": 0.00025125,
+        "latency_ms": 3915,
+        "predicted": "I",
+        "correct": true
+      },
+      "weak_skill": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "1.  **IDENTIFY DOMAIN:** This question relates to business ethics and regulation, specifically concerning advertising. While not strictly accounting, finance, economics, or management in the core sense, it falls under the broader umbrella of business practices and consumer protection, which is relevant to business studies.\n\n2.  **IDENTIFY CONCEPT:** The question is testing knowledge of common principles or guidelines in advertising regulation. It's about what types of content are typically prohibited or discouraged in advertisements.\n\n3.  **APPLY THE RULE:** This is not a rule-based application like accounting or finance. Instead, it requires general knowledge of common advertising standards. Common regulatory concerns include:\n    *   **Safety:** Advertisements should not encourage *unsafe practices*. Encouraging safe practices is generally the goal, not a prohibition.\n    *   **Consumer Welfare/Psychology:** Advertisements should not cause undue *distress* or *fear*. Causing \"joy\" or \"wants\" is often the purpose of advertising, not something to be regulated against unless it leads to other harms.\n    *   **Offense:** Advertisements should not cause *offense*, particularly serious offense. \"Trivial\" offense is usually not the primary regulatory concern.\n\n    Let's evaluate the blanks based on these common regulatory concerns:\n    *   Blank 1: Should not encourage **unsafe practices**.\n    *   Blank 2: Should not cause unnecessary **distress** or **fear**. \"Wants\" is a normal part of advertising. \"Jealousy\" is a possible outcome but \"distress\" or \"fear\" are more direct regulatory concerns.\n    *   Blank 3: Should not cause unnecessary **distress** or **fear**.\n    *   Blank 4: Must not cause **serious** offense. \"Trivial\" offense is usually not the focus of regulation.\n\n4.  **ELIMINATE:**\n    *   Options A, C, D, F, G suggest \"Safe practices\" for the first blank, which is incorrect. Advertisements are regulated *against* encouraging unsafe practices.\n    *   Options A, C, G, F suggest \"Trivial\" for the last blank, which is incorrect. Regulations typically aim to prevent *serious* offense.\n    *   Let's look at the remaining options (B, E, H, I) and the middle blanks:\n        *   B: Unsafe practices, Distress, Joy, Trivial (Joy is unlikely to be a regulated negative outcome, Trivial is wrong) - Eliminate B.\n        *   E: Unsafe practices, Wants, Jealousy, Serious (Wants is not typically regulated negatively, but Distress/Fear are more common) - Keep E for now, but note potential weakness.\n        *   H: Unsafe practices, Wants, Fear, Trivial (Trivial is wrong) - Eliminate H.\n        *   I: Unsafe practices, Distress, Fear, Serious (This aligns well with the common regulatory concerns identified).\n\n    Re-evaluating E vs. I:\n    *   \"Encourage unsafe practices\" - Both E and I have this.\n    *   \"Cause unnecessary ________ or _____\" - I has \"Distress\" or \"Fear\". E has \"Wants\" or \"Jealousy\". \"Distress\" and \"Fear\" are much more common regulatory targets than \"Wants\" (which is the point of advertising) or \"Jealousy\" (though possible, less direct than distress/fear).\n    *   \"Must not cause _______ offence\" - I has \"Serious\". E has \"Serious\". Both are consistent here.\n\n    Comparing E and I, option I (\"Unsafe practices, Distress, Fear, Serious\") fits the typical regulatory framework for advertising much better than option E (\"Unsafe",
+        "input_tokens": 445,
+        "output_tokens": 800,
+        "total_tokens": 1245,
+        "cost_usd": 0.0003645,
+        "latency_ms": 4012,
+        "predicted": "E",
+        "correct": false
+      }
+    }
+  },
+  {
+    "question_id": 71,
+    "category": "business",
+    "question": "Managers are entrusted to run the company in the best interest of ________. Specifically, they have a duty to act for the benefit of the company, as well as a duty of ________ and of _______.",
+    "options": [
+      "Shareholders, Diligence, Self-interest",
+      "Shareholders, Self-interest, Care and Skill",
+      "Stakeholders, Care and skill, Self-interest",
+      "Stakeholders, Diligence, Care and Skill",
+      "Customers, Care and Skill, Diligence",
+      "Shareholders, Care and Skill, Diligence",
+      "Shareholders, Self-interest, Diligence",
+      "Employees, Care and Skill, Diligence",
+      "Stakeholders, Self-interest, Diligence",
+      "Stakeholder, Care and Skill, Diligence"
+    ],
+    "correct_answer": "F",
+    "configs": {
+      "weak_alone": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "The question asks about the primary beneficiaries of managerial duties and the specific duties themselves.\n\nFirst, consider who managers are entrusted to run the company in the best interest of. While stakeholders (including employees, customers, and the community) are important, the traditional and legally recognized primary beneficiaries of managerial duties in corporate governance are shareholders. This is often referred to as shareholder primacy.\n\nNext, consider the specific duties. Managers have a duty to act for the benefit of the company. This implies a duty of care and a duty of loyalty. The duty of care involves acting with the diligence, care, and skill that a reasonably prudent person would exercise in similar circumstances. The duty of loyalty requires managers to act in the best interests of the company and its shareholders, not their own self-interest.\n\nLet's evaluate the options based on these principles:\n\n*   **Shareholders** is the most appropriate beneficiary.\n*   The duties are typically described as **Care and Skill** (or diligence) and **Loyalty** (which contrasts with self-interest).\n\nLooking at the options:\n\n*   A. Shareholders, Diligence, Self-interest (Self-interest is a duty *not* to breach, not a positive duty).\n*   B. Shareholders, Self-interest, Care and Skill (Self-interest is not a duty; it's the opposite of the duty of loyalty).\n*   C. Stakeholders, Care and skill, Self-interest (Stakeholders is less precise than shareholders in this context, and self-interest is not a duty).\n*   D. Stakeholders, Care and skill, Self-interest (Same issues as C).\n*   E. Customers, Care and Skill, Diligence (Customers are not the primary beneficiaries).\n*   F. Shareholders, Care and Skill, Diligence (This fits well. Care and Skill and Diligence are often used interchangeably or as components of the duty of care. The question asks for two distinct duties, and Care and Skill and Diligence are closely related aspects of the duty of care. However, the phrasing \"duty of ________ and of _______\" suggests two distinct duties. Let's re-examine the common legal understanding of these duties).\n\nIn corporate law, the primary duties of directors and officers are often categorized as the duty of care and the duty of loyalty. The duty of care encompasses acting with the diligence, care, and skill that a reasonably prudent person would exercise. The duty of loyalty requires them to act in the best interests of the corporation and its shareholders, avoiding conflicts of interest and self-dealing.\n\nLet's re-evaluate the options with \"duty of care\" and \"duty of loyalty\" in mind, and how the options represent these.\n\n*   \"Care and Skill\" is a good representation of the duty of care.\n*   \"Diligence\" is also a component of the duty of care.\n*   \"Self-interest\" is the opposite of the duty of loyalty.\n\nLet's look for options that combine \"Shareholders\" with \"Care and Skill\" and something that represents loyalty or its absence.\n\n*   F. Shareholders, Care and Skill, Diligence. This option lists two aspects of the duty of care. The question asks for \"a duty to act for the benefit of the company, as well as a duty of ________ and of _______.\" This implies two distinct duties.\n\nLet's reconsider the phrasing. \"Specifically, they have a duty to act for the benefit of the company, as well as a duty of ________ and of _______.\" The first part, \"duty to act for the benefit of the company,\" is a broad statement that encompasses both care and loyalty. The subsequent \"duty of X and of Y\" are likely referring to the specific components.\n\nLet's look at the options again, focusing on the common legal understanding of managerial duties",
+        "input_tokens": 208,
+        "output_tokens": 800,
+        "total_tokens": 1008,
+        "cost_usd": 0.00034080000000000004,
+        "latency_ms": 2648,
+        "predicted": "F",
+        "correct": true
+      },
+      "mid_alone": {
+        "model": "gemini-3.1-flash-lite-preview",
+        "text": "Answer: F",
+        "input_tokens": 208,
+        "output_tokens": 3,
+        "total_tokens": 211,
+        "cost_usd": 1.65e-05,
+        "latency_ms": 734,
+        "predicted": "F",
+        "correct": true
+      },
+      "strong_alone": {
+        "model": "gemini-3.1-pro-preview",
+        "text": "Answer: F",
+        "input_tokens": 208,
+        "output_tokens": 3,
+        "total_tokens": 211,
+        "cost_usd": 0.00027499999999999996,
+        "latency_ms": 6122,
+        "predicted": "F",
+        "correct": true
+      },
+      "weak_skill": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "1. **IDENTIFY DOMAIN:** Management/Corporate Governance. This question deals with the responsibilities of managers within a company.\n\n2. **IDENTIFY CONCEPT:** Fiduciary duties of corporate managers. The question is asking about who managers are primarily responsible to and what specific duties they owe.\n\n3. **APPLY THE RULE:**\n   - **Primary Beneficiary:** In corporate law, managers are generally considered to have a primary duty to the *shareholders* (owners of the company). While stakeholder interests are increasingly considered, the foundational legal duty is to shareholders.\n   - **Fiduciary Duties:** Managers owe two primary fiduciary duties:\n      - **Duty of Care:** This requires managers to act with the care that a reasonably prudent person in a similar position would exercise under similar circumstances. This often encompasses acting with \"care and skill.\"\n      - **Duty of Loyalty:** This requires managers to act in the best interests of the corporation and its shareholders, and to avoid conflicts of interest. This means refraining from self-dealing and acting with \"diligence\" in pursuing the company's goals.\n\n4. **ELIMINATE:**\n   - Options C, D, I, J mention \"Stakeholders\" as the primary beneficiary. While important, the *primary* legal duty is to shareholders. Eliminate C, D, I, J.\n   - Option E mentions \"Customers.\" While customer satisfaction is important for business success, it's not the primary group to whom managers owe a fiduciary duty. Eliminate E.\n   - Option H mentions \"Employees.\" Similar to customers, employees are important stakeholders, but not the primary beneficiaries of the fiduciary duty. Eliminate H.\n\n   Now we are left with options A, B, F, G, which all identify \"Shareholders\" as the primary beneficiary. Let's examine the specific duties:\n\n   - **Option A:** \"Shareholders, Diligence, Self-interest.\" \"Self-interest\" is not a fiduciary duty; in fact, managers must *avoid* acting in their own self-interest at the expense of shareholders. Eliminate A.\n   - **Option B:** \"Shareholders, Self-interest, Care and Skill.\" Again, \"Self-interest\" is incorrect. Eliminate B.\n   - **Option G:** \"Shareholders, Self-interest, Diligence.\" Again, \"Self-interest\" is incorrect. Eliminate G.\n\n   This leaves Option F: \"Shareholders, Care and Skill, Diligence.\"\n   - \"Shareholders\" is correct as the primary beneficiary.\n   - \"Care and Skill\" aligns with the Duty of Care.\n   - \"Diligence\" aligns with the Duty of Loyalty (acting diligently in the company's best interest).\n\n5. **DOUBLE-CHECK:** The remaining option F accurately reflects the primary beneficiary (shareholders) and the core fiduciary duties (care and skill, and diligence/loyalty).\n\nAnswer: F",
+        "input_tokens": 460,
+        "output_tokens": 611,
+        "total_tokens": 1071,
+        "cost_usd": 0.0002904,
+        "latency_ms": 2197,
+        "predicted": "F",
+        "correct": true
+      }
+    }
+  },
+  {
+    "question_id": 72,
+    "category": "business",
+    "question": "There are two main issues associated with _____ sizing. _______ is a key issue as due to the information policy of the corporation it can be argued that employees have a right to know if they are being made redundant. _______ is a second issue, particularly the ________ package that employees receive when laid off.",
+    "options": [
+      "Down, Autonomy, Remuneration, Benefit",
+      "Down, Involvement, Independence, Benefit",
+      "Up, Independence, Involvement, Benefit",
+      "Down, Privacy, Autonomy, Benefit",
+      "Up, Involvement, Autonomy, Compensation",
+      "Down, Independence, Autonomy, Compensation",
+      "Up, Involvement, Remuneration, Severance",
+      "Up, Privacy, Remuneration, Severance",
+      "Up, Autonomy, Remuneration, Compensation",
+      "Down, Involvement, Remuneration, Compensation"
+    ],
+    "correct_answer": "J",
+    "configs": {
+      "weak_alone": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "The question discusses issues related to \"sizing,\" which in a corporate context often refers to workforce sizing or downsizing. The first blank likely refers to the direction of this sizing. \"Downsizing\" is a common term for reducing workforce size.\n\nThe first issue mentioned is related to employees' right to know if they are being made redundant. This relates to the employee's control over their own career and information about their employment status. \"Autonomy\" (control over one's own affairs) or \"Independence\" (freedom from external control) could fit here, but \"Autonomy\" seems more directly related to the right to know about one's own employment situation. \"Privacy\" is less likely as the issue is about being informed, not about personal information being withheld. \"Involvement\" is also less direct.\n\nThe second issue is particularly about the \"package\" employees receive when laid off. This refers to compensation and benefits. The options provide \"Benefit,\" \"Compensation,\" and \"Severance.\" \"Severance\" is a specific type of package for laid-off employees, making it a strong candidate. \"Compensation\" is a broader term that includes salary and other payments. \"Benefit\" is also part of the package.\n\nLet's analyze the options based on these deductions:\n\n*   **First blank:** Likely \"Down\" (for downsizing). This eliminates C, G, H, I.\n*   **Second blank:** Related to the right to know about redundancy. \"Autonomy\" or \"Independence\" are plausible. \"Privacy\" is less likely. \"Involvement\" is less direct.\n*   **Third blank:** Refers to the package. \"Benefit,\" \"Compensation,\" or \"Severance.\"\n\nLet's re-examine the options that start with \"Down\":\n\n*   **A. Down, Autonomy, Remuneration, Benefit:** \"Autonomy\" fits the first issue. \"Remuneration\" and \"Benefit\" are components of a package. This is a strong contender.\n*   **B. Down, Involvement, Independence, Benefit:** \"Involvement\" is less fitting for the first issue.\n*   **D. Down, Privacy, Autonomy, Benefit:** \"Privacy\" is not the best fit for the first issue.\n*   **F. Down, Independence, Autonomy, Compensation:** \"Independence\" is plausible for the first issue. \"Autonomy\" is also plausible. The third blank is \"Compensation.\"\n*   **J. Down, Involvement, Remuneration, Compensation:** \"Involvement\" is less fitting for the first issue.\n\nNow let's look at the second part of the sentence: \"_______ is a second issue, particularly the ________ package that employees receive when laid off.\"\n\nThe second issue is about the package. The options have \"Remuneration,\" \"Benefit,\" \"Compensation,\" and \"Severance.\" \"Severance\" is the most specific and appropriate term for a package given upon layoff. However, \"Severance\" only appears in options G and H, which we've already eliminated because they start with \"Up.\" This suggests that the question might be using broader terms or that \"Severance\" is not the intended word in the options provided.\n\nLet's reconsider the phrasing: \"_______ is a second issue, particularly the ________ package that employees receive when laid off.\" This implies the second issue *is* the package itself, or something related to it.\n\nLet's re-evaluate the options, focusing on the second and third blanks together.\n\n*   **A. Down, Autonomy, Remuneration, Benefit:** The second issue is \"Autonomy.\" The third is \"Remuneration\" and the fourth is \"Benefit.\" This structure is a bit confusing. It seems like the sentence is structured as: \"There are two main issues associated with _____ sizing. _______ is a",
+        "input_tokens": 228,
+        "output_tokens": 800,
+        "total_tokens": 1028,
+        "cost_usd": 0.00034280000000000004,
+        "latency_ms": 2681,
+        "predicted": "A",
+        "correct": false
+      },
+      "mid_alone": {
+        "model": "gemini-3.1-flash-lite-preview",
+        "text": "Answer: J",
+        "input_tokens": 228,
+        "output_tokens": 3,
+        "total_tokens": 231,
+        "cost_usd": 1.8e-05,
+        "latency_ms": 2524,
+        "predicted": "J",
+        "correct": true
+      },
+      "strong_alone": {
+        "model": "gemini-3.1-pro-preview",
+        "text": "Answer: J",
+        "input_tokens": 228,
+        "output_tokens": 3,
+        "total_tokens": 231,
+        "cost_usd": 0.0003,
+        "latency_ms": 4972,
+        "predicted": "J",
+        "correct": true
+      },
+      "weak_skill": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "1. **IDENTIFY DOMAIN:** This question deals with business management and human resources, specifically concerning employee layoffs.\n\n2. **IDENTIFY CONCEPT:** The question is about the considerations and issues involved in deciding the scale of employee layoffs (\"sizing\"). It highlights two specific concerns: employee rights regarding redundancy information and the compensation provided to laid-off employees.\n\n3. **APPLY THE RULE:**\n    * The first blank refers to the direction of the sizing. The context of \"redundant\" and \"laid off\" strongly suggests a reduction in workforce, meaning \"Down\" sizing. This immediately eliminates options C, G, H, and I.\n    * The second blank refers to a key issue related to employees' right to know about potential redundancy. This relates to the information flow and transparency within the company. \"Privacy\" (D) is about an individual's right to control personal information, which doesn't fit the context of being informed about company decisions affecting them. \"Autonomy\" (A, F) refers to self-governance, which is also not the primary concern here. \"Involvement\" (B, J) relates to participation in decision-making, which is closer but still not the most precise fit for the right to *know*. \"Independence\" (B) refers to freedom from external control. Let's re-evaluate the options for the second blank in light of the remaining choices.\n    * The third blank refers to the compensation package for laid-off employees. \"Remuneration\" (J) and \"Compensation\" (F) are both appropriate terms for what employees receive. \"Benefit\" (A, B) is a component of compensation but not the whole package.\n    * The fourth blank specifies the type of package. \"Benefit\" (A, B) is too narrow. \"Severance\" (G, H) is the specific term for compensation paid to employees upon termination. \"Compensation\" (F, J) is a broader term.\n\nLet's re-examine the second blank with the remaining options (A, B, D, F, J). The phrasing \"employees have a right to know if they are being made redundant\" points towards the *transparency* or *communication* of information. None of the provided options for the second blank perfectly capture this. However, let's consider the *implication* of the right to know. If employees have a right to know, it implies a certain level of openness and potentially their right to be *involved* in understanding the process or at least being informed.\n\nLet's reconsider the options for the second blank:\n*   **Autonomy:** Not directly related to the right to know.\n*   **Involvement:** Could be interpreted as being involved in the process of understanding the redundancy, or at least being involved in the communication.\n*   **Privacy:** Incorrect.\n*   **Independence:** Incorrect.\n\nNow let's look at the remaining options after eliminating C, G, H, I:\n*   A. Down, Autonomy, Remuneration, Benefit (Benefit is too narrow for the package)\n*   B. Down, Involvement, Independence, Benefit (Independence is incorrect, Benefit is too narrow)\n*   D. Down, Privacy, Autonomy, Benefit (Privacy is incorrect, Benefit is too narrow)\n*   F. Down, Independence, Autonomy, Compensation (Independence is incorrect, Autonomy is not the best fit for the second blank)\n*   J. Down, Involvement, Remuneration, Compensation (This option seems to fit best so far, assuming \"Involvement\" can be interpreted as being involved in the communication process or having a right to be informed.)\n\nLet's re-read the sentence carefully: \"_______ is a key issue as due to the information policy of the corporation it can be argued that employees",
+        "input_tokens": 480,
+        "output_tokens": 800,
+        "total_tokens": 1280,
+        "cost_usd": 0.00036800000000000005,
+        "latency_ms": 3460,
+        "predicted": "J",
+        "correct": true
+      }
+    }
+  },
+  {
+    "question_id": 73,
+    "category": "business",
+    "question": "_______ locate morality beyond the sphere of rationality in an emotional 'moral impulse' towards others.",
+    "options": [
+      "Ethical egoism",
+      "Ethics of duty",
+      "Postmodern ethics",
+      "Consequentialist ethics",
+      "Utilitarian ethics",
+      "Deontological ethics",
+      "Virtue ethics",
+      "Ethics of care",
+      "Ethics of rights",
+      "Relativist ethics"
+    ],
+    "correct_answer": "C",
+    "configs": {
+      "weak_alone": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "The question asks about locating morality in an \"emotional 'moral impulse' towards others.\" Let's analyze the options:\n\n*   **A. Ethical egoism:** Focuses on self-interest as the basis of morality. This is contrary to an impulse *towards others*.\n*   **B. Ethics of duty (Deontological ethics):** Focuses on rules, obligations, and duties, often derived from reason. While it can involve duties to others, the primary emphasis isn't on an *emotional impulse*.\n*   **C. Postmodern ethics:** Often skeptical of universal moral frameworks and can emphasize individual interpretation, but doesn't specifically pinpoint an emotional impulse as the core.\n*   **D. Consequentialist ethics:** Judges morality by the outcomes or consequences of actions. This is not about an emotional impulse.\n*   **E. Utilitarian ethics:** A type of consequentialism, focusing on maximizing overall happiness. Again, outcome-focused, not impulse-driven.\n*   **F. Deontological ethics:** (Same as B) Focuses on duty and rules, not primarily emotional impulses.\n*   **G. Virtue ethics:** Focuses on character and virtues, which can be informed by emotions, but the core is character development rather than a direct \"moral impulse.\"\n*   **H. Ethics of care:** This ethical framework emphasizes relationships, empathy, compassion, and responsiveness to the needs of others. It often highlights the importance of emotions and affective responses in moral decision-making and motivation, aligning well with the idea of an \"emotional 'moral impulse' towards others.\"\n*   **I. Ethics of rights:** Focuses on entitlements and claims individuals have. While rights can be seen as stemming from moral considerations, the emphasis is on the rights themselves, not an emotional impulse.\n*   **J. Relativist ethics:** Argues that morality is relative to culture or individuals. While it might acknowledge diverse moral motivations, it doesn't specifically identify an emotional impulse as the universal source.\n\nThe description \"emotional 'moral impulse' towards others\" most closely aligns with the core tenets of the Ethics of Care, which emphasizes empathy, compassion, and relational responsiveness as fundamental to morality.\n\nAnswer: H",
+        "input_tokens": 133,
+        "output_tokens": 462,
+        "total_tokens": 595,
+        "cost_usd": 0.00019810000000000002,
+        "latency_ms": 1853,
+        "predicted": "H",
+        "correct": false
+      },
+      "mid_alone": {
+        "model": "gemini-3.1-flash-lite-preview",
+        "text": "Answer: C",
+        "input_tokens": 133,
+        "output_tokens": 3,
+        "total_tokens": 136,
+        "cost_usd": 1.0875e-05,
+        "latency_ms": 928,
+        "predicted": "C",
+        "correct": true
+      },
+      "strong_alone": {
+        "model": "gemini-3.1-pro-preview",
+        "text": "Answer: C",
+        "input_tokens": 133,
+        "output_tokens": 3,
+        "total_tokens": 136,
+        "cost_usd": 0.00018125000000000001,
+        "latency_ms": 5580,
+        "predicted": "C",
+        "correct": true
+      },
+      "weak_skill": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "1. **IDENTIFY DOMAIN:** This question is in the domain of ethics, a philosophical field that often intersects with business and management in terms of ethical decision-making.\n\n2. **IDENTIFY CONCEPT:** The question is testing the understanding of different ethical theories and their core tenets, specifically focusing on the origin of morality. The key phrase is \"locate morality beyond the sphere of rationality in an emotional 'moral impulse' towards others.\"\n\n3. **APPLY THE RULE:** Let's analyze each option in relation to the concept:\n\n    *   **A. Ethical egoism:** Morality is based on self-interest. This is contrary to an \"emotional 'moral impulse' towards others.\"\n    *   **B. Ethics of duty (Deontological ethics):** Morality is based on adherence to rules or duties, often derived from reason or divine command. While it can involve obligations to others, the emphasis is not typically on an *emotional impulse*.\n    *   **C. Postmodern ethics:** Often questions universal moral truths and emphasizes context, power, and individual interpretation. While it might acknowledge emotional aspects, it doesn't specifically pinpoint an \"emotional 'moral impulse' towards others\" as the *source* of morality.\n    *   **D. Consequentialist ethics:** Morality is judged by the outcomes or consequences of actions. This is distinct from an internal \"moral impulse.\"\n    *   **E. Utilitarian ethics:** A type of consequentialism, focusing on maximizing overall happiness. Again, the focus is on outcomes, not an emotional impulse.\n    *   **F. Deontological ethics:** (Same as B) Morality is based on duty and rules.\n    *   **G. Virtue ethics:** Focuses on character and the cultivation of virtues. While virtues can lead to compassionate actions, the primary focus is on character development, not necessarily an immediate emotional impulse as the *source* of morality.\n    *   **H. Ethics of care:** This theory emphasizes the importance of relationships, empathy, and responsiveness to the needs of others. It often highlights the role of emotions and affective responses in moral decision-making and understanding. The idea of an \"emotional 'moral impulse' towards others\" aligns strongly with the core tenets of the ethics of care.\n    *   **I. Ethics of rights:** Morality is based on the recognition and protection of individual rights. This is a rule-based or principle-based approach, not primarily driven by emotional impulses.\n    *   **J. Relativist ethics:** Morality is relative to culture, society, or individuals. While it acknowledges diversity in moral beliefs, it doesn't specifically identify an \"emotional 'moral impulse' towards others\" as the universal source of morality.\n\n4. **ELIMINATE:**\n    *   A, D, E, I are eliminated because they focus on self-interest, consequences, or rights, not emotional impulses towards others.\n    *   B, F are eliminated because they focus on duty and rules, not primarily emotional impulses.\n    *   C and J are too broad or focus on relativity rather than a specific source of moral impulse.\n    *   G focuses on character, which is related but not the direct answer to an *emotional impulse*.\n\n5. **DOUBLE-CHECK:** The remaining option, **H. Ethics of care**, directly addresses the idea of morality stemming from emotional connections and responsiveness to others, fitting the description of an \"emotional 'moral impulse' towards others.\"\n\nAnswer: H",
+        "input_tokens": 385,
+        "output_tokens": 733,
+        "total_tokens": 1118,
+        "cost_usd": 0.00033170000000000004,
+        "latency_ms": 2449,
+        "predicted": "H",
+        "correct": false
+      }
+    }
+  },
+  {
+    "question_id": 74,
+    "category": "business",
+    "question": " Some of key differences between Islamic finance and conventional finance include - prohibition of charging and paying _______, prohibition on ______ and ______ transactions, prohibition of sinful investment and requirement for all financial products to be backed by __________.",
+    "options": [
+      "Interest, Certain, Assured, Both tangible and intangible assets",
+      "Interest, Uncertain, Assured, Both tangible and intangible assets",
+      "Interest, Uncertain, Speculative, Intangible assets",
+      "Interest, Certain, Assured, Tangible assets",
+      "Interest, Uncertain, Assured, Intangible assets",
+      "Profit, Uncertain, Speculative, Tangible assets",
+      "Interest, Uncertain, Speculative, Tangible assets",
+      "Interest, Certain, Speculative, Intangible assets",
+      "Profit, Certain, Assured, Tangible assets",
+      "Interest, Certain, Speculative, Both tangible and intangible assets"
+    ],
+    "correct_answer": "G",
+    "configs": {
+      "weak_alone": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "The question asks about key differences between Islamic finance and conventional finance. Let's break down the blanks:\n\n1.  **Prohibition of charging and paying _______**: Islamic finance strictly prohibits *riba*, which is commonly translated as interest. Conventional finance is built on interest. So, the first blank is \"Interest\". This eliminates options F and I.\n\n2.  **Prohibition on ______ and ______ transactions**: Islamic finance prohibits *gharar* (uncertainty or ambiguity) and *maysir* (gambling or speculation). Conventional finance often involves transactions with uncertainty and speculative elements. So, the second and third blanks should relate to uncertainty and speculation.\n\n    *   Looking at the remaining options, we see combinations like \"Uncertain, Assured\", \"Uncertain, Speculative\", \"Certain, Assured\", \"Certain, Speculative\".\n    *   The prohibition is on *uncertain* and *speculative* transactions. \"Assured\" transactions are generally acceptable in both systems, as long as they don't involve *riba*. \"Certain\" transactions are also generally acceptable. The key prohibitions are against excessive uncertainty and pure speculation.\n    *   Therefore, the second and third blanks should be \"Uncertain\" and \"Speculative\" (or vice-versa, depending on the order in the option).\n\n3.  **Requirement for all financial products to be backed by __________**: Islamic finance emphasizes that financial transactions should be linked to real economic activity and tangible assets. Financial products should represent ownership of or investment in real assets, not just abstract financial claims. So, the last blank should refer to tangible assets.\n\nLet's re-evaluate the options based on these deductions:\n\n*   All remaining options (A-E, G-J) start with \"Interest\", which is correct.\n*   We need \"Uncertain\" and \"Speculative\" for the second and third blanks.\n    *   Option B has \"Uncertain, Assured\" - Incorrect.\n    *   Option C has \"Uncertain, Speculative\" - This fits.\n    *   Option E has \"Uncertain, Assured\" - Incorrect.\n    *   Option G has \"Uncertain, Speculative\" - This fits.\n    *   Option H has \"Certain, Speculative\" - Incorrect (prohibition is on uncertainty, not just certainty).\n    *   Option J has \"Certain, Speculative\" - Incorrect.\n*   Now we are left with options C and G, both of which have \"Uncertain, Speculative\" for the second and third blanks.\n*   The final blank needs to be \"tangible assets\".\n    *   Option C has \"Intangible assets\" - Incorrect.\n    *   Option G has \"Tangible assets\" - This fits.\n\nTherefore, option G seems to be the most accurate. Let's confirm the wording: \"prohibition of charging and paying Interest, prohibition on Uncertain and Speculative transactions, and requirement for all financial products to be backed by Tangible assets.\" This aligns with the core principles of Islamic finance.\n\nFinal check:\n*   Interest (Riba) prohibition: Yes.\n*   Uncertainty (Gharar) prohibition: Yes.\n*   Speculative (Maysir) prohibition: Yes.\n*   Backed by tangible assets: Yes, this is a key principle for many Islamic financial products.\n\nAnswer: G",
+        "input_tokens": 234,
+        "output_tokens": 710,
+        "total_tokens": 944,
+        "cost_usd": 0.0003074,
+        "latency_ms": 2895,
+        "predicted": "G",
+        "correct": true
+      },
+      "mid_alone": {
+        "model": "gemini-3.1-flash-lite-preview",
+        "text": "Answer: G",
+        "input_tokens": 234,
+        "output_tokens": 3,
+        "total_tokens": 237,
+        "cost_usd": 1.845e-05,
+        "latency_ms": 659,
+        "predicted": "G",
+        "correct": true
+      },
+      "strong_alone": {
+        "model": "gemini-3.1-pro-preview",
+        "text": "Answer: G",
+        "input_tokens": 234,
+        "output_tokens": 3,
+        "total_tokens": 237,
+        "cost_usd": 0.0003075,
+        "latency_ms": 3957,
+        "predicted": "G",
+        "correct": true
+      },
+      "weak_skill": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "1. **IDENTIFY DOMAIN:** This question falls under finance, specifically Islamic finance, which is a specialized area.\n\n2. **IDENTIFY CONCEPT:** The question is testing knowledge of the core principles and prohibitions in Islamic finance.\n\n3. **APPLY THE RULE:**\n    *   **Prohibition of charging and paying _______:** Islamic finance strictly prohibits *riba*, which is commonly translated as interest or usury. This eliminates options F and I, which suggest \"Profit\" as the prohibited item.\n    *   **Prohibition on ______ and ______ transactions:** Islamic finance prohibits *gharar* (uncertainty or ambiguity) and *maysir* (gambling or speculation). This means transactions cannot be uncertain or speculative.\n        *   Looking at the options, we need to find a combination of \"Uncertain\" and \"Speculative\" or similar concepts.\n        *   Options A, D, and H mention \"Certain\" transactions, which is incorrect. This eliminates A, D, and H.\n        *   We are left with options B, C, E, G, and J.\n        *   Options B and E mention \"Uncertain\" and \"Assured\". \"Assured\" is the opposite of what is prohibited. This eliminates B and E.\n        *   We are left with C, G, and J.\n        *   Option C has \"Uncertain\" and \"Speculative\".\n        *   Option G has \"Uncertain\" and \"Speculative\".\n        *   Option J has \"Certain\" and \"Speculative\". \"Certain\" is incorrect, so J is eliminated.\n        *   We are now left with C and G. Both have \"Uncertain\" and \"Speculative\".\n\n    *   **Requirement for all financial products to be backed by ________:** Islamic finance emphasizes that financial transactions should be backed by real economic activity and tangible assets. Intangible assets alone are generally not sufficient.\n        *   Option C suggests \"Intangible assets\". This is incorrect.\n        *   Option G suggests \"Tangible assets\". This aligns with the principle of backing financial products with real assets.\n\n4. **ELIMINATE:** Based on the above, we have eliminated A, B, D, E, H, I, and J. We are left with C and G.\n    *   Option C: Interest, Uncertain, Speculative, Intangible assets (Incorrect backing)\n    *   Option G: Interest, Uncertain, Speculative, Tangible assets (Correct backing)\n\n5. **DOUBLE-CHECK:**\n    *   Prohibition of charging and paying interest: Correct.\n    *   Prohibition on uncertain and speculative transactions: Correct.\n    *   Requirement for all financial products to be backed by tangible assets: Correct.\n\nTherefore, option G fits all the criteria.\n\nAnswer: G",
+        "input_tokens": 486,
+        "output_tokens": 596,
+        "total_tokens": 1082,
+        "cost_usd": 0.000287,
+        "latency_ms": 2168,
+        "predicted": "G",
+        "correct": true
+      }
+    }
+  },
+  {
+    "question_id": 866,
+    "category": "law",
+    "question": "A woman was standing in the aisle of a subway car and put her purse on the seat next to her. A man approached the woman from behind and grabbed the purse off the seat. He then pushed the woman out of the way and ran out of the subway car while carrying the purse. The man was apprehended on the subway platform while in possession of the purse. In a jurisdiction that follows the common law with respect to criminal offenses, of what crime can the man properly be convicted?",
+    "options": [
+      "Fraud, because he took the purse without the woman's consent.",
+      "Larceny, because he took the purse without the woman's permission.",
+      "Burglary, because he entered the subway car with the intention of committing a theft.",
+      "Robbery, because he used force in leaving with the purse.",
+      "Robbery, because he used force to take possession of the purse.",
+      "Robbery, because he used force to remove the woman from the purse's vicinity.",
+      "Larceny, because force was not used until after he took the purse.",
+      "Assault, because he pushed the woman out of the way.",
+      "Larceny, because he made no threat to use force.",
+      "Robbery, because he physically took the purse from the woman's presence."
+    ],
+    "correct_answer": "D",
+    "configs": {
+      "weak_alone": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "The question asks for the crime the man can *properly* be convicted of, following common law principles. Let's analyze the elements of each potential crime presented in the options.\n\n*   **Fraud (A):** Fraud typically involves deception or misrepresentation to obtain property. There's no indication of deception here; it was a direct taking.\n\n*   **Larceny (B, G, I):** Larceny at common law is the wrongful taking and carrying away of the personal property of another with the intent to permanently deprive the owner of it.\n    *   Option B states \"without the woman's permission.\" This is a key element of larceny.\n    *   Option G states \"force was not used until after he took the purse.\" This distinction is crucial. If force is used *after* the taking is complete (i.e., the purse is already in the thief's possession and they are escaping), it might be larceny plus a separate offense (like assault or battery), but not necessarily robbery. However, the facts state he \"grabbed the purse off the seat\" and *then* \"pushed the woman out of the way and ran out.\" This sequence suggests the force was used to *effectuate the escape with the stolen property*, or to overcome resistance *during* the taking.\n    *   Option I states \"he made no threat to use force.\" The facts state he *pushed* the woman, which is the use of force, not just a threat.\n\n*   **Burglary (C):** Burglary at common law is the breaking and entering of the dwelling of another at night with the intent to commit a felony therein. While he entered the subway car with intent to commit theft (a felony), it's not a dwelling, and the \"breaking and entering\" element is typically interpreted more strictly than simply walking into a public space. Modern statutes often broaden burglary, but the question specifies common law.\n\n*   **Robbery (D, E, F, J):** Robbery at common law is the taking of the personal property of another from his person or presence by force or by putting him in fear.\n    *   Option D states \"he used force in leaving with the purse.\" This is a strong contender. The force used to push the woman out of the way while he was escaping with the purse is directly related to the taking and carrying away.\n    *   Option E states \"he used force to take possession of the purse.\" The facts state he \"grabbed the purse off the seat\" and *then* \"pushed the woman out of the way.\" The grabbing itself might not have involved force against the woman directly, but the pushing *while* he was taking the purse or immediately after securing it to escape *is* force used in the course of the taking. The common law definition of robbery often includes force used to overcome resistance or to escape with the stolen goods.\n    *   Option F states \"he used force to remove the woman from the purse's vicinity.\" This is a consequence of the force, but the core of robbery is the taking of property from the person or presence by force or fear.\n    *   Option J states \"he physically took the purse from the woman's presence.\" This is true, but it omits the crucial element of force or fear required for robbery.\n\nLet's re-examine the sequence:\n1.  Purse on seat.\n2.  Man grabs purse off seat.\n3.  Man pushes woman out of the way.\n4.  Man runs out with purse.\n\nThe key is whether the force used (pushing the woman) occurred *during* the taking or was essential to the taking or escape. The common law definition of robbery is the taking of property from the person or presence of another by force",
+        "input_tokens": 329,
+        "output_tokens": 800,
+        "total_tokens": 1129,
+        "cost_usd": 0.0003529,
+        "latency_ms": 3395,
+        "predicted": "J",
+        "correct": false
+      },
+      "mid_alone": {
+        "model": "gemini-3.1-flash-lite-preview",
+        "text": "Answer: D",
+        "input_tokens": 329,
+        "output_tokens": 3,
+        "total_tokens": 332,
+        "cost_usd": 2.5574999999999998e-05,
+        "latency_ms": 908,
+        "predicted": "D",
+        "correct": true
+      },
+      "strong_alone": {
+        "model": "gemini-3.1-pro-preview",
+        "text": "Answer: G",
+        "input_tokens": 329,
+        "output_tokens": 3,
+        "total_tokens": 332,
+        "cost_usd": 0.0004262499999999999,
+        "latency_ms": 8007,
+        "predicted": "G",
+        "correct": false
+      },
+      "weak_skill": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "1. IDENTIFY LEGAL DOMAIN: Criminal law.\n2. IDENTIFY DOCTRINE: The question asks for the crime the man can be convicted of, implying a need to analyze the elements of various criminal offenses. The key actions are taking a purse, using force, and fleeing. This points towards theft-related crimes and crimes involving force.\n3. APPLY ELEMENTS / STANDARDS:\n    *   **Larceny:** (1) Trespassory (2) taking and (3) carrying away (4) the personal property (5) of another (6) with the intent to permanently deprive the owner thereof.\n    *   **Burglary:** (1) Breaking and (2) entering (3) the dwelling of another (4) at night (5) with the intent to commit a felony therein. (Modern statutes often broaden this, but the common law definition is relevant here given the \"common law\" instruction).\n    *   **Robbery:** Larceny accomplished by (1) force or (2) threat of force. The force or threat must precede or accompany the taking.\n    *   **Assault:** An (1) attempted battery or (2) placing another in reasonable apprehension of an imminent battery.\n\n4. ELIMINATE OPTIONS:\n    *   A. Fraud: Requires deception, not force or trespassory taking. Incorrect.\n    *   B. Larceny: While larceny is involved, the use of force elevates it. This option ignores the force element.\n    *   C. Burglary: A subway car is not typically considered a \"dwelling of another\" under common law burglary. Even under modern statutes, the focus is on the *entry with intent*, not the subsequent actions. The primary crime here is the taking and the force used. Incorrect.\n    *   D. Robbery, because he used force in leaving with the purse. The force must be contemporaneous with or precede the taking. Force used *after* the taking is complete (i.e., during escape) might be considered part of the larceny but doesn't necessarily make the initial taking robbery if no force was used *at the time of taking*. However, the facts state he \"pushed the woman out of the way\" *while* carrying the purse and running out. This is ambiguous as to whether the push was to *gain possession* or to *escape with possession*. Let's keep evaluating.\n    *   E. Robbery, because he used force to take possession of the purse. This aligns with the definition of robbery where force is used to accomplish the taking. The facts state he \"grabbed the purse off the seat\" and then \"pushed the woman out of the way.\" The grabbing itself could be considered the taking, and the subsequent push could be seen as part of the overall act of taking possession and securing it against interference.\n    *   F. Robbery, because he used force to remove the woman from the purse's vicinity. This focuses on the effect on the woman, but the core of robbery is the taking of property by force. While the push did remove her, the primary criminal act is the taking of the purse. This is a consequence of the force used in the taking.\n    *   G. Larceny, because force was not used until after he took the purse. The facts state he \"grabbed the purse off the seat\" and *then* \"pushed the woman out of the way and ran out.\" This suggests the taking (grabbing) might have occurred before the push. If the grabbing was a trespassory taking without force, and the push was only to escape, then it might be larceny plus a separate assault. However, the phrasing \"grabbed the purse off the seat\" followed by \"pushed the woman out of the way and ran out of the subway",
+        "input_tokens": 558,
+        "output_tokens": 800,
+        "total_tokens": 1358,
+        "cost_usd": 0.00037580000000000003,
+        "latency_ms": 3027,
+        "predicted": "G",
+        "correct": false
+      }
+    }
+  },
+  {
+    "question_id": 867,
+    "category": "law",
+    "question": "A federal grand jury was investigating a corporation whose tanker ship had spilled crude oil into environmentally sensitive waters. The grand jury issued a subpoena requiring the corporation to produce all emails and internal documents regarding the corporation's knowledge of the risks of an oil spill. The corporation has objected, citing its Fifth Amendment privilege against self-incrimination. Can the subpoena be enforced?",
+    "options": [
+      "Yes, because the Fifth Amendment privilege only applies to personal testimonies.",
+      "Yes, because a corporation has no Fifth Amendment privilege.",
+      "No, because the corporation was not granted use-and-derivative-use immunity.",
+      "No, because the corporation was not granted transactional immunity.",
+      "Yes, because the Fifth Amendment privilege does not apply to the compelled production of documents.",
+      "No, because the documents are protected under attorney-client privilege.",
+      "No, because a corporation has the same Fifth Amendment rights as an individual.",
+      "No, because the subpoena violates the corporation's Fourth Amendment rights.",
+      "Yes, because the documents are not self-incriminating.",
+      "Yes, because the subpoena is part of a lawful investigation."
+    ],
+    "correct_answer": "B",
+    "configs": {
+      "weak_alone": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "The Fifth Amendment privilege against self-incrimination is a personal right and does not extend to corporations. While individuals can invoke the privilege to refuse to produce documents that might incriminate them, corporations cannot. This is often referred to as the \"collective entity doctrine.\" Therefore, the corporation's objection based on the Fifth Amendment is invalid.\n\nOption A is incorrect because while the Fifth Amendment is personal, the core issue here is that it doesn't apply to corporations at all.\nOption B correctly states that a corporation has no Fifth Amendment privilege.\nOption C and D are incorrect because immunity is a separate concept from the privilege itself, and the privilege doesn't apply to the corporation in the first place.\nOption E is partially correct in that the Fifth Amendment doesn't apply to compelled production of documents for corporations, but the reason is more fundamental than just the nature of documents.\nOption F is a potential defense, but the question specifically asks about the Fifth Amendment privilege, not attorney-client privilege.\nOption G is incorrect as corporations do not have the same Fifth Amendment rights as individuals.\nOption H is incorrect; the subpoena itself, if properly issued, does not violate Fourth Amendment rights.\nOption I is incorrect because the question is about the applicability of the Fifth Amendment privilege, not the content of the documents.\nOption J is a general statement about lawful investigations and doesn't address the specific Fifth Amendment objection.\n\nThe most direct and accurate answer is that a corporation has no Fifth Amendment privilege.\n\nAnswer: B",
+        "input_tokens": 289,
+        "output_tokens": 310,
+        "total_tokens": 599,
+        "cost_usd": 0.0001529,
+        "latency_ms": 1616,
+        "predicted": "B",
+        "correct": true
+      },
+      "mid_alone": {
+        "model": "gemini-3.1-flash-lite-preview",
+        "text": "Answer: B",
+        "input_tokens": 289,
+        "output_tokens": 3,
+        "total_tokens": 292,
+        "cost_usd": 2.2575e-05,
+        "latency_ms": 676,
+        "predicted": "B",
+        "correct": true
+      },
+      "strong_alone": {
+        "model": "gemini-3.1-pro-preview",
+        "text": "Answer: B",
+        "input_tokens": 289,
+        "output_tokens": 3,
+        "total_tokens": 292,
+        "cost_usd": 0.00037624999999999996,
+        "latency_ms": 3765,
+        "predicted": "B",
+        "correct": true
+      },
+      "weak_skill": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "1.  **IDENTIFY LEGAL DOMAIN:** This question involves the Fifth Amendment privilege against self-incrimination and the nature of corporations in legal proceedings. This falls under **Constitutional Law** and **Criminal Procedure**.\n\n2.  **IDENTIFY DOCTRINE:** The core doctrine is the Fifth Amendment's privilege against self-incrimination, specifically as it applies to corporations and the production of documents.\n\n3.  **APPLY ELEMENTS / STANDARDS:**\n    *   **Fifth Amendment Privilege:** The privilege protects individuals from being compelled to give testimony that could incriminate them.\n    *   **Corporations and the Fifth Amendment:** A well-established Supreme Court precedent (e.g., *Hale v. Henkel*, *United States v. White*) holds that corporations are *not* entitled to the Fifth Amendment privilege against self-incrimination. This is because a corporation is an artificial entity and its records are not considered \"personal\" in the same way an individual's are. The privilege is personal.\n    *   **Production of Documents:** While an individual can assert the Fifth Amendment privilege regarding the *contents* of documents if producing them would be testimonial and incriminating, this protection does not extend to corporations. The \"act of production\" by a corporation is not considered testimonial in a way that triggers the Fifth Amendment.\n    *   **Immunity (Use/Derivative-Use and Transactional):** These concepts relate to compelling testimony from individuals who *do* have the Fifth Amendment privilege. If a corporation has no Fifth Amendment privilege to begin with, the question of immunity is irrelevant.\n    *   **Attorney-Client Privilege:** This is a separate privilege that protects confidential communications between an attorney and client for the purpose of obtaining legal advice. While it *could* apply to documents, the question specifically frames the objection around the Fifth Amendment.\n    *   **Fourth Amendment:** This amendment protects against unreasonable searches and seizures. The subpoena power of a grand jury is generally considered a reasonable exercise of its investigative authority, provided it is not overly broad or unduly burdensome, which is not indicated here.\n\n4.  **ELIMINATE OPTIONS:**\n    *   A. \"Yes, because the Fifth Amendment privilege only applies to personal testimonies.\" This is partially true in that the privilege is personal, but it's misleading because it implies the privilege *could* apply to a corporation's \"personal\" testimony if it had any. The core issue is that corporations *don't* have the privilege.\n    *   B. \"Yes, because a corporation has no Fifth Amendment privilege.\" This directly aligns with established Supreme Court precedent.\n    *   C. \"No, because the corporation was not granted use-and-derivative-use immunity.\" Incorrect. Immunity is only relevant if the entity has a privilege to waive. Corporations do not have the Fifth Amendment privilege.\n    *   D. \"No, because the corporation was not granted transactional immunity.\" Incorrect. Same reason as C.\n    *   E. \"Yes, because the Fifth Amendment privilege does not apply to the compelled production of documents.\" This is true for corporations, but option B is a more direct and complete statement of the underlying principle. The privilege *itself* doesn't apply to corporations, making the document production aspect a consequence of that.\n    *   F. \"No, because the documents are protected under attorney-client privilege.\" The objection was explicitly based on the Fifth Amendment, not attorney-client privilege. This introduces a new, unraised issue.\n    *   G. \"No, because a corporation has the same Fifth Amendment rights as an individual.\" This is factually incorrect.\n    *   H. \"No, because the subpoena violates the corporation's Fourth Amendment rights.\" The subpoena power of a grand jury is generally permissible. The objection was Fifth Amendment.\n    *",
+        "input_tokens": 518,
+        "output_tokens": 800,
+        "total_tokens": 1318,
+        "cost_usd": 0.00037180000000000004,
+        "latency_ms": 3059,
+        "predicted": "H",
+        "correct": false
+      }
+    }
+  },
+  {
+    "question_id": 868,
+    "category": "law",
+    "question": "A state has recently enacted a statute requiring all prospective voters in state elections who wish to write-in a candidate to print the candidate's full name, and designate the office for which the candidate is running. The statute provides that such information must be written on the ballot in ink inan appropriate space. A write-in candidate is a German-American and is of the opinion that he needs a large turnout of German voters in order to win the election. As a result, his campaign manager decides to mail to every registered German voter a tear-off sticker, which bears the candidate's name and office for which he is running. Since many native German people are not proficient in reading and writing English, the campaign manager believes that many of the voters will have difficulty writing the candidate's name and office on the ballot. As a result, the campaign manager has mounted an extensive media campaign to inform voters on how to apply the stickers to the ballot. Five months prior to the election an election official notifies the candidate's campaign committee that the tear-off stickers do not comply with the state statute. In her letter, the official explains that state election officials are of the opinion that it is necessary for potential voters to write the candidate's name in ink. Therefore, she concludes that the stickers do not comply with statutory requirements. Three weeks later, the candidate filed suit in federal district court against state election officials, claiming that their interpretation of the state statute violates the U. S. Constitution. Which of the following sets forth the strongest constitutional argument the candidate could make against the interpretation of the statute by the state officials?",
+    "options": [
+      "It unreasonably discriminates against German voters who lack a proficiency in the English language.",
+      "It unreasonably interferes with the exclusive federal election power as embodied in the Fifteenth Amendment.",
+      "It goes against the spirit of the Twenty-fourth Amendment by effectively imposing a \"literacy tax.\"",
+      "It unreasonably discriminates against non-English speaking voters in general.",
+      "It violates the Equal Protection Clause by treating write-in candidates differently.",
+      "It unreasonably discriminates against write-in candidates for public office.",
+      "It unreasonably limits the means by which a candidate can campaign, infringing on democratic practices.",
+      "It unreasonably restricts freedom of speech as guaranteed by the First Amendment.",
+      "It unreasonably interferes with the 1965 Voting Rights Act outlawing literacy tests.",
+      "It interferes with the right to vote as guaranteed by the Nineteenth Amendment."
+    ],
+    "correct_answer": "F",
+    "configs": {
+      "weak_alone": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "The question asks for the strongest constitutional argument against the state election officials' interpretation of the statute. The statute requires voters to *write* the candidate's name and office in ink. The election official interprets this to mean that using a sticker, even if it contains the correct information, is not permissible because it's not \"written in ink.\" The candidate's campaign manager believes this will disproportionately affect German voters who may have difficulty with English literacy.\n\nLet's analyze the options:\n\nA. **It unreasonably discriminates against German voters who lack a proficiency in the English language.** This is a strong argument. The statute, as interpreted, creates a barrier for a specific group of voters based on their language proficiency, which is tied to their national origin. This implicates equal protection concerns.\n\nB. **It unreasonably interferes with the exclusive federal election power as embodied in the Fifteenth Amendment.** The Fifteenth Amendment prohibits denying the right to vote based on race, color, or previous condition of servitude. While the statute might have a disparate impact, it doesn't directly target race or color in its wording.\n\nC. **It goes against the spirit of the Twenty-fourth Amendment by effectively imposing a \"literacy tax.\"** The Twenty-fourth Amendment prohibits poll taxes. While the sticker issue might be seen as a barrier to voting, it's not a direct monetary tax. The term \"literacy tax\" is more closely associated with historical literacy tests that were used to disenfranchise voters.\n\nD. **It unreasonably discriminates against non-English speaking voters in general.** This is similar to A but broader. If the statute's interpretation disproportionately affects non-English speakers, it raises equal protection concerns. This is a plausible argument.\n\nE. **It violates the Equal Protection Clause by treating write-in candidates differently.** The Equal Protection Clause applies to individuals, not categories of candidates. While write-in candidates might be treated differently, the core issue here is the impact on voters.\n\nF. **It unreasonably discriminates against write-in candidates for public office.** Similar to E, the primary concern is the impact on voters' ability to cast their vote for a write-in candidate, not discrimination against the candidate themselves.\n\nG. **It unreasonably limits the means by which a candidate can campaign, infringing on democratic practices.** While this might be true, it's more of a political argument than a strong constitutional one. The focus is on the voter's right to vote.\n\nH. **It unreasonably restricts freedom of speech as guaranteed by the First Amendment.** While voting is a form of political speech, the primary argument here is about the *ability to vote*, not the ability to express oneself through speech.\n\nI. **It interferes with the 1965 Voting Rights Act outlawing literacy tests.** The Voting Rights Act of 1965, particularly Section 4(c), aimed to eliminate literacy tests and similar devices that were used to disenfranchise voters. The state's interpretation of the statute, requiring voters to *write* in ink, could be seen as a modern equivalent of a literacy test, especially for those with limited English proficiency. This is a very strong argument.\n\nJ. **It interferes with the right to vote as guaranteed by the Nineteenth Amendment.** The Nineteenth Amendment prohibits denying the right to vote based on sex. This is irrelevant to the current issue.\n\nComparing A, D, and I:\nOption I, referencing the Voting Rights Act and its outlawing of literacy tests, is the strongest constitutional argument. The state's interpretation of the statute, requiring voters to write in ink, effectively creates a barrier for those with limited English proficiency, which is analogous to the literacy tests the VRA was designed to combat. While A and D raise valid equal protection concerns, the VRA provides a more specific and powerful legal framework to challenge such barriers, especially when they disproportion",
+        "input_tokens": 562,
+        "output_tokens": 800,
+        "total_tokens": 1362,
+        "cost_usd": 0.00037620000000000004,
+        "latency_ms": 3008,
+        "predicted": "D",
+        "correct": false
+      },
+      "mid_alone": {
+        "model": "gemini-3.1-flash-lite-preview",
+        "text": "Answer: A",
+        "input_tokens": 562,
+        "output_tokens": 3,
+        "total_tokens": 565,
+        "cost_usd": 4.305e-05,
+        "latency_ms": 600,
+        "predicted": "A",
+        "correct": false
+      },
+      "strong_alone": {
+        "model": "gemini-3.1-pro-preview",
+        "text": "Answer: F",
+        "input_tokens": 562,
+        "output_tokens": 3,
+        "total_tokens": 565,
+        "cost_usd": 0.0007175,
+        "latency_ms": 8281,
+        "predicted": "F",
+        "correct": true
+      },
+      "weak_skill": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "1.  **IDENTIFY LEGAL DOMAIN:** Constitutional Law (specifically, voting rights and equal protection).\n\n2.  **IDENTIFY DOCTRINE:** The core issue is whether the state's interpretation of its election statute, which effectively disenfranchises voters who cannot write in English, violates constitutional principles. This points towards Equal Protection, Voting Rights, and potentially First Amendment concerns.\n\n3.  **APPLY ELEMENTS / STANDARDS:**\n    *   **Equal Protection (14th Amendment):** Laws that discriminate based on national origin or language proficiency are subject to heightened scrutiny. The state's interpretation creates a burden on a specific group (German voters, and by extension, non-English speakers) that may not be justified by a compelling state interest.\n    *   **Voting Rights:** The Constitution protects the right to vote. Laws that unduly burden this right, especially for specific groups, are suspect.\n    *   **First Amendment (Speech):** While campaigning is involved, the primary claim is about the *voter's* ability to cast a ballot and the *candidate's* ability to be voted for, not necessarily the campaign's speech itself being directly restricted in its content.\n    *   **Fifteenth Amendment:** Prohibits denial of suffrage based on race, color, or previous condition of servitude. Not directly applicable here as the discrimination is based on language/national origin.\n    *   **Twenty-fourth Amendment:** Prohibits poll taxes in federal elections. While the \"literacy tax\" concept is analogous, the 24th Amendment specifically addresses monetary taxes.\n    *   **Nineteenth Amendment:** Grants women the right to vote. Not relevant to the specific discrimination alleged.\n    *   **Voting Rights Act of 1965:** Prohibits discriminatory voting practices, including literacy tests. This is highly relevant.\n\n4.  **ELIMINATE OPTIONS THAT CONFUSE DOCTRINES:**\n\n    *   **B. Fifteenth Amendment:** Incorrect. The 15th Amendment deals with race, not language or national origin.\n    *   **C. Twenty-fourth Amendment:** Analogous, but the 24th Amendment specifically targets poll taxes, not literacy requirements. The \"literacy tax\" is a descriptive term, not a direct constitutional violation of the 24th.\n    *   **J. Nineteenth Amendment:** Incorrect. The 19th Amendment is about women's suffrage.\n\n5.  **DOUBLE-CHECK THE OPTION NAMING ALL REQUIRED ELEMENTS:**\n\n    *   **A. It unreasonably discriminates against German voters who lack a proficiency in the English language.** This is a strong argument. The statute's interpretation, as applied, disproportionately burdens German voters due to language barriers. This implicates Equal Protection and potentially the Voting Rights Act.\n    *   **D. It unreasonably discriminates against non-English speaking voters in general.** This is broader than A but also strong. The candidate's specific concern is German voters, but the underlying principle applies to all non-English speakers. This is a very strong Equal Protection and Voting Rights Act argument.\n    *   **E. It violates the Equal Protection Clause by treating write-in candidates differently.** The statute treats *all* write-in votes similarly, requiring them to be written in ink. The *interpretation* creates a burden on voters, not necessarily a differential treatment of candidates *per se* in the way Equal Protection is typically applied to candidate classifications. The core issue is voter disenfranchisement.\n    *   **F. It unreasonably discriminates against write-in candidates for public office.** The statute applies to *all* write-in votes, not just those for specific candidates. The discrimination is on the voter's ability to comply, not on the candidate's status as a write-in.\n    *",
+        "input_tokens": 791,
+        "output_tokens": 800,
+        "total_tokens": 1591,
+        "cost_usd": 0.00039910000000000005,
+        "latency_ms": 3377,
+        "predicted": "F",
+        "correct": true
+      }
+    }
+  },
+  {
+    "question_id": 869,
+    "category": "law",
+    "question": "The defendant was walking down the street when he saw a woman struggling with a man over a briefcase. Unbeknownst to the defendant, the woman had just stolen the briefcase from the man on the street. Believing the woman to be the victim of an attack, the defendant intervened and punched the man until the woman was able to get away with the briefcase. Confused as to why he wasn't being hailed as a hero by the woman, the defendant eventually realized that he had been an unwitting accomplice to the woman's theft. The defendant apologized profusely to the man and went home. According to the alter ego rule, which of the following statements is correct with respect to the amount of force that the defendant was entitled to use in the woman's defense?",
+    "options": [
+      "Not knowing the true facts, the defendant was not justified in using force to protect the woman because the man was privileged to recapture his briefcase.",
+      "The defendant was justified in using any amount of force necessary in the woman's defense, since he believed she was in immediate danger.",
+      "The defendant was not justified in using force, regardless of his belief about the situation, because the woman was attempting to steal the man's briefcase.",
+      "The defendant was not justified in using force because he did not personally know the woman.",
+      "Since the defendant did not stand in any personal relationship with the woman, he was not justified in using force in her defense.",
+      "The defendant was justified in using force in the woman's defense, as he was acting in good faith and did not know the true circumstances.",
+      "The defendant could use force in the woman's defense, provided that he did not cause more harm to the man than the woman was suffering.",
+      "The defendant was justified in using reasonable force in the woman's defense, since his belief that she was in immediate danger of unlawful bodily harm from the man was both objectively and subjectively reasonable.",
+      "The defendant was justified in using reasonable force in the woman's defense, since he reasonably believed she was in immediate danger of unlawful bodily harm from the man.",
+      "The defendant was justified in using force, even if the woman was in the wrong, because he believed she was in danger."
+    ],
+    "correct_answer": "A",
+    "configs": {
+      "weak_alone": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "The question asks about the application of the alter ego rule in the context of self-defense or defense of others. The alter ego rule states that a person defending another is entitled to use the same force that the person being defended would be entitled to use. However, this rule is often modified by the requirement that the defender must reasonably believe that the person they are defending is in danger of unlawful harm.\n\nLet's analyze the options:\n\n*   **A. Not knowing the true facts, the defendant was not justified in using force to protect the woman because the man was privileged to recapture his briefcase.** This is incorrect. The defendant's belief about the situation is crucial. The man's privilege to recapture his property does not automatically negate the defendant's right to defend what he reasonably believes to be a victim.\n\n*   **B. The defendant was justified in using any amount of force necessary in the woman's defense, since he believed she was in immediate danger.** This is too broad. The force used must generally be reasonable and proportionate to the perceived threat. \"Any amount of force necessary\" is not typically the standard.\n\n*   **C. The defendant was not justified in using force, regardless of his belief about the situation, because the woman was attempting to steal the man's briefcase.** This is incorrect. The defendant's belief is central to the justification. If he reasonably believed the woman was being attacked, his actions would be judged based on that belief.\n\n*   **D. The defendant was not justified in using force because he did not personally know the woman.** This is irrelevant. Personal acquaintance is not a prerequisite for defending another.\n\n*   **E. Since the defendant did not stand in any personal relationship with the woman, he was not justified in using force in her defense.** This is incorrect. The duty to defend others can extend beyond close relationships, especially when a reasonable belief of imminent danger exists.\n\n*   **F. The defendant was justified in using force in the woman's defense, as he was acting in good faith and did not know the true circumstances.** This is partially correct but not the most precise answer. Good faith is important, but the belief must also be reasonable.\n\n*   **G. The defendant could use force in the woman's defense, provided that he did not cause more harm to the man than the woman was suffering.** This introduces a proportionality test that is not the primary focus of the alter ego rule or the justification for defense of others in this scenario.\n\n*   **H. The defendant was justified in using reasonable force in the woman's defense, since his belief that she was in immediate danger of unlawful bodily harm from the man was both objectively and subjectively reasonable.** This option combines the subjective belief (he believed she was in danger) with an objective reasonableness standard, and specifies \"unlawful bodily harm,\" which is a key element in justifying the use of force. The alter ego rule allows the defender to step into the shoes of the person being defended, but this is often qualified by the defender's reasonable belief.\n\n*   **I. The defendant was justified in using reasonable force in the woman's defense, since he reasonably believed she was in immediate danger of unlawful bodily harm from the man.** This is very similar to H but omits the \"objectively and subjectively reasonable\" phrasing. However, \"reasonably believed\" inherently encompasses both subjective and objective reasonableness. This is a strong contender.\n\n*   **J. The defendant was justified in using force, even if the woman was in the wrong, because he believed she was in danger.** This is too broad. While the belief is important, the belief must be reasonable, and the force used must be reasonable. Simply believing someone is in danger, even if mistaken, does not automatically justify any force.\n\nComparing H and I, both are strong. However, the phrasing in H",
+        "input_tokens": 518,
+        "output_tokens": 800,
+        "total_tokens": 1318,
+        "cost_usd": 0.00037180000000000004,
+        "latency_ms": 2854,
+        "predicted": "H",
+        "correct": false
+      },
+      "mid_alone": {
+        "model": "gemini-3.1-flash-lite-preview",
+        "text": "Answer: A",
+        "input_tokens": 518,
+        "output_tokens": 3,
+        "total_tokens": 521,
+        "cost_usd": 3.9750000000000004e-05,
+        "latency_ms": 763,
+        "predicted": "A",
+        "correct": true
+      },
+      "strong_alone": {
+        "model": "gemini-3.1-pro-preview",
+        "text": "Answer: A",
+        "input_tokens": 518,
+        "output_tokens": 3,
+        "total_tokens": 521,
+        "cost_usd": 0.0006625000000000001,
+        "latency_ms": 5791,
+        "predicted": "A",
+        "correct": true
+      },
+      "weak_skill": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "1. IDENTIFY LEGAL DOMAIN: This question deals with the use of force in defense of another, which falls under criminal law, specifically the justification of self-defense or defense of others.\n\n2. IDENTIFY DOCTRINE: The core doctrine here is the \"alter ego rule\" (also known as the \"vicarious defense\" or \"defense of defense\"). This rule dictates that a person defending another can only use the amount of force that the person being defended could have lawfully used. The defendant's belief about the situation is relevant, but it's judged against the actual rights of the person they are defending.\n\n3. APPLY ELEMENTS / STANDARDS:\n    *   **Defense of Others:** Generally, one can use reasonable force to defend another person from imminent unlawful harm.\n    *   **Alter Ego Rule:** The defender \"steps into the shoes\" of the person being defended. If the person being defended had no right to use force (e.g., they were the aggressor or the force used against them was lawful), then the defender also has no right to use force.\n    *   **Mistake of Fact:** A mistake of fact can sometimes excuse criminal conduct, but the mistake must be reasonable and relate to a fact that, if true, would have justified the action. In the context of defense of others, the mistake must be about the danger to the other person, and the person being defended must have had a right to use force.\n\n4. ELIMINATE OPTIONS THAT CONFUSE DOCTRINES:\n    *   Options B, F, J, and potentially G focus heavily on the defendant's belief or good faith without adequately addressing whether the person being defended *actually* had a right to use force. The alter ego rule is crucial here.\n    *   Options A and C directly address the fact that the woman was not entitled to use force because she was the thief. This aligns with the alter ego rule.\n    *   Options D and E focus on the defendant's personal relationship with the woman, which is generally not the primary determinant of the right to defend another, but rather the circumstances of the perceived threat and the rights of the person being defended.\n    *   Options H and I introduce \"unlawful bodily harm\" and \"objectively and subjectively reasonable\" beliefs, which are elements of self-defense, but they don't fully capture the nuance of the alter ego rule when the person being defended is not entitled to use force.\n\n5. DOUBLE-CHECK THE OPTION NAMING ALL REQUIRED ELEMENTS:\n    *   The question specifically asks about the \"alter ego rule.\" This rule means the defendant's right to use force is derivative of the woman's right to use force. Since the woman was the thief, she had no right to use force against the man trying to recover his property. Therefore, the defendant, acting under the alter ego rule, also had no right to use force.\n\nLet's analyze the remaining plausible options in light of the alter ego rule:\n\n*   **A. Not knowing the true facts, the defendant was not justified in using force to protect the woman because the man was privileged to recapture his briefcase.** This option correctly applies the alter ego rule. The man was privileged to use reasonable force to recapture his stolen property. Since the woman had no right to use force, the defendant, acting as her alter ego, also had no right to use force. The defendant's ignorance of the facts doesn't create a right where none existed for the person he was trying to defend.\n\n*   **C. The defendant was not justified in using force, regardless of his belief about the situation, because the woman was attempting to steal the man's briefcase.** This is very close to A and also captures the essence of the alter ego rule. The woman's action (theft) negates",
+        "input_tokens": 747,
+        "output_tokens": 800,
+        "total_tokens": 1547,
+        "cost_usd": 0.00039470000000000005,
+        "latency_ms": 3252,
+        "predicted": "A",
+        "correct": true
+      }
+    }
+  },
+  {
+    "question_id": 870,
+    "category": "law",
+    "question": "Two college students were members of the same fraternity. During a fraternity party, the defendant pulled out a gun, pointed it at the other student and said, \"Beg for your life, sucker. \" The student, who knew that the defendant had a reputation as a practical joker, said, \"Get lost, you jerk. \" The defendant then pulled the trigger and shot the student to death. A statute in this jurisdiction provides: \"Any intentional and premeditated killing with malice aforethought is murder in the first degree. Murder in the second degree is any killing that occurs during the commission or attempted commission of a serious or inherently dangerous felony. Manslaughter includes all other types of unlawftil homicide and unjustifiable killings. \"The defendant was subsequently prosecuted for killing the student. At trial, the defendant testified that a fellow fraternity member gave him the gun before the shooting and told him that it was unloaded. If the jury believes the defendant, it should find him",
+    "options": [
+      "guilty of assault, but not murder or manslaughter.",
+      "guilty of second-degree murder.",
+      "guilty of second-degree murder, due to the commission of a dangerous act.",
+      "guilty of first-degree murder.",
+      "guilty of manslaughter.",
+      "not guilty due to lack of intent.",
+      "not guilty, as he was misinformed about the gun being loaded.",
+      "guilty of first-degree murder, due to malice aforethought.",
+      "guilty of homicide, but not manslaughter or murder.",
+      "guilty of assault and manslaughter."
+    ],
+    "correct_answer": "E",
+    "configs": {
+      "weak_alone": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "The question hinges on the defendant's belief about the gun being unloaded. If the jury believes the defendant, it means he did not *intend* to kill the victim.\n\nLet's analyze the options based on this belief:\n\n*   **First-degree murder:** Requires intentional and premeditated killing with malice aforethought. If the defendant believed the gun was unloaded, he lacked the intent to kill. So, D and H are incorrect.\n*   **Second-degree murder:** Requires a killing during the commission or attempted commission of a serious or inherently dangerous felony. While pulling a gun and threatening someone could be part of an assault, the statute defines second-degree murder by the *felony* committed, not just a dangerous act. If the defendant believed the gun was unloaded, he might not have intended to commit a felony that would lead to death. Option B and C are questionable because the *intent* to commit the underlying felony is often required.\n*   **Manslaughter:** Includes all other unlawful homicide and unjustifiable killings. If the defendant unintentionally killed someone while acting unlawfully (e.g., brandishing a firearm, even if believed unloaded), it could be manslaughter. This fits the scenario if the jury believes his statement. So, E is a strong possibility.\n*   **Assault:** The defendant clearly committed assault by pointing the gun and making threats. However, the question asks what the jury *should* find him guilty of, implying the most serious offense supported by the facts *if his testimony is believed*. Option A suggests *only* assault, which might be too low if an unlawful killing occurred.\n*   **Not guilty due to lack of intent:** This is too broad. While he may lack the intent to kill, his actions were still unlawful. So, F is incorrect.\n*   **Not guilty, as he was misinformed about the gun being loaded:** This is similar to F. While being misinformed is a factor, it doesn't automatically lead to a complete acquittal if his actions were still unlawful and resulted in death. So, G is incorrect.\n*   **Homicide, but not manslaughter or murder:** This is a strange category. Manslaughter and murder are types of homicide. So, I is incorrect.\n*   **Assault and manslaughter:** This is plausible, as he committed assault, and if the killing was unintentional but unlawful, it would be manslaughter. However, the options are usually mutually exclusive for the *primary* charge.\n\nConsidering the statute's definition of manslaughter as \"all other types of unlawful homicide and unjustifiable killings,\" if the jury believes the defendant's testimony that he thought the gun was unloaded, he lacked the intent for first or second-degree murder. However, his actions of pointing a gun and pulling the trigger, even if he believed it was unloaded, could still be considered an unlawful act that resulted in death, thus falling under manslaughter.\n\nLet's re-examine the second-degree murder definition: \"any killing that occurs during the commission or attempted commission of a serious or inherently dangerous felony.\" If the defendant believed the gun was unloaded, he might not have intended to commit a felony that would lead to death. However, some jurisdictions might consider brandishing a loaded firearm as an inherently dangerous felony even if the perpetrator believes it's unloaded, if the act itself is dangerous. But the wording \"commission or attempted commission\" implies intent to commit the felony.\n\nThe most straightforward interpretation, if the jury believes the defendant thought the gun was unloaded, is that he lacked the intent for murder. His actions were still unlawful and resulted in death, making manslaughter the most appropriate charge.\n\nLet's consider the options again. If the jury believes the defendant, he did not *intend* to kill. This eliminates first-degree murder (D, H). It also makes second-degree murder less likely if intent to commit the underlying",
+        "input_tokens": 369,
+        "output_tokens": 800,
+        "total_tokens": 1169,
+        "cost_usd": 0.00035690000000000006,
+        "latency_ms": 2811,
+        "predicted": "H",
+        "correct": false
+      },
+      "mid_alone": {
+        "model": "gemini-3.1-flash-lite-preview",
+        "text": "Answer: E",
+        "input_tokens": 369,
+        "output_tokens": 3,
+        "total_tokens": 372,
+        "cost_usd": 2.8575000000000003e-05,
+        "latency_ms": 691,
+        "predicted": "E",
+        "correct": true
+      },
+      "strong_alone": {
+        "model": "gemini-3.1-pro-preview",
+        "text": "Answer: E",
+        "input_tokens": 369,
+        "output_tokens": 3,
+        "total_tokens": 372,
+        "cost_usd": 0.00047625,
+        "latency_ms": 7058,
+        "predicted": "E",
+        "correct": true
+      },
+      "weak_skill": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "1.  **IDENTIFY LEGAL DOMAIN:** Criminal Law (homicide, murder, manslaughter, assault).\n2.  **IDENTIFY DOCTRINE:** Homicide statutes, degrees of murder, manslaughter, assault, mens rea (intent).\n3.  **APPLY ELEMENTS / STANDARDS:**\n    *   **First-Degree Murder:** Intentional, premeditated killing with malice aforethought.\n    *   **Second-Degree Murder:** Killing during the commission or attempted commission of a serious or inherently dangerous felony. (Note: The statute's definition of 2nd-degree murder is unusual, defining it as occurring *during* a felony, which is typically felony murder, a form of 2nd-degree murder or sometimes 1st-degree depending on jurisdiction. However, the facts don't clearly establish a predicate felony *other than* the killing itself.)\n    *   **Manslaughter:** All other unlawful homicide and unjustifiable killings. This is a catch-all for unlawful killings that don't meet the higher murder standards.\n    *   **Assault:** An intentional act that creates a reasonable apprehension of imminent harmful or offensive contact, or an attempt to commit a battery. Pointing a gun and threatening someone can constitute assault.\n    *   **Mens Rea (Intent):** The defendant's state of mind is crucial. The statute for first-degree murder requires \"intentional and premeditated killing with malice aforethought.\" The facts state the defendant \"pulled out a gun, pointed it at the other student and said, 'Beg for your life, sucker.'\" This strongly suggests intent to cause fear or harm, and the act of pulling the trigger is an intentional act. The defense is that the defendant *believed* the gun was unloaded.\n\n4.  **ELIMINATE OPTIONS:**\n\n    *   **A. guilty of assault, but not murder or manslaughter.** The act of pointing a gun and threatening death, followed by pulling the trigger and causing death, goes beyond mere assault. Manslaughter is a possibility if the intent for murder is lacking.\n    *   **B. guilty of second-degree murder.** The statute defines second-degree murder as occurring *during* a felony. The facts don't clearly establish a predicate felony separate from the killing itself. This definition is unusual and doesn't fit the facts as well as other options.\n    *   **C. guilty of second-degree murder, due to the commission of a dangerous act.** This is similar to B and relies on the unusual definition of second-degree murder in the statute. The \"dangerous act\" is the shooting, which is the homicide itself, not a predicate felony *during which* the homicide occurred.\n    *   **D. guilty of first-degree murder.** This requires intentional, premeditated killing with malice aforethought. While the act was intentional and the threat suggests malice, the defense is that the defendant believed the gun was unloaded, which could negate the specific intent required for first-degree murder.\n    *   **E. guilty of manslaughter.** This is a strong contender. If the jury believes the defendant was misinformed and thus lacked the specific intent for murder (premeditation, malice aforethought), but still finds the killing was an unlawful and unjustifiable killing (e.g., due to recklessness or negligence in handling a potentially loaded weapon, or if the belief about it being unloaded was not reasonable), then manslaughter would apply. The act of pointing a gun and pulling the trigger, even if believed unloaded, is a highly dangerous act.\n    *   **F. not guilty due to lack of intent.** This is too broad. There was clearly intent to perform the *act* of pulling the trigger. The question is about the intent to kill or cause serious harm. If the jury believes the defendant's testimony, it might negate the intent",
+        "input_tokens": 598,
+        "output_tokens": 800,
+        "total_tokens": 1398,
+        "cost_usd": 0.0003798,
+        "latency_ms": 3194,
+        "predicted": "F",
+        "correct": false
+      }
+    }
+  },
+  {
+    "question_id": 1986,
+    "category": "psychology",
+    "question": "A person who received a Level 4 rating on the Rancho Los Amigos Scale of Cognitive Functioning:",
+    "options": [
+      "is unresponsive to all stimuli but shows signs of basic physiological functioning such as breathing and heartbeat.",
+      "is highly responsive and coherent, but cannot remember or integrate past and recent events.",
+      "is functioning at an intellectual level that is average for his/her age, education, and demographic background.",
+      "is responsive to stimuli but cannot remember or integrate past and recent events, and exhibits impaired judgment.",
+      "is confused and incoherent, may exhibit bizarre behavior, and is unable to care for him/herself.",
+      "is functioning at an intellectual level that is superior for his/her age, education, and demographic background.",
+      "is nonresponsive to visual or auditory stimuli and seems to be in a state of deep sleep.",
+      "is alert and oriented and can remember and integrate remote and recent events but may have some impairment in judgment, planning, and abstract reasoning."
+    ],
+    "correct_answer": "E",
+    "configs": {
+      "weak_alone": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "The Rancho Los Amigos Scale of Cognitive Functioning is used to describe the stages of cognitive recovery in individuals with brain injuries. Let's analyze the options in relation to the scale:\n\n*   **Level 1:** No response.\n*   **Level 2:** Generalized response.\n*   **Level 3:** Localized response.\n*   **Level 4:** Confused/Agitated. This level is characterized by a state of severe confusion, agitation, and disorientation. Individuals at this level are often very active but their behavior is not purposeful. They have a short attention span and are unable to learn new information. They may also exhibit bizarre behavior and have difficulty with self-care.\n*   **Level 5:** Confused, Inappropriate.\n*   **Level 6:** Confused, Appropriate.\n*   **Level 7:** Automatic, Appropriate.\n*   **Level 8:** Purposeful, Appropriate.\n\nNow let's evaluate the options:\n\n*   **A. is unresponsive to all stimuli but shows signs of basic physiological functioning such as breathing and heartbeat.** This describes Level 1.\n*   **B. is highly responsive and coherent, but cannot remember or integrate past and recent events.** This sounds like a higher level of functioning than Level 4, perhaps Level 5 or 6, where coherence is improving.\n*   **C. is functioning at an intellectual level that is average for his/her age, education, and demographic background.** This describes normal cognitive functioning, not a stage of recovery from brain injury.\n*   **D. is responsive to stimuli but cannot remember or integrate past and recent events, and exhibits impaired judgment.** This describes aspects of confusion and memory deficits, but \"agitated\" is a key characteristic of Level 4 that is missing. This might fit Level 5 or 6 better.\n*   **E. is confused and incoherent, may exhibit bizarre behavior, and is unable to care for him/herself.** This aligns very well with the description of Level 4, which is characterized by confusion, agitation, and often inappropriate or bizarre behavior, leading to a lack of self-care.\n*   **F. is functioning at an intellectual level that is superior for his/her age, education, and demographic background.** This describes superior cognitive functioning, not a stage of recovery.\n*   **G. is nonresponsive to visual or auditory stimuli and seems to be in a state of deep sleep.** This describes Level 1.\n*   **H. is alert and oriented and can remember and integrate remote and recent events but may have some impairment in judgment, planning, and abstract reasoning.** This describes a much higher level of functioning, likely Level 7 or 8.\n\nOption E most accurately captures the essence of Level 4 on the Rancho Los Amigos Scale.\n\nThe final answer is $\\boxed{E}$.",
+        "input_tokens": 259,
+        "output_tokens": 600,
+        "total_tokens": 859,
+        "cost_usd": 0.00026589999999999996,
+        "latency_ms": 1978,
+        "predicted": "E",
+        "correct": true
+      },
+      "mid_alone": {
+        "model": "gemini-3.1-flash-lite-preview",
+        "text": "Answer: E",
+        "input_tokens": 259,
+        "output_tokens": 3,
+        "total_tokens": 262,
+        "cost_usd": 2.0325000000000003e-05,
+        "latency_ms": 787,
+        "predicted": "E",
+        "correct": true
+      },
+      "strong_alone": {
+        "model": "gemini-3.1-pro-preview",
+        "text": "Answer: E",
+        "input_tokens": 259,
+        "output_tokens": 3,
+        "total_tokens": 262,
+        "cost_usd": 0.00033875,
+        "latency_ms": 6076,
+        "predicted": "E",
+        "correct": true
+      },
+      "weak_skill": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "1. **IDENTIFY SUB-FIELD:** This question falls under **clinical psychology** or **neuropsychology**, as it deals with cognitive functioning after an injury or illness, specifically referencing a scale used in rehabilitation.\n\n2. **IDENTIFY FRAMEWORK/THEORIST:** The framework is the **Rancho Los Amigos Scale of Cognitive Functioning**. This scale is a descriptive tool, not tied to a specific theorist in the same way as Piaget or Freud.\n\n3. **APPLY THE DEFINITIONS EXACTLY:** We need to know the definition of a Level 4 rating on the Rancho Los Amigos Scale.\n    * **Level 1:** No response.\n    * **Level 2:** Generalized response.\n    * **Level 3:** Localized response.\n    * **Level 4: Confused/Agitated:** The individual is in a state of \"agitation\" and \"confusion.\" They are not able to cooperate with treatment. Their attention span is very limited, and they are unable to learn new information. They may exhibit bizarre and inappropriate behavior. They are not able to recognize people or places.\n    * **Level 5:** Confused, Inappropriate.\n    * **Level 6:** Confused, Appropriate.\n    * **Level 7:** Automatic, Appropriate.\n    * **Level 8:** Purposeful, Appropriate.\n\n4. **ELIMINATE options that confuse adjacent concepts:**\n    * **A & G:** These describe states of unresponsiveness or deep sleep, which are much lower levels (Level 1 or 2) on the scale.\n    * **B:** While memory issues are present at higher levels, \"highly responsive and coherent\" is not characteristic of Level 4.\n    * **C & F:** These describe intellectual functioning relative to norms, not the specific cognitive and behavioral state assessed by the Rancho Scale. The Rancho Scale describes the *quality* of response and cognitive processing, not necessarily intellectual capacity in a standardized testing sense.\n    * **D:** This option is closer, but \"responsive to stimuli\" is a bit too general for Level 4, which is characterized by *agitation* and *confusion*. Impaired judgment is present, but the core of Level 4 is the confusion and agitation.\n    * **E:** This option accurately captures the essence of Level 4: \"confused and incoherent, may exhibit bizarre behavior, and is unable to care for him/herself.\" The inability to care for oneself is a consequence of the confusion and agitation.\n    * **H:** This describes a much higher level of functioning (Level 7 or 8), where the individual is alert, oriented, and can integrate events, with only minor impairments.\n\n5. **DOUBLE-CHECK exact terminology:** Option E aligns best with the description of Level 4 as \"Confused/Agitated,\" where the individual is disoriented, has a severely limited attention span, exhibits inappropriate behavior, and requires constant supervision.\n\nAnswer: E",
+        "input_tokens": 523,
+        "output_tokens": 624,
+        "total_tokens": 1147,
+        "cost_usd": 0.0003019,
+        "latency_ms": 2399,
+        "predicted": "E",
+        "correct": true
+      }
+    }
+  },
+  {
+    "question_id": 1987,
+    "category": "psychology",
+    "question": "You receive a phone call from Hermann H., age 28, who says he is \u201ctotally miserable\u201d because of the recent breakup with his girlfriend and that he would like to begin therapy with you. During the first session with Hermann, you find out that his political views are completely repugnant to you, and you feel that you would not enjoy working with him. As an ethical psychologist, you should:",
+    "options": [
+      "Discuss your discomfort with Hermann's political views in the first session.",
+      "Ignore your personal feelings and continue therapy without discussing the difference in political views.",
+      "discuss the difference in political views with Hermann only if they become relevant to the psychotherapy process.",
+      "Suggest Hermann to find a psychologist who shares his political views.",
+      "Decline Hermann's request for therapy because of the difference in political views.",
+      "see Hermann in therapy until his current crisis is over and then make a referral if necessary.",
+      "Tell Hermann outright that his political views are repugnant and continue the therapy.",
+      "Offer to treat Hermann only if he changes his political views.",
+      "provide Hermann with appropriate referrals."
+    ],
+    "correct_answer": "I",
+    "configs": {
+      "weak_alone": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "Here's a thinking process to arrive at the correct answer:\n\n1.  **Analyze the Core Ethical Dilemma:** The psychologist has personal feelings (discomfort, repugnance, lack of enjoyment) about the client's political views, which are unrelated to the client's presenting problem (breakup, misery). The question asks for the *ethical* course of action.\n\n2.  **Review Ethical Principles for Psychologists:** Key principles include:\n    *   **Beneficence and Non-maleficence:** Do good, avoid harm.\n    *   **Fidelity and Responsibility:** Establish trust, uphold professional standards.\n    *   **Integrity:** Promote accuracy, honesty, and truthfulness.\n    *   **Justice:** Fair and equitable access to services.\n    *   **Respect for People's Rights and Dignity:** Respect the worth and rights of all individuals, including privacy, confidentiality, and self-determination.\n\n3.  **Evaluate Each Option Against Ethical Principles:**\n\n    *   **A. Discuss your discomfort with Hermann's political views in the first session.**\n        *   *Ethical Issue:* This is likely to be harmful to the therapeutic alliance. The client is seeking help for a specific problem, not a debate or judgment on their political views. It violates the principle of integrity (being honest about *relevant* professional limitations, not personal biases) and potentially non-maleficence (causing distress). It also undermines the client's self-determination and dignity.\n\n    *   **B. Ignore your personal feelings and continue therapy without discussing the difference in political views.**\n        *   *Ethical Issue:* While ignoring personal feelings is good, *ignoring* them completely might lead to unconscious bias or an inability to be fully present and effective. The psychologist *feels* they wouldn't enjoy working with him, which suggests a potential impairment in their ability to provide competent and effective therapy. This option doesn't address the potential impairment.\n\n    *   **C. Discuss the difference in political views with Hermann only if they become relevant to the psychotherapy process.**\n        *   *Ethical Issue:* This is a reasonable approach *if* the personal feelings are manageable and don't impair the psychologist's ability to work effectively. However, the prompt states the psychologist feels they \"would not enjoy working with him,\" which implies a significant potential impairment. Simply waiting for relevance might not be enough if the initial feeling is strong enough to hinder the therapeutic relationship from the start.\n\n    *   **D. Suggest Hermann to find a psychologist who shares his political views.**\n        *   *Ethical Issue:* This is discriminatory. Therapy is not about finding someone who agrees with your political views. It's about providing competent help for the presenting problem. This violates the principle of justice and respect for dignity.\n\n    *   **E. Decline Hermann's request for therapy because of the difference in political views.**\n        *   *Ethical Issue:* This is a strong contender. If the psychologist's personal values or biases are so strong that they would impair their ability to provide effective and unbiased therapy, then declining the client is the most ethical course of action to protect the client from harm and ensure they receive appropriate care. This aligns with the principle of non-maleficence and competence.\n\n    *   **F. See Hermann in therapy until his current crisis is over and then make a referral if necessary.**\n        *   *Ethical Issue:* This is problematic. The psychologist already feels they wouldn't enjoy working with him and that his views are repugnant. Continuing therapy under these conditions, even temporarily, risks providing suboptimal care, potentially causing harm, and delaying the client's access to a therapist who *can* work effectively with him. It's not ethical to provide care when you know your personal feelings will impair your",
+        "input_tokens": 286,
+        "output_tokens": 800,
+        "total_tokens": 1086,
+        "cost_usd": 0.0003486,
+        "latency_ms": 2737,
+        "predicted": "F",
+        "correct": false
+      },
+      "mid_alone": {
+        "model": "gemini-3.1-flash-lite-preview",
+        "text": "Answer: C",
+        "input_tokens": 286,
+        "output_tokens": 3,
+        "total_tokens": 289,
+        "cost_usd": 2.235e-05,
+        "latency_ms": 698,
+        "predicted": "C",
+        "correct": false
+      },
+      "strong_alone": {
+        "model": "gemini-3.1-pro-preview",
+        "text": "Answer: I",
+        "input_tokens": 286,
+        "output_tokens": 3,
+        "total_tokens": 289,
+        "cost_usd": 0.0003725,
+        "latency_ms": 9235,
+        "predicted": "I",
+        "correct": true
+      },
+      "weak_skill": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "1. **IDENTIFY SUB-FIELD:** This question falls under **Clinical Psychology** and touches upon **Ethics**.\n\n2. **IDENTIFY FRAMEWORK/THEORIST:** The core framework here is ethical guidelines for psychologists, particularly regarding dual relationships, competence, and client welfare. While no specific theorist is directly invoked, ethical codes (like the APA's) are the guiding principles.\n\n3. **APPLY THE DEFINITIONS EXACTLY:**\n    * **Ethical Practice:** Psychologists must prioritize client welfare, maintain professional boundaries, and avoid imposing their personal values. They should also be aware of their own biases and how they might impact therapy.\n    * **Competence:** Psychologists should only practice within their areas of competence and avoid situations where their personal biases could impair their judgment or effectiveness.\n    * **Referral:** If a psychologist cannot provide effective treatment due to personal conflicts or lack of competence, they have an ethical obligation to refer the client to another qualified professional.\n\n4. **ELIMINATE options that confuse adjacent concepts:**\n    * **A. Discuss your discomfort with Hermann's political views in the first session:** This violates professional boundaries and could alienate the client. The focus should be on the client's presenting problem, not the therapist's personal reactions.\n    * **B. Ignore your personal feelings and continue therapy without discussing the difference in political views:** While ignoring feelings is sometimes necessary, in this case, the feelings are so strong they might impair the therapist's ability to provide effective treatment. Ignoring them doesn't resolve the potential ethical issue.\n    * **C. discuss the difference in political views with Hermann only if they become relevant to the psychotherapy process:** This is a reasonable approach in some situations, but the prompt states the views are \"completely repugnant\" and the therapist \"would not enjoy working with him.\" This suggests a level of bias that might interfere *before* the views become directly relevant to the presenting problem.\n    * **D. Suggest Hermann to find a psychologist who shares his political views:** This is problematic. The goal of therapy is not to find someone who agrees with the client's views, but someone who can effectively treat their presenting problem. This implies that shared political views are a prerequisite for effective therapy, which is generally not true.\n    * **F. see Hermann in therapy until his current crisis is over and then make a referral if necessary:** This prolongs a potentially unethical situation. If the therapist's biases are already interfering, continuing therapy even temporarily is not ideal.\n    * **G. Tell Hermann outright that his political views are repugnant and continue the therapy:** This is highly unethical and unprofessional. It directly imposes the therapist's values and would likely be damaging to the client.\n    * **H. Offer to treat Hermann only if he changes his political views:** This is unethical. Therapists cannot demand clients change their personal beliefs as a condition of treatment.\n\n5. **DOUBLE-CHECK exact terminology:** The question asks what an *ethical* psychologist should do. Ethical guidelines emphasize client welfare and the therapist's ability to provide unbiased, effective treatment.\n\nBased on the elimination process, the most ethical course of action is to acknowledge the inability to provide effective treatment due to personal bias and facilitate a referral. Option I directly addresses this.\n\nAnswer: I",
+        "input_tokens": 550,
+        "output_tokens": 687,
+        "total_tokens": 1237,
+        "cost_usd": 0.0003298,
+        "latency_ms": 3040,
+        "predicted": "I",
+        "correct": true
+      }
+    }
+  },
+  {
+    "question_id": 1988,
+    "category": "psychology",
+    "question": "During the second stage of Kohlberg\u2019s preconventional level of moral development, children obey rules because:",
+    "options": [
+      "they are taught that rules are unbreakable.",
+      "they enjoy following the rules.",
+      "they are rewarded for following rules.",
+      "they feel they have a personal duty to uphold rules and laws.",
+      "doing so helps them satisfy their personal needs.",
+      "they understand the concept of fairness and justice.",
+      "doing so helps them avoid punishment.",
+      "\"\"\"everyone else is doing it.\"\"\"",
+      "they believe in the inherent goodness of rules.",
+      "they fear societal disapproval."
+    ],
+    "correct_answer": "E",
+    "configs": {
+      "weak_alone": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "The question asks about the second stage of Kohlberg's *preconventional* level of moral development. Let's break down Kohlberg's levels and stages:\n\n*   **Preconventional Level:** Morality is externally controlled. Rules are obeyed because of the consequences.\n    *   **Stage 1: Obedience and Punishment Orientation:** The child obeys rules to avoid punishment.\n    *   **Stage 2: Individualism and Exchange:** The child obeys rules because doing so is in their own self-interest (e.g., to get rewards or satisfy personal needs).\n\n*   **Conventional Level:** Morality is based on conforming to social norms and laws.\n    *   **Stage 3: Good Interpersonal Relationships:** The child obeys rules to be seen as a \"good\" person and to gain approval from others.\n    *   **Stage 4: Maintaining the Social Order:** The child obeys rules because they understand the importance of laws and social order.\n\n*   **Postconventional Level:** Morality is based on abstract principles and universal ethical ideas.\n    *   **Stage 5: Social Contract and Individual Rights:** The child understands that laws are social contracts that can be changed for the greater good, but also that certain individual rights are paramount.\n    *   **Stage 6: Universal Principles:** The child follows self-chosen ethical principles that are universal and abstract.\n\nNow let's evaluate the options in the context of Stage 2 (Individualism and Exchange) of the preconventional level:\n\n*   A. \"they are taught that rules are unbreakable.\" - This sounds more like a rigid adherence to authority, potentially Stage 1 or a misunderstanding.\n*   B. \"they enjoy following the rules.\" - While enjoyment might be a factor, it's not the primary motivator at this stage.\n*   C. \"they are rewarded for following rules.\" - This is a strong possibility, as rewards are a form of self-interest.\n*   D. \"they feel they have a personal duty to uphold rules and laws.\" - This is characteristic of the conventional or postconventional levels.\n*   E. \"doing so helps them satisfy their personal needs.\" - This directly aligns with the \"individualism and exchange\" aspect, where actions are taken for personal benefit.\n*   F. \"they understand the concept of fairness and justice.\" - This is characteristic of higher levels, particularly Stage 5.\n*   G. \"doing so helps them avoid punishment.\" - This is characteristic of Stage 1, the *first* stage of the preconventional level.\n*   H. \"\"\"everyone else is doing it.\"\"\" - This is characteristic of Stage 3 (Good Interpersonal Relationships) in the conventional level.\n*   I. \"they believe in the inherent goodness of rules.\" - This is characteristic of higher levels.\n*   J. \"they fear societal disapproval.\" - This is characteristic of Stage 3 (Good Interpersonal Relationships) in the conventional level.\n\nComparing options C and E, option E (\"satisfy their personal needs\") is a broader and more accurate description of the motivation in Stage 2 than just \"being rewarded.\" Rewards are a *way* to satisfy personal needs, but the underlying principle is self-interest and personal benefit. The \"exchange\" part of the stage name also implies a quid pro quo for personal gain.\n\nTherefore, satisfying personal needs is the most fitting description for Stage 2.\n\nThe final answer is $\\boxed{E}$.",
+        "input_tokens": 183,
+        "output_tokens": 728,
+        "total_tokens": 911,
+        "cost_usd": 0.00030950000000000004,
+        "latency_ms": 2816,
+        "predicted": "E",
+        "correct": true
+      },
+      "mid_alone": {
+        "model": "gemini-3.1-flash-lite-preview",
+        "text": "Answer: E",
+        "input_tokens": 183,
+        "output_tokens": 3,
+        "total_tokens": 186,
+        "cost_usd": 1.4625e-05,
+        "latency_ms": 1530,
+        "predicted": "E",
+        "correct": true
+      },
+      "strong_alone": {
+        "model": "gemini-3.1-pro-preview",
+        "text": "Answer: E",
+        "input_tokens": 183,
+        "output_tokens": 3,
+        "total_tokens": 186,
+        "cost_usd": 0.00024375000000000002,
+        "latency_ms": 5620,
+        "predicted": "E",
+        "correct": true
+      },
+      "weak_skill": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "1. **IDENTIFY SUB-FIELD:** Developmental Psychology (specifically, moral development).\n2. **IDENTIFY FRAMEWORK/THEORIST:** Kohlberg's stages of moral development.\n3. **APPLY THE DEFINITIONS EXACTLY:**\n    * Kohlberg's preconventional level has two stages:\n        * **Stage 1: Obedience and Punishment Orientation:** Children obey rules to avoid punishment.\n        * **Stage 2: Individualism and Exchange:** Children obey rules because doing so satisfies their own needs or because they see it as a fair exchange.\n    * The question asks about the *second stage* of the preconventional level.\n\n4. **ELIMINATE options that confuse adjacent concepts:**\n    * A. \"taught that rules are unbreakable\" sounds more like a rigid adherence to authority, potentially Stage 1 or a misunderstanding of Stage 2.\n    * B. \"enjoy following the rules\" is not the primary motivation at this stage; it's more about self-interest.\n    * C. \"rewarded for following rules\" is a key aspect of operant conditioning, but Kohlberg's Stage 2 is more about *self-interest* and *exchange*, not just external rewards. While rewards can be a motivator, the core of Stage 2 is about what *benefits the child*.\n    * D. \"personal duty to uphold rules and laws\" is characteristic of higher stages (conventional or postconventional).\n    * F. \"understand the concept of fairness and justice\" is more aligned with later stages, particularly the conventional level.\n    * G. \"avoid punishment\" is the defining characteristic of Stage 1, not Stage 2.\n    * H. \"everyone else is doing it\" relates to social conformity, which is more characteristic of Stage 3 (Good Boy/Good Girl Orientation) in the conventional level.\n    * I. \"believe in the inherent goodness of rules\" is a more advanced moral understanding, not typical of the preconventional level.\n    * J. \"fear societal disapproval\" is also characteristic of Stage 3 (conventional level).\n\n5. **DOUBLE-CHECK exact terminology:** The second stage of the preconventional level is often described as \"Instrumental Purpose and Exchange\" or \"Individualism and Exchange.\" The core idea is that actions are judged by their consequences for the individual, and there's a focus on satisfying one's own needs and interests, often through a kind of \"you scratch my back, I'll scratch yours\" mentality. Option E, \"they feel they have a personal duty to uphold rules and laws,\" is incorrect. Option E, \"doing so helps them satisfy their personal needs,\" directly aligns with the definition of Stage 2.\n\nLet's re-evaluate the options based on the precise definition of Stage 2:\n* **Stage 1:** Avoid punishment. (Option G)\n* **Stage 2:** What's in it for me? Satisfy own needs. Fair exchange. (Option E)\n\nOption E most accurately reflects the motivation in Kohlberg's Stage 2 of the preconventional level.\n\nAnswer: E",
+        "input_tokens": 447,
+        "output_tokens": 658,
+        "total_tokens": 1105,
+        "cost_usd": 0.0003079,
+        "latency_ms": 2968,
+        "predicted": "E",
+        "correct": true
+      }
+    }
+  },
+  {
+    "question_id": 1989,
+    "category": "psychology",
+    "question": "The mental retardation associated with PKU is preventable with:",
+    "options": [
+      "hormone replacement therapy.",
+      "surgical intervention.",
+      "psychotherapy.",
+      "vitamin supplements.",
+      "blood transfusions.",
+      "removal of environmental toxins.",
+      "gene therapy.",
+      "antibiotics.",
+      "regular exercise."
+    ],
+    "correct_answer": "F",
+    "configs": {
+      "weak_alone": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "Phenylketonuria (PKU) is a genetic disorder where the body cannot properly break down phenylalanine, an amino acid found in protein. This leads to a buildup of phenylalanine in the blood, which can cause intellectual disability and other health problems if left untreated. The key to preventing the mental retardation associated with PKU is a strict dietary restriction of phenylalanine. This is achieved by limiting the intake of protein-rich foods. While not explicitly listed as an option, this dietary management is the cornerstone of PKU treatment.\n\nLet's analyze the given options:\n\nA. Hormone replacement therapy: Not relevant to PKU.\nB. Surgical intervention: Not relevant to PKU.\nC. Psychotherapy: May be helpful for coping with the condition, but does not prevent the underlying metabolic issue.\nD. Vitamin supplements: While some vitamins might be supplemented in a restricted diet, they are not the primary preventative measure for the mental retardation.\nE. Blood transfusions: Not relevant to PKU.\nF. Removal of environmental toxins: PKU is a genetic disorder, not caused by environmental toxins.\nG. Gene therapy: While gene therapy is a potential future treatment for genetic disorders, it is not the current standard or preventable measure for the mental retardation associated with PKU.\nH. Antibiotics: Not relevant to PKU.\nI. Regular exercise: May be beneficial for overall health but does not address the metabolic defect.\n\nNone of the options directly represent the primary preventative measure (dietary restriction). However, the question asks what the mental retardation is *preventable with*. This implies an intervention. In the context of metabolic disorders, sometimes specific dietary components or their metabolic byproducts are managed.\n\nLet's reconsider the options in light of how PKU is managed. The core issue is the inability to metabolize phenylalanine. This leads to a buildup of phenylalanine. The prevention of mental retardation is achieved by keeping phenylalanine levels low. This is done through a low-phenylalanine diet.\n\nLooking at the options again, none directly state \"dietary restriction.\" However, let's think about what might be *related* to managing a metabolic disorder.\n\nIf we consider the *consequences* of the metabolic defect, it's the buildup of a substance. The prevention is to avoid this buildup.\n\nLet's re-evaluate the options, considering if any could be interpreted as a broad category that might encompass the necessary intervention, or if there's a misunderstanding of the question or options.\n\nThe question is about *preventing* mental retardation. This is achieved by managing the underlying metabolic issue.\n\nLet's assume there might be a less direct but still correct answer among the choices.\n\nConsider the possibility that one of the options is a proxy for the actual treatment.\n\nLet's search for information on PKU treatment and prevention of mental retardation. The primary treatment is a lifelong low-phenylalanine diet.\n\nIf we are forced to choose from these options, and knowing that the core issue is a metabolic problem, we need to find an option that could relate to managing metabolic byproducts or deficiencies.\n\nLet's consider the possibility of a poorly worded question or options.\n\nHowever, if we think about what is *supplemented* or *managed* in the context of a metabolic disorder, it's often related to nutrients or substances that are either deficient or in excess.\n\nLet's consider the possibility that one of the options is a distractor, and another is the intended answer, even if not perfectly worded.\n\nLet's think about what is *given* to a patient to manage a condition.\n\nIf we consider the broader context of managing genetic metabolic disorders, sometimes specific nutrients or compounds are supplemented to aid in metabolic pathways or to compensate for deficiencies caused by the disorder or its treatment.\n\nLet's look at option D: vitamin supplements. While not the primary treatment,",
+        "input_tokens": 119,
+        "output_tokens": 800,
+        "total_tokens": 919,
+        "cost_usd": 0.00033190000000000004,
+        "latency_ms": 3604,
+        "predicted": "D",
+        "correct": false
+      },
+      "mid_alone": {
+        "model": "gemini-3.1-flash-lite-preview",
+        "text": "Answer: D",
+        "input_tokens": 119,
+        "output_tokens": 3,
+        "total_tokens": 122,
+        "cost_usd": 9.825e-06,
+        "latency_ms": 900,
+        "predicted": "D",
+        "correct": false
+      },
+      "strong_alone": {
+        "model": "gemini-3.1-pro-preview",
+        "text": "Answer: D",
+        "input_tokens": 119,
+        "output_tokens": 3,
+        "total_tokens": 122,
+        "cost_usd": 0.00016375000000000002,
+        "latency_ms": 7711,
+        "predicted": "D",
+        "correct": false
+      },
+      "weak_skill": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "1. **IDENTIFY SUB-FIELD:** This question relates to biological bases of behavior and cognitive deficits, touching on neuroscience and potentially developmental psychology.\n\n2. **IDENTIFY FRAMEWORK/THEORIST:** While no specific theorist is mentioned, understanding metabolic disorders and their impact on development is key.\n\n3. **APPLY THE DEFINITIONS EXACTLY:**\n    * **PKU (Phenylketonuria):** This is a genetic disorder where the body cannot break down phenylalanine, an amino acid found in protein. If untreated, phenylalanine builds up in the blood and can cause intellectual disability.\n    * **Prevention of mental retardation associated with PKU:** The key to preventing the cognitive deficits of PKU lies in managing the buildup of phenylalanine.\n\n4. **ELIMINATE options that confuse adjacent concepts:**\n    * **A. Hormone replacement therapy:** Not directly relevant to PKU's metabolic pathway.\n    * **B. Surgical intervention:** Not the primary treatment for PKU.\n    * **C. Psychotherapy:** Addresses psychological issues, not the underlying metabolic cause of intellectual disability in PKU.\n    * **E. Blood transfusions:** Used for blood disorders, not metabolic ones like PKU.\n    * **F. Removal of environmental toxins:** PKU is an inherited metabolic disorder, not caused by environmental toxins.\n    * **G. Gene therapy:** While a potential future treatment, it's not the *current* standard preventative measure for the mental retardation.\n    * **H. Antibiotics:** Used for bacterial infections, irrelevant to PKU.\n    * **I. Regular exercise:** Beneficial for overall health but not a direct preventative measure for PKU's cognitive effects.\n\n    * **D. Vitamin supplements:** This is the closest to the correct answer. While not strictly \"vitamin supplements\" in the typical sense, the management of PKU involves a **special diet** that is low in phenylalanine. This diet is often supplemented with specific nutrients and amino acid mixtures to ensure adequate nutrition while restricting phenylalanine. This dietary management is the cornerstone of preventing the intellectual disability. In a broader sense, ensuring proper nutrient intake, which can be achieved through specialized dietary formulations that might be considered akin to supplements in their role of providing necessary components, is the key. Given the options, this is the most plausible.\n\n5. **DOUBLE-CHECK exact terminology:** The question asks about *preventing* the mental retardation. The established method for this is dietary management. Option D, \"vitamin supplements,\" is the closest fit among the choices, representing the nutritional management aspect of PKU. A low-phenylalanine diet is the primary intervention.\n\nThe most accurate answer, considering the options provided, is related to nutritional management. While \"vitamin supplements\" isn't perfectly precise, it aligns with the concept of providing necessary nutrients to manage the metabolic disorder and prevent cognitive impairment. The actual treatment is a strict low-phenylalanine diet, often supplemented with special formulas.\n\nAnswer: D",
+        "input_tokens": 383,
+        "output_tokens": 613,
+        "total_tokens": 996,
+        "cost_usd": 0.00028350000000000006,
+        "latency_ms": 2355,
+        "predicted": "D",
+        "correct": false
+      }
+    }
+  },
+  {
+    "question_id": 1990,
+    "category": "psychology",
+    "question": "Which of the following item difficulty (p) levels maximizes the differentiation of examinees into high- and low-performing groups:",
+    "options": [
+      "0",
+      "0.5",
+      "0.8",
+      "0.3",
+      "1.2",
+      "0.2",
+      "0.9",
+      "1.0",
+      "0.7",
+      "1.5"
+    ],
+    "correct_answer": "B",
+    "configs": {
+      "weak_alone": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "The question asks about item difficulty (p) levels that maximize differentiation between high- and low-performing groups. Item difficulty (p) is typically defined as the proportion of examinees who answer an item correctly. This value ranges from 0 (no one answers correctly) to 1 (everyone answers correctly).\n\n*   **Items with p = 0 or p = 1** provide no differentiation. If no one gets it right, it doesn't distinguish between those who know more and those who know less. If everyone gets it right, it also doesn't distinguish.\n*   **Items with p close to 0 or 1** also provide limited differentiation.\n*   **Items with p close to 0.5** are most likely to discriminate between high- and low-performing groups. An item that is answered correctly by about half the examinees will be answered incorrectly by the other half. This allows for the greatest spread in scores and thus the best differentiation.\n\nLooking at the options:\nA. 0 (No differentiation)\nB. 0.5 (Ideal for differentiation)\nC. 0.8 (Leans towards easy, less differentiation)\nD. 0.3 (Leans towards difficult, but 0.5 is better)\nE. 1.2 (Invalid p value, probability cannot exceed 1)\nF. 0.2 (Leans towards difficult, but 0.5 is better)\nG. 0.9 (Leans towards easy, less differentiation)\nH. 1.0 (No differentiation)\nI. 0.7 (Leans towards easy, less differentiation)\nJ. 1.5 (Invalid p value)\n\nTherefore, the p-value that maximizes differentiation is 0.5.\n\nAnswer: B",
+        "input_tokens": 145,
+        "output_tokens": 379,
+        "total_tokens": 524,
+        "cost_usd": 0.0001661,
+        "latency_ms": 1359,
+        "predicted": "B",
+        "correct": true
+      },
+      "mid_alone": {
+        "model": "gemini-3.1-flash-lite-preview",
+        "text": "Answer: B",
+        "input_tokens": 145,
+        "output_tokens": 3,
+        "total_tokens": 148,
+        "cost_usd": 1.1775e-05,
+        "latency_ms": 912,
+        "predicted": "B",
+        "correct": true
+      },
+      "strong_alone": {
+        "model": "gemini-3.1-pro-preview",
+        "text": "Answer: B",
+        "input_tokens": 145,
+        "output_tokens": 3,
+        "total_tokens": 148,
+        "cost_usd": 0.00019625,
+        "latency_ms": 2577,
+        "predicted": "B",
+        "correct": true
+      },
+      "weak_skill": {
+        "model": "gemini-2.5-flash-lite",
+        "text": "1. **IDENTIFY SUB-FIELD:** This question falls under **Psychometrics**, a sub-field of psychology concerned with the theory and technique of psychological measurement.\n\n2. **IDENTIFY FRAMEWORK/THEORIST:** The concept of item difficulty (p) and its relation to item discrimination is a core principle in classical test theory, often associated with figures like Spearman and Thurstone, but the question itself doesn't directly invoke a specific theorist's framework beyond general psychometric principles.\n\n3. **APPLY THE DEFINITIONS EXACTLY:**\n   - **Item difficulty (p):** The proportion of examinees who answer an item correctly. A p-value of 0 means no one got it right, and a p-value of 1 means everyone got it right.\n   - **Item discrimination:** The extent to which an item differentiates between high- and low-performing examinees. An item with good discrimination will be answered correctly by more high-performing examinees than low-performing examinees.\n\n4. **ELIMINATE options that confuse adjacent concepts:**\n   - **Extremely easy items (p close to 1):** These items will be answered correctly by almost everyone, including low performers. They don't differentiate well between groups. Options H (1.0) and G (0.9) are likely to have low discrimination.\n   - **Extremely difficult items (p close to 0):** These items will be answered incorrectly by almost everyone, including high performers. They also don't differentiate well. Options A (0) and F (0.2) are likely to have low discrimination.\n   - **Invalid p-values:** Item difficulty (p) is a proportion, so it must be between 0 and 1 inclusive. Options E (1.2) and J (1.5) are impossible p-values and can be immediately eliminated.\n\n5. **DOUBLE-CHECK exact terminology:** The question asks for the p-level that *maximizes differentiation*. In classical test theory, an item's ability to discriminate is maximized when it is neither too easy nor too difficult. This typically occurs when the p-value is around 0.5. This allows for a good spread of scores, with high performers more likely to get it right and low performers more likely to get it wrong.\n\nConsidering the remaining options:\n- B (0.5) represents the ideal scenario for maximizing discrimination.\n- C (0.8) and I (0.7) are on the easier side, and while they can discriminate, they are less optimal than 0.5.\n- D (0.3) is on the harder side, and while it can discriminate, it is less optimal than 0.5.\n\nTherefore, the p-level that *maximizes* differentiation is generally considered to be 0.5.\n\nAnswer: B",
+        "input_tokens": 409,
+        "output_tokens": 601,
+        "total_tokens": 1010,
+        "cost_usd": 0.0002813,
+        "latency_ms": 2451,
+        "predicted": "B",
+        "correct": true
+      }
+    }
+  }
+]

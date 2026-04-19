@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Scaffolding Wedge V3 — MMLU-Pro</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:-apple-system,'Inter',sans-serif;background:#0a0a0a;color:#e8e6e3;margin:0;padding:2rem;line-height:1.55}
+.wrap{max-width:1280px;margin:0 auto}
+h1{font-size:2rem;margin:0 0 .25rem;letter-spacing:-.02em}
+h2{font-size:1.25rem;margin:2rem 0 .75rem;color:#f5f5f4}
+h3{font-size:.9375rem;color:#d97757;margin:1rem 0 .5rem}
+h4{font-size:.8125rem;margin:.5rem 0}
+.sub{color:#9a9590;font-size:.8125rem}
+.card{background:#151413;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.verdict{background:linear-gradient(135deg,rgba(255,255,255,.02),rgba(255,255,255,.05));border:2px solid;padding:2rem;text-align:center}
+.vlabel{font-size:2rem;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.vmetrics{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-top:1.5rem}
+.metric{background:rgba(255,255,255,.03);padding:1rem;border-radius:8px}
+.mlabel{font-size:.625rem;text-transform:uppercase;letter-spacing:.12em;color:#9a9590;margin-bottom:.25rem}
+.mval{font-size:1.5rem;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
+.b{background:rgba(255,255,255,.05);border-radius:4px;height:18px;position:relative;overflow:hidden}
+.bf{height:100%;transition:width .3s}
+.bl{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.6875rem;font-family:'JetBrains Mono',monospace;color:#fff;mix-blend-mode:difference}
+.bg{display:grid;grid-template-columns:240px 1fr;gap:.5rem;align-items:center;margin:.35rem 0;font-size:.75rem}
+.bgl{color:#9a9590;text-align:right;font-size:.6875rem}
+.q-grid{display:grid;grid-template-columns:60px 110px repeat(4,50px) 1fr;gap:.5rem;align-items:center;padding:.375rem .5rem;border-bottom:1px solid rgba(255,255,255,.04);font-size:.6875rem;font-family:'JetBrains Mono',monospace}
+.q-grid:hover{background:rgba(255,255,255,.02)}
+.hdr{font-weight:700;color:#9a9590;border-bottom:2px solid rgba(255,255,255,.08)}
+.ans{text-align:center;padding:2px 4px;border-radius:3px;font-weight:700}
+.ans.ok{background:rgba(34,197,94,.15);color:#22c55e}
+.ans.xx{background:rgba(239,68,68,.15);color:#ef4444}
+.insight{background:rgba(34,197,94,.05);border-left:3px solid #22c55e;padding:1rem;border-radius:4px;margin-top:1rem}
+.warn{background:rgba(245,158,11,.05);border-left:3px solid #f59e0b;padding:1rem;border-radius:4px;margin-top:1rem}
+.foot{text-align:center;color:#5d5854;font-size:.6875rem;margin-top:3rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.04)}
+code.m{font-family:'JetBrains Mono',monospace;background:rgba(255,255,255,.05);padding:2px 6px;border-radius:4px;font-size:.8125rem}
+a{color:#d97757;text-decoration:none}
+.dom-row{display:grid;grid-template-columns:140px repeat(4,1fr);gap:.5rem;margin:.5rem 0;align-items:center}
+</style></head><body><div class="wrap">
+<h1>Scaffolding Wedge V3</h1>
+<p class="sub">attrition.sh research arm · Public benchmark: <a href="https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro" target="_blank">MMLU-Pro</a> (TIGER-Lab, NeurIPS 2024) · Deterministic scoring · 4-tier Gemini capability ladder</p>
+
+<div class="card verdict" style="border-color:#f59e0b">
+  <div class="vlabel" style="color:#f59e0b">PARTIAL — skill transfers, economics don't close</div>
+  <p class="sub" style="margin-top:.5rem">Skill adds +13.3pp to weak, but gap to strong remains and skill tokens eat savings.</p>
+  <div class="vmetrics">
+    <div class="metric"><div class="mlabel">Accuracy retention</div><div class="mval" style="color:#f59e0b">69.2%</div><div class="sub">(weak+skill / strong)</div></div>
+    <div class="metric"><div class="mlabel">Cost fraction</div><div class="mval" style="color:#60a5fa">95.8%</div><div class="sub">(weak+skill / strong)</div></div>
+    <div class="metric"><div class="mlabel">Skill uplift</div><div class="mval" style="color:#22c55e">+13.3pp</div><div class="sub">(weak+skill vs weak)</div></div>
+    <div class="metric"><div class="mlabel">Gap to mid</div><div class="mval" style="color:#f59e0b">-20.0pp</div><div class="sub">(weak+skill vs mid alone)</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Method</h2>
+  <p><strong>Dataset</strong>: Real MMLU-Pro questions fetched from HuggingFace (TIGER-Lab/MMLU-Pro). Graduate-level, 10 multiple-choice options, deterministic correct answer. No judge subjectivity — correctness is letter-match.</p>
+  <p><strong>Sample</strong>: 15 questions across 3 domains (business, law, psychology), 5 each.</p>
+  <p><strong>Capability ladder</strong>:</p>
+  <ul>
+    <li><code class="m">gemini-2.5-flash-lite</code> (weakest, cheapest, $0.10/$0.40 per M)</li>
+    <li><code class="m">gemini-3.1-flash-lite-preview</code> (mid, $0.075/$0.30 per M)</li>
+    <li><code class="m">gemini-3.1-pro-preview</code> (strongest, $1.25/$5.00 per M)</li>
+    <li>Weak + domain-distilled reasoning skill (hand-crafted checklist per domain)</li>
+  </ul>
+  <p><strong>Note on older Gemini</strong>: Gemini 1.0 and 1.5 are fully retired. Gemini 2.0 retires June 2026. 2.5-flash-lite is the weakest currently available tier.</p>
+</div>
+
+<div class="card">
+  <h2>Aggregate Accuracy (N=15)</h2>
+<div class="bg"><div class="bgl">Weak alone (2.5-flash-lite)</div><div class="b"><div class="bf" style="width:46.666666666666664%;background:#94a3b8"></div><div class="bl">46.7%</div></div></div><div class="bg"><div class="bgl">Mid alone (3.1-flash-lite)</div><div class="b"><div class="bf" style="width:80.0%;background:#60a5fa"></div><div class="bl">80.0%</div></div></div><div class="bg"><div class="bgl">Strong alone (3.1-pro)</div><div class="b"><div class="bf" style="width:86.66666666666667%;background:#f59e0b"></div><div class="bl">86.7%</div></div></div><div class="bg"><div class="bgl">Weak + distilled skill</div><div class="b"><div class="bf" style="width:60.0%;background:#22c55e"></div><div class="bl">60.0%</div></div></div></div><div class="card"><h2>Total Cost (all 15 questions)</h2><div class="bg"><div class="bgl">Weak alone (2.5-flash-lite)</div><div class="b"><div class="bf" style="width:82.96667454502482%;background:#94a3b8"></div><div class="bl">$0.004388</div></div></div><div class="bg"><div class="bgl">Mid alone (3.1-flash-lite)</div><div class="b"><div class="bf" style="width:6.005672417868116%;background:#60a5fa"></div><div class="bl">$0.000318</div></div></div><div class="bg"><div class="bgl">Strong alone (3.1-pro)</div><div class="b"><div class="bf" style="width:100.0%;background:#f59e0b"></div><div class="bl">$0.005289</div></div></div><div class="bg"><div class="bgl">Weak + distilled skill</div><div class="b"><div class="bf" style="width:95.81091940439612%;background:#22c55e"></div><div class="bl">$0.005067</div></div></div></div>
+
+<div class="card">
+  <h2>Key Findings (brutally honest)</h2>
+
+  <div class="insight">
+    <strong style="color:#22c55e">Finding 1: The skill DOES transfer reasoning.</strong><br>
+    Weak + skill scored 60.0% vs weak alone at 46.7% — an uplift of <strong>+13.3pp</strong>.
+    On 4 questions the skill rescued a wrong weak-model answer. On 2 questions the skill HURT performance (weak alone got it right, weak+skill got it wrong).
+    Net positive: distillation is not placebo; it moves the needle.
+  </div>
+
+  <div class="warn">
+    <strong style="color:#f59e0b">Finding 2: But it doesn't close the gap to a stronger model.</strong><br>
+    Weak + skill (60.0%) still trails strong (86.7%) by 26.7pp.
+    Quality retention is only <strong>69.2%</strong>, below the 80% threshold needed for the wedge to be commercially viable on this benchmark.
+    Some questions require capability the weak model doesn't have, and no checklist fixes that.
+  </div>
+
+  <div class="warn">
+    <strong style="color:#f59e0b">Finding 3: The skill prompt eats the cost savings.</strong><br>
+    The distilled skill adds ~700-900 input tokens. Cost fraction is <strong>95.8%</strong> — weak+skill is nearly as expensive as strong alone on this benchmark.
+    Naive scaffolding injection doesn't work economically unless the skill can be cached, compressed, or shared across many queries.
+  </div>
+
+  <div class="insight">
+    <strong style="color:#22c55e">Finding 4: The REAL winner is the MID tier.</strong><br>
+    <code class="m">gemini-3.1-flash-lite-preview</code> scored <strong>80.0%</strong> — only 6.7pp behind strong — at total cost of <strong>$0.000318</strong> (6.0% of strong).
+    For many workloads, the right optimization isn't distillation — it's picking the right model tier in the first place.
+    This reframes attrition's value: not "use a cheaper model with a skill" but "measure capability vs cost per query type and route accordingly."
+  </div>
+
+  <div class="insight">
+    <strong style="color:#22c55e">Finding 5: Strong is not always better.</strong><br>
+    On 1 questions, strong got it WRONG while a smaller model got it right. Blindly defaulting to Pro wastes money without guaranteeing quality.
+  </div>
+</div>
+
+<div class="card">
+  <h2>By Domain</h2>
+  <div class="dom-row" style="font-weight:700;color:#9a9590;font-size:.75rem">
+    <div>Domain</div>
+    <div style="text-align:center">Weak</div>
+    <div style="text-align:center">Mid</div>
+    <div style="text-align:center">Strong</div>
+    <div style="text-align:center">Weak+Skill</div>
+  </div>
+<div class="dom-row"><div><strong>business</strong> (n=5)</div><div style="text-align:center"><div class="b" style="height:16px"><div class="bf" style="width:60.0%;background:#94a3b8"></div><div class="bl">60%</div></div></div><div style="text-align:center"><div class="b" style="height:16px"><div class="bf" style="width:100.0%;background:#60a5fa"></div><div class="bl">100%</div></div></div><div style="text-align:center"><div class="b" style="height:16px"><div class="bf" style="width:100.0%;background:#f59e0b"></div><div class="bl">100%</div></div></div><div style="text-align:center"><div class="b" style="height:16px"><div class="bf" style="width:60.0%;background:#22c55e"></div><div class="bl">60%</div></div></div></div><div class="dom-row"><div><strong>law</strong> (n=5)</div><div style="text-align:center"><div class="b" style="height:16px"><div class="bf" style="width:20.0%;background:#94a3b8"></div><div class="bl">20%</div></div></div><div style="text-align:center"><div class="b" style="height:16px"><div class="bf" style="width:80.0%;background:#60a5fa"></div><div class="bl">80%</div></div></div><div style="text-align:center"><div class="b" style="height:16px"><div class="bf" style="width:80.0%;background:#f59e0b"></div><div class="bl">80%</div></div></div><div style="text-align:center"><div class="b" style="height:16px"><div class="bf" style="width:40.0%;background:#22c55e"></div><div class="bl">40%</div></div></div></div><div class="dom-row"><div><strong>psychology</strong> (n=5)</div><div style="text-align:center"><div class="b" style="height:16px"><div class="bf" style="width:60.0%;background:#94a3b8"></div><div class="bl">60%</div></div></div><div style="text-align:center"><div class="b" style="height:16px"><div class="bf" style="width:60.0%;background:#60a5fa"></div><div class="bl">60%</div></div></div><div style="text-align:center"><div class="b" style="height:16px"><div class="bf" style="width:80.0%;background:#f59e0b"></div><div class="bl">80%</div></div></div><div style="text-align:center"><div class="b" style="height:16px"><div class="bf" style="width:80.0%;background:#22c55e"></div><div class="bl">80%</div></div></div></div>
+</div>
+
+<div class="card">
+  <h2>Per-Question Results</h2>
+  <div class="q-grid hdr">
+    <div>QID</div><div>Domain</div>
+    <div title="Weak alone">Weak</div><div title="Mid alone">Mid</div><div title="Strong alone">Strong</div><div title="Weak+Skill">W+Skill</div>
+    <div>Correct</div>
+  </div>
+<div class="q-grid"><div>70</div><div>business</div><div class="ans ok">I</div><div class="ans ok">I</div><div class="ans ok">I</div><div class="ans xx">E</div><div>I</div></div><div class="q-grid"><div>71</div><div>business</div><div class="ans ok">F</div><div class="ans ok">F</div><div class="ans ok">F</div><div class="ans ok">F</div><div>F</div></div><div class="q-grid"><div>72</div><div>business</div><div class="ans xx">A</div><div class="ans ok">J</div><div class="ans ok">J</div><div class="ans ok">J</div><div>J</div></div><div class="q-grid"><div>73</div><div>business</div><div class="ans xx">H</div><div class="ans ok">C</div><div class="ans ok">C</div><div class="ans xx">H</div><div>C</div></div><div class="q-grid"><div>74</div><div>business</div><div class="ans ok">G</div><div class="ans ok">G</div><div class="ans ok">G</div><div class="ans ok">G</div><div>G</div></div><div class="q-grid"><div>866</div><div>law</div><div class="ans xx">J</div><div class="ans ok">D</div><div class="ans xx">G</div><div class="ans xx">G</div><div>D</div></div><div class="q-grid"><div>867</div><div>law</div><div class="ans ok">B</div><div class="ans ok">B</div><div class="ans ok">B</div><div class="ans xx">H</div><div>B</div></div><div class="q-grid"><div>868</div><div>law</div><div class="ans xx">D</div><div class="ans xx">A</div><div class="ans ok">F</div><div class="ans ok">F</div><div>F</div></div><div class="q-grid"><div>869</div><div>law</div><div class="ans xx">H</div><div class="ans ok">A</div><div class="ans ok">A</div><div class="ans ok">A</div><div>A</div></div><div class="q-grid"><div>870</div><div>law</div><div class="ans xx">H</div><div class="ans ok">E</div><div class="ans ok">E</div><div class="ans xx">F</div><div>E</div></div><div class="q-grid"><div>1986</div><div>psychology</div><div class="ans ok">E</div><div class="ans ok">E</div><div class="ans ok">E</div><div class="ans ok">E</div><div>E</div></div><div class="q-grid"><div>1987</div><div>psychology</div><div class="ans xx">F</div><div class="ans xx">C</div><div class="ans ok">I</div><div class="ans ok">I</div><div>I</div></div><div class="q-grid"><div>1988</div><div>psychology</div><div class="ans ok">E</div><div class="ans ok">E</div><div class="ans ok">E</div><div class="ans ok">E</div><div>E</div></div><div class="q-grid"><div>1989</div><div>psychology</div><div class="ans xx">D</div><div class="ans xx">D</div><div class="ans xx">D</div><div class="ans xx">D</div><div>F</div></div><div class="q-grid"><div>1990</div><div>psychology</div><div class="ans ok">B</div><div class="ans ok">B</div><div class="ans ok">B</div><div class="ans ok">B</div><div>B</div></div></div>
+
+<div class="card" style="border:2px solid #f59e0b">
+  <h2>First-Principles Conclusion (V2 vs V3 cross-check)</h2>
+
+  <h3>Why V2 said "WEDGE CONFIRMED DOMINANT" and V3 says "PARTIAL"</h3>
+  <p>V2 used FloorAI synthetic queries judged by a Pro judge. Pro-as-judge biases toward responses that look structured and policy-grounded — which is exactly what the distilled skill produces. The judge rewarded form over correctness.</p>
+  <p>V3 uses real MMLU-Pro with DETERMINISTIC correct answers. No judge bias. Correctness is letter-match. And the signal is subtler: skills help, but not enough to close the capability gap on hard questions.</p>
+
+  <h3>What's actually true after both experiments</h3>
+  <ul>
+    <li><strong>Skills transfer SOME reasoning</strong>: +13.3pp on weak model, rescue 4 wrong answers.</li>
+    <li><strong>Skills don't close the capability gap</strong>: weak+skill 60.0% vs strong 86.7%. The cheapest model can't reason like the best one.</li>
+    <li><strong>Prompt overhead kills economics</strong>: skill tokens make cheap+skill as expensive as strong on this benchmark.</li>
+    <li><strong>Model tier selection beats skill injection</strong>: mid tier gives 92% of strong's accuracy at 6% of the cost. No skill needed.</li>
+    <li><strong>Strong is not a safe default</strong>: strong was wrong on 1 questions a smaller model got right.</li>
+  </ul>
+
+  <h3>Honest commercial implication</h3>
+  <p>attrition's viable wedge is NOT distillation-as-a-service. It is <strong>per-query capability routing backed by measurement</strong>:</p>
+  <ol>
+    <li>Measure which queries actually benefit from Pro capability (MMLU-Pro-style ground truth).</li>
+    <li>Route the rest to mid-tier or weak+skill based on measured outcomes, not guesses.</li>
+    <li>Only apply scaffolding where the data shows it recovers >X% of capability gap.</li>
+  </ol>
+  <p>That's a <em>routing + measurement engine</em>, not a distillation engine. Measurement is what nobody else does against real ground truth. That's the defensible wedge.</p>
+
+  <h3>Next experiment (V4)</h3>
+  <ol>
+    <li><strong>100+ questions across 5+ domains</strong> for statistical confidence.</li>
+    <li><strong>Per-query classifier</strong>: train on "which tier succeeds on this query?" using MMLU-Pro labels.</li>
+    <li><strong>Skill caching</strong>: move skill into cacheable system prompt, test whether it recovers the cost advantage.</li>
+    <li><strong>Hard-subset test</strong>: split MMLU-Pro into easy (mid gets it) vs hard (only strong gets it) and test if skill helps MORE on hard questions.</li>
+  </ol>
+</div>
+
+<div class="foot">
+  attrition.sh scaffolding wedge V3 · Real MMLU-Pro data · No judge subjectivity · All data measured · Generated April 19, 2026
+</div>
+</div></body></html>
