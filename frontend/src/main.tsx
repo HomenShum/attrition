@@ -16,6 +16,7 @@ import { Architect } from "./pages/Architect";
 import { Builder } from "./pages/Builder";
 import { Radar } from "./pages/Radar";
 import { Fidelity } from "./pages/Fidelity";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import "./index.css";
 
 const CONVEX_URL =
@@ -28,14 +29,50 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <ConvexProvider client={convex}>
       <BrowserRouter>
         <Routes>
-          {/* Three public pages */}
-          <Route path="/" element={<Architect />} />
-          <Route path="/build" element={<Builder />} />
-          <Route path="/build/:slug" element={<Builder />} />
-          <Route path="/radar" element={<Radar />} />
+          {/* Three public pages — each wrapped so a render error on one
+              page doesn't blank the whole app. */}
+          <Route
+            path="/"
+            element={
+              <ErrorBoundary label="architect">
+                <Architect />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/build"
+            element={
+              <ErrorBoundary label="builder">
+                <Builder />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/build/:slug"
+            element={
+              <ErrorBoundary label="builder">
+                <Builder />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/radar"
+            element={
+              <ErrorBoundary label="radar">
+                <Radar />
+              </ErrorBoundary>
+            }
+          />
 
           {/* Internal operator view — fidelity trial rollups */}
-          <Route path="/_internal/fidelity" element={<Fidelity />} />
+          <Route
+            path="/_internal/fidelity"
+            element={
+              <ErrorBoundary label="fidelity">
+                <Fidelity />
+              </ErrorBoundary>
+            }
+          />
 
           {/* Everything else → Architect. No dead links. */}
           <Route path="*" element={<Navigate to="/" replace />} />

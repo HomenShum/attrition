@@ -53,6 +53,7 @@ export function Radar() {
     limit: 200,
   });
   const counts = useQuery(api.domains.daas.radar.getCategoryCounts, {});
+  const ingestHealth = useQuery(api.domains.daas.radar.getIngestHealth, {});
 
   // Client-side derived filters — stack, delta-since-24h, free-text search.
   const DAY_MS = 86_400_000;
@@ -124,6 +125,82 @@ export function Radar() {
             interpreters. Tier 3 is weak signal — never used alone.
           </p>
         </header>
+
+        {/* Ingest health card — tier-1 and tier-3 ingest cadence + errors */}
+        {ingestHealth ? (
+          <div
+            style={{
+              padding: 12,
+              background:
+                ingestHealth.errorsLast24h > 0
+                  ? "rgba(239,68,68,0.06)"
+                  : "rgba(34,197,94,0.05)",
+              border:
+                ingestHealth.errorsLast24h > 0
+                  ? "1px solid rgba(239,68,68,0.3)"
+                  : "1px solid rgba(34,197,94,0.25)",
+              borderRadius: 8,
+              marginBottom: 16,
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 12,
+              flexWrap: "wrap",
+              fontSize: 12,
+              color: "rgba(255,255,255,0.75)",
+            }}
+          >
+            <div>
+              <span style={{ color: "rgba(255,255,255,0.5)" }}>GitHub releases</span>{" "}
+              {ingestHealth.githubReleases ? (
+                <>
+                  last{" "}
+                  <span style={{ color: "rgba(255,255,255,0.9)" }}>
+                    {new Date(ingestHealth.githubReleases.createdAt).toLocaleString()}
+                  </span>{" "}
+                  · {String(ingestHealth.githubReleases.status).toUpperCase()}
+                </>
+              ) : (
+                "never run"
+              )}
+            </div>
+            <div>
+              <span style={{ color: "rgba(255,255,255,0.5)" }}>Hacker News</span>{" "}
+              {ingestHealth.hackerNews ? (
+                <>
+                  last{" "}
+                  <span style={{ color: "rgba(255,255,255,0.9)" }}>
+                    {new Date(ingestHealth.hackerNews.createdAt).toLocaleString()}
+                  </span>{" "}
+                  · {String(ingestHealth.hackerNews.status).toUpperCase()}
+                </>
+              ) : (
+                "never run"
+              )}
+            </div>
+            <div>
+              <span style={{ color: "rgba(255,255,255,0.5)" }}>Errors 24h</span>{" "}
+              <span
+                style={{
+                  color: ingestHealth.errorsLast24h > 0 ? "#ef4444" : "#22c55e",
+                  fontWeight: 500,
+                }}
+              >
+                {ingestHealth.errorsLast24h}
+              </span>
+            </div>
+            <a
+              href="/_internal/fidelity"
+              style={{
+                marginLeft: "auto",
+                color: "#d97757",
+                textDecoration: "none",
+                fontSize: 11,
+              }}
+            >
+              operator → /_internal/fidelity
+            </a>
+          </div>
+        ) : null}
 
         {/* Filter bar: category pills + stack dropdown + delta toggle + search */}
         <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap", alignItems: "center" }}>

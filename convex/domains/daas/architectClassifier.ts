@@ -106,6 +106,34 @@ export const classify = action({
     prompt: v.string(),
   },
   handler: async (ctx, args): Promise<{ ok: boolean; reason?: string }> => {
+    // Rate-limit check — bucket by the first 6 chars of sessionSlug so
+    // one anonymous client can't spam classifier calls. This is a best-
+    // effort protection until we ship real auth.
+    const bucketKey = `architect:${args.sessionSlug.slice(0, 6) || "anon"}`;
+    const bucket = await ctx.runMutation(
+      api.domains.daas.architectRate.checkClassifyBucket,
+      { bucketKey },
+    );
+    if (!bucket.allowed) {
+      await ctx.runMutation(api.domains.daas.architect.commitClassification, {
+        sessionSlug: args.sessionSlug,
+        checklistJson: JSON.stringify([
+          {
+            step: "problem_type_identified",
+            status: "missing",
+            detail: `rate limit reached (20 classify calls per 5 min); try again after ${new Date(bucket.resetAt).toLocaleTimeString()}`,
+          },
+        ]),
+        classificationJson: "{}",
+        runtimeLane: "keep_big_model",
+        worldModelLane: "lite",
+        intentLane: "unknown",
+        rationale:
+          "Rate limit reached (20 classify calls per 5 min per bucket). Wait a few minutes or contact us to raise the cap.",
+      });
+      return { ok: false, reason: "rate_limited" };
+    }
+
     await ctx.runMutation(api.domains.daas.architect.markClassifying, {
       sessionSlug: args.sessionSlug,
     });

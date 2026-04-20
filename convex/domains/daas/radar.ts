@@ -130,6 +130,35 @@ export const listItems = query({
   },
 });
 
+/**
+ * Ingest health — powers the Radar page's reliability card.
+ * Surfaces the most recent `radar.ingestAll` and `radar.ingestHn` audit
+ * rows so operators see ingest cadence + error counts without paging
+ * through Convex function logs.
+ */
+export const getIngestHealth = query({
+  args: {},
+  handler: async (ctx) => {
+    const recent = await ctx.db
+      .query("daasAuditLog")
+      .withIndex("by_createdAt")
+      .order("desc")
+      .take(100);
+    const findLast = (op: string) => recent.find((r) => r.op === op) ?? null;
+    return {
+      githubReleases: findLast("radar.ingestAll"),
+      hackerNews: findLast("radar.ingestHn"),
+      // Count errors in the last 24h across all ingest ops
+      errorsLast24h: recent.filter(
+        (r) =>
+          r.status === "error" &&
+          (r.op === "radar.ingestAll" || r.op === "radar.ingestHn") &&
+          Date.now() - r.createdAt < 24 * 60 * 60 * 1000,
+      ).length,
+    };
+  },
+});
+
 /** Counts by category — powers the Radar tab pills */
 export const getCategoryCounts = query({
   args: {},

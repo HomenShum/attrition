@@ -13,6 +13,7 @@ import type * as domains_daas_actions from "../domains/daas/actions.js";
 import type * as domains_daas_admin from "../domains/daas/admin.js";
 import type * as domains_daas_architect from "../domains/daas/architect.js";
 import type * as domains_daas_architectClassifier from "../domains/daas/architectClassifier.js";
+import type * as domains_daas_architectRate from "../domains/daas/architectRate.js";
 import type * as domains_daas_benchmarks from "../domains/daas/benchmarks.js";
 import type * as domains_daas_compileDown from "../domains/daas/compileDown.js";
 import type * as domains_daas_fidelity from "../domains/daas/fidelity.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   "domains/daas/admin": typeof domains_daas_admin;
   "domains/daas/architect": typeof domains_daas_architect;
   "domains/daas/architectClassifier": typeof domains_daas_architectClassifier;
+  "domains/daas/architectRate": typeof domains_daas_architectRate;
   "domains/daas/benchmarks": typeof domains_daas_benchmarks;
   "domains/daas/compileDown": typeof domains_daas_compileDown;
   "domains/daas/fidelity": typeof domains_daas_fidelity;
