@@ -1,0 +1,3 @@
+# Benchmark dataset caches + run outputs — regenerable, never committed
+_cache/
+*.jsonl
