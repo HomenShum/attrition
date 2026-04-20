@@ -262,10 +262,20 @@ export const daasRateBuckets = defineTable({
  */
 export const DAAS_BENCHMARK_IDS = [
   "bfcl_v3",
+  "bfcl_v4",
   "mmlu_pro",
   "tau2_retail",
+  "tau2_telecom",
+  "tau2_airline",
   "swebench_verified",
   "reportbench",
+  "judgebench",
+  "if_rewardbench",
+  "mcp_atlas",
+  "terminal_bench_2",
+  "browsecomp",
+  "arena_hard_auto",
+  "rewardbench_2",
 ] as const;
 
 /**

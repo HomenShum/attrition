@@ -130,6 +130,16 @@ def run_trials(
 # ---------------------------------------------------------------------------
 
 
+def prompt_scaffold_passthrough(
+    task: dict[str, Any], ext: Externalization
+) -> dict[str, Any]:
+    """No-op scaffold for benchmarks where the adapter's live_replay
+    already applies the full prompt contract (e.g., JudgeBench's pick-A-or-B
+    format). Use when the externalization under test is measured against
+    the adapter's default behavior."""
+    return task
+
+
 def prompt_scaffold_for_mmlu_pro(
     task: dict[str, Any], ext: Externalization
 ) -> dict[str, Any]:

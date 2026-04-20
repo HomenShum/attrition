@@ -1,0 +1,8 @@
+{
+  "externalization_id": "judgebench_passthrough_v1",
+  "form": "prompt",
+  "source_model": "gemini-3.1-pro-preview",
+  "source_trace_ids": [],
+  "notes": "No-op scaffold baseline — measures how much Pro beats Flash Lite on JudgeBench before any distillation. Use this as the n=0 reference; any real scaffold must beat its distilled column on the exact same n.",
+  "system_prompt": ""
+}

@@ -33,8 +33,13 @@ from pathlib import Path
 from typing import Any
 
 from daas.benchmarks.mmlu_pro import runner as mmlu_pro_runner
+from daas.benchmarks.judgebench import runner as judgebench_runner
 from daas.fidelity import Externalization
-from daas.fidelity.trial import prompt_scaffold_for_mmlu_pro, run_trials
+from daas.fidelity.trial import (
+    prompt_scaffold_for_mmlu_pro,
+    prompt_scaffold_passthrough,
+    run_trials,
+)
 
 CONVEX_PROD_URL = "https://joyous-walrus-428.convex.cloud"
 
@@ -42,8 +47,10 @@ CONVEX_PROD_URL = "https://joyous-walrus-428.convex.cloud"
 def _adapter_for(benchmark: str):
     if benchmark == "mmlu_pro":
         return mmlu_pro_runner
+    if benchmark == "judgebench":
+        return judgebench_runner
     raise SystemExit(
-        f"unknown benchmark {benchmark!r}; only 'mmlu_pro' is currently wired. "
+        f"unknown benchmark {benchmark!r}. Known: mmlu_pro, judgebench. "
         "Add the adapter + scaffold function to daas/fidelity/cli.py."
     )
 
@@ -51,6 +58,11 @@ def _adapter_for(benchmark: str):
 def _scaffold_for(benchmark: str, form: str):
     if benchmark == "mmlu_pro" and form == "prompt":
         return prompt_scaffold_for_mmlu_pro
+    if benchmark == "judgebench" and form == "prompt":
+        # JudgeBench tasks already contain the full question in task["question"]
+        # and are consumed by judgebench.live_replay — the scaffold here is a
+        # no-op passthrough unless/until we distill a judge-specific preamble.
+        return prompt_scaffold_passthrough
     raise SystemExit(
         f"no scaffold known for (benchmark={benchmark}, form={form}). "
         "Implement one in daas/fidelity/trial.py."
@@ -59,7 +71,7 @@ def _scaffold_for(benchmark: str, form: str):
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--benchmark", required=True, choices=["mmlu_pro"])
+    p.add_argument("--benchmark", required=True, choices=["mmlu_pro", "judgebench"])
     p.add_argument("--externalization-id", required=True)
     p.add_argument("--form", required=True, choices=["prompt", "tool_schema", "scaffold_graph"])
     p.add_argument("--artifact", required=True, type=Path, help="Path to JSON artifact")
@@ -67,7 +79,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--small-model", required=True)
     p.add_argument("--large-model", required=True)
     p.add_argument("--limit", type=int, default=60)
-    p.add_argument("--category", default=None, help="Optional benchmark-specific filter")
+    p.add_argument("--category", default=None, help="mmlu_pro category filter (e.g. law)")
+    p.add_argument("--split", default=None, help="judgebench split: claude | gpt")
     p.add_argument("--notes", default="")
     p.add_argument("--record", action="store_true", help="Write trials + verdict to Convex")
     p.add_argument("--convex-url", default=CONVEX_PROD_URL)
@@ -96,8 +109,10 @@ def main(argv: list[str] | None = None) -> int:
     scaffold = _scaffold_for(args.benchmark, args.form)
 
     load_kwargs: dict[str, Any] = {}
-    if args.category:
+    if args.category and args.benchmark == "mmlu_pro":
         load_kwargs["category"] = args.category
+    if args.split and args.benchmark == "judgebench":
+        load_kwargs["split"] = args.split
 
     convex_client = None
     if args.record:

@@ -483,6 +483,8 @@ function ScaffoldTab({ runtimeLane }: { runtimeLane: string }) {
 
 function EvalTab({ runtimeLane }: { runtimeLane: string }) {
   const plan = evalPlanForRuntime(runtimeLane);
+  // Show recent verdicts for the benchmarks most relevant to this lane.
+  const benchmarkIds = benchmarkIdsForRuntime(runtimeLane);
   return (
     <div>
       <h3 style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Evaluation plan</h3>
@@ -490,6 +492,25 @@ function EvalTab({ runtimeLane }: { runtimeLane: string }) {
         Deterministic oracles first, bounded rubric second. We only call a
         difference significant when the Newcombe 95% CI excludes zero.
       </p>
+
+      {benchmarkIds.length > 0 ? (
+        <div style={{ marginBottom: 20 }}>
+          <div
+            style={{
+              fontSize: 11,
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.5)",
+              marginBottom: 10,
+            }}
+          >
+            Recent verdicts (live)
+          </div>
+          {benchmarkIds.map((benchId) => (
+            <BenchmarkVerdictRow key={benchId} benchmarkId={benchId} />
+          ))}
+        </div>
+      ) : null}
 
       <div style={{ display: "grid", gap: 10 }}>
         {plan.map((p) => (
@@ -527,6 +548,91 @@ function EvalTab({ runtimeLane }: { runtimeLane: string }) {
         a shipping decision. Use the deterministic oracle first; for open-ended
         residuals, use a small jury (PoLL pattern), not one large judge.
       </div>
+    </div>
+  );
+}
+
+function BenchmarkVerdictRow({ benchmarkId }: { benchmarkId: string }) {
+  const rows = useQuery(api.domains.daas.fidelity.listVerdictsByBenchmark, {
+    benchmarkId,
+    limit: 3,
+  });
+  if (!rows) {
+    return null;
+  }
+  if (rows.length === 0) {
+    return (
+      <div
+        style={{
+          padding: 10,
+          marginBottom: 8,
+          background: "rgba(255,255,255,0.02)",
+          border: "1px dashed rgba(255,255,255,0.12)",
+          borderRadius: 6,
+          fontSize: 12,
+          color: "rgba(255,255,255,0.5)",
+        }}
+      >
+        <code style={{ color: "#d97757" }}>{benchmarkId}</code> — no verdicts yet.
+        Run{" "}
+        <code style={{ fontSize: 11 }}>
+          python -m daas.fidelity.cli --benchmark {benchmarkId} …
+        </code>
+      </div>
+    );
+  }
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", marginBottom: 4 }}>
+        <code style={{ color: "#d97757" }}>{benchmarkId}</code> — {rows.length} recent
+      </div>
+      {rows.map((v) => {
+        const bg =
+          v.verdict === "transfers"
+            ? "rgba(34,197,94,0.1)"
+            : v.verdict === "regression"
+              ? "rgba(239,68,68,0.1)"
+              : v.verdict === "lossy"
+                ? "rgba(245,158,11,0.1)"
+                : "rgba(100,116,139,0.1)";
+        const border =
+          v.verdict === "transfers"
+            ? "rgba(34,197,94,0.35)"
+            : v.verdict === "regression"
+              ? "rgba(239,68,68,0.35)"
+              : v.verdict === "lossy"
+                ? "rgba(245,158,11,0.35)"
+                : "rgba(100,116,139,0.35)";
+        return (
+          <div
+            key={v._id}
+            style={{
+              padding: "8px 12px",
+              marginBottom: 4,
+              background: bg,
+              border: `1px solid ${border}`,
+              borderRadius: 6,
+              fontSize: 12,
+              color: "rgba(255,255,255,0.85)",
+              fontVariantNumeric: "tabular-nums",
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 12,
+              alignItems: "center",
+            }}
+          >
+            <span>
+              <strong>{v.verdict.toUpperCase()}</strong> · n={v.n} · base{" "}
+              {(v.baselineRate * 100).toFixed(1)}% → ceil{" "}
+              {(v.ceilingRate * 100).toFixed(1)}% → dist{" "}
+              {(v.distilledRate * 100).toFixed(1)}%
+            </span>
+            <span style={{ color: "rgba(255,255,255,0.45)", fontSize: 11 }}>
+              {v.externalizationId}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -657,6 +763,21 @@ function filesForRuntime(lane: string): Array<{ path: string; note: string }> {
     { path: "/route/keep_big_model.ts", note: "route to frontier; don't distill" },
     { path: "/eval/sample_budget.ts", note: "size test to justify spend" },
   ];
+}
+
+function benchmarkIdsForRuntime(lane: string): string[] {
+  // Which benchmarks are most relevant to the accepted runtime lane.
+  // Keep in sync with daas/benchmarks/ and the Fidelity trial registry.
+  if (lane === "orchestrator_worker") {
+    return ["judgebench", "tau2_retail", "mmlu_pro"];
+  }
+  if (lane === "tool_first_chain") {
+    return ["bfcl_v3", "judgebench", "tau2_retail"];
+  }
+  if (lane === "simple_chain") {
+    return ["mmlu_pro", "judgebench"];
+  }
+  return ["judgebench"];
 }
 
 function evalPlanForRuntime(lane: string): Array<{ layer: string; benchmarks: string; why: string }> {

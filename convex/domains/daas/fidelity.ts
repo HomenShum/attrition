@@ -226,6 +226,28 @@ export const listVerdictHistory = query({
 });
 
 /**
+ * All verdicts for a specific benchmark — powers Builder's Eval tab,
+ * which shows what's recently been measured against e.g. JudgeBench or
+ * tau2 so users don't have to flip to /_internal/fidelity.
+ */
+export const listVerdictsByBenchmark = query({
+  args: {
+    benchmarkId: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = Math.min(args.limit ?? 20, 100);
+    return await ctx.db
+      .query("daasFidelityVerdicts")
+      .withIndex("by_benchmarkId_createdAt", (q) =>
+        q.eq("benchmarkId", args.benchmarkId),
+      )
+      .order("desc")
+      .take(limit);
+  },
+});
+
+/**
  * Per-task trial list — drill into which tasks the scaffold helped vs hurt.
  */
 export const listTrials = query({
