@@ -424,6 +424,159 @@ export function ProofSection() {
         </ul>
       </div>
 
+      {/* Loop C proof — meta-workflow distillation on real Claude Code JSONL */}
+      <div
+        style={{
+          marginTop: 0,
+          marginBottom: 18,
+          padding: "14px 16px",
+          background: "rgba(217,119,87,0.05)",
+          border: "1px solid rgba(217,119,87,0.3)",
+          borderRadius: 10,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 10,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "#d97757",
+            marginBottom: 6,
+          }}
+        >
+          Proof · Loop C · meta-workflow distillation · n=7 real sessions
+        </div>
+        <div
+          style={{
+            fontSize: 13,
+            color: "rgba(255,255,255,0.85)",
+            lineHeight: 1.5,
+            marginBottom: 10,
+          }}
+        >
+          compile-down isn&apos;t a tool inventory — it&apos;s{" "}
+          <em style={{ color: "#d97757", fontStyle: "normal" }}>
+            why · when · because-of-what
+          </em>
+          . We segment a raw transcript into phases, each answering:
+          what is this section doing, targeting which angles, triggered
+          by which user message?
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+            gap: 8,
+            marginBottom: 12,
+            fontFamily: "'JetBrains Mono', monospace",
+          }}
+        >
+          <Metric label="sessions" value="7" />
+          <Metric label="trace steps (ingested)" value="17,213" />
+          <Metric label="meta-phases distilled" value="452" accent="#d97757" />
+          <Metric
+            label="phases w/ user trigger"
+            value="442 (97.8%)"
+            accent="#22c55e"
+          />
+          <Metric
+            label="angles auto-extracted"
+            value="208"
+            accent="#22c55e"
+          />
+          <Metric
+            label="avg phases / session"
+            value="64.6"
+          />
+        </div>
+
+        {/* Inline example phase — from session 30393b87, phase 2 */}
+        <div
+          style={{
+            padding: "10px 12px",
+            background: "rgba(0,0,0,0.30)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 8,
+            fontSize: 11.5,
+            marginBottom: 10,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 10,
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.5)",
+              marginBottom: 6,
+            }}
+          >
+            Example · session <code>30393b87</code> · phase 2 of 23
+          </div>
+          <div
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              color: "rgba(255,255,255,0.9)",
+              fontSize: 11.5,
+              lineHeight: 1.55,
+            }}
+          >
+            <div>
+              <span style={{ color: "#d97757" }}>trigger</span>{" "}
+              <span style={{ color: "rgba(255,255,255,0.55)" }}>(user):</span>{" "}
+              &quot;NodeBench Master Strategy &amp; PRD — NodeBench should be
+              built as a local-first, multi-entity operating-memory and
+              context substrate…&quot;
+            </div>
+            <div style={{ marginTop: 4 }}>
+              <span style={{ color: "#d97757" }}>intent</span>
+              <span style={{ color: "rgba(255,255,255,0.55)" }}>:</span>{" "}
+              Now saving the full expanded PRD.
+            </div>
+            <div style={{ marginTop: 4 }}>
+              <span style={{ color: "#d97757" }}>tool classes</span>
+              <span style={{ color: "rgba(255,255,255,0.55)" }}>:</span>{" "}
+              edit, read, search, shell, write
+            </div>
+            <div style={{ marginTop: 4 }}>
+              <span style={{ color: "#d97757" }}>tools</span>
+              <span style={{ color: "rgba(255,255,255,0.55)" }}>:</span> Read ·
+              ToolSearch · TodoWrite · Write
+            </div>
+            <div style={{ marginTop: 4 }}>
+              <span style={{ color: "#d97757" }}>step span</span>
+              <span style={{ color: "rgba(255,255,255,0.55)" }}>:</span> 118
+              raw trace steps collapse to one readable meta-phase
+            </div>
+          </div>
+        </div>
+
+        <p
+          style={{
+            fontSize: 11,
+            color: "rgba(255,255,255,0.55)",
+            lineHeight: 1.55,
+            margin: "0",
+          }}
+        >
+          <strong style={{ color: "rgba(255,255,255,0.8)" }}>
+            Complex → simple:
+          </strong>{" "}
+          the 81 MB / 9,587-step marathon collapsed to{" "}
+          <strong style={{ color: "rgba(255,255,255,0.9)" }}>
+            226 meta-phases
+          </strong>
+          , 102 angles extracted, 58 unique tools captured — every emitted{" "}
+          <code>.py</code> parses across 5 runtime lanes.{" "}
+          <strong style={{ color: "rgba(255,255,255,0.8)" }}>
+            Simple → complex:
+          </strong>{" "}
+          the 3.7 KB / 2-step trivial session still emits a full
+          orchestrator_worker scaffold (plan → dispatch → compact) that
+          degenerates gracefully. Structural + intent captured; behavioral
+          equivalence on rerun is the next loop.
+        </p>
+      </div>
+
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", fontSize: 11 }}>
         <Link
           to="/_internal/fidelity"
@@ -557,6 +710,50 @@ function StatBar({ stat }: { stat: Stat }) {
         >
           CI [{stat.ciLo.toFixed(1)}, {stat.ciHi.toFixed(1)}]
         </div>
+      </div>
+    </div>
+  );
+}
+
+function Metric({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent?: string;
+}) {
+  const color = accent || "rgba(255,255,255,0.9)";
+  return (
+    <div
+      style={{
+        padding: "6px 8px",
+        background: "rgba(0,0,0,0.25)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: 6,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 9,
+          color: "rgba(255,255,255,0.45)",
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          marginBottom: 2,
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          fontSize: 13,
+          fontWeight: 600,
+          color,
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {value}
       </div>
     </div>
   );

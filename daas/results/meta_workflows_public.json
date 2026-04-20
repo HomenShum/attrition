@@ -1,0 +1,1147 @@
+{
+  "sessions": [
+    {
+      "session_id_prefix": "17443bc7",
+      "total_steps": 2,
+      "phase_count": 0,
+      "dominant_tool_classes": [],
+      "phases_summary": []
+    },
+    {
+      "session_id_prefix": "30393b87",
+      "total_steps": 768,
+      "phase_count": 23,
+      "dominant_tool_classes": [
+        "edit",
+        "read",
+        "write",
+        "search",
+        "shell"
+      ],
+      "phases_summary": [
+        {
+          "index": 0,
+          "name_preview": "Let me assess the current state",
+          "intent_preview": "Let me assess the current state against this PRD to identify the implementation gap.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "agent"
+          ],
+          "tool_count": 1,
+          "step_count": 8
+        },
+        {
+          "index": 1,
+          "name_preview": "Now saving the full expanded PRD",
+          "intent_preview": "Now saving the full expanded PRD.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "edit",
+            "read",
+            "search",
+            "shell",
+            "write"
+          ],
+          "tool_count": 8,
+          "step_count": 118
+        },
+        {
+          "index": 2,
+          "name_preview": "Next highest-impact action: **Screen 1 \u2014",
+          "intent_preview": "Next highest-impact action: **Screen 1 \u2014 Context Intake view** (the missing entry point to the prove-first loop).",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "edit",
+            "read",
+            "search",
+            "shell",
+            "write"
+          ],
+          "tool_count": 7,
+          "step_count": 37
+        },
+        {
+          "index": 3,
+          "name_preview": "Next highest-impact: **Wire the Context Intake",
+          "intent_preview": "Next highest-impact: **Wire the Context Intake data into packet generation** so the loop actually works end-to-end.",
+          "has_trigger": true,
+          "trigger_length": 8,
+          "angle_count": 0,
+          "tool_classes": [
+            "edit",
+            "read",
+            "search",
+            "write"
+          ],
+          "tool_count": 4,
+          "step_count": 30
+        },
+        {
+          "index": 4,
+          "name_preview": "Build is clean \u2014 zero errors",
+          "intent_preview": "Build is clean \u2014 zero errors.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "edit",
+            "read",
+            "shell"
+          ],
+          "tool_count": 3,
+          "step_count": 12
+        },
+        {
+          "index": 5,
+          "name_preview": "You ran `/loop` without a prompt",
+          "intent_preview": "You ran `/loop` without a prompt.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 2,
+          "tool_classes": [],
+          "tool_count": 0,
+          "step_count": 2
+        },
+        {
+          "index": 6,
+          "name_preview": "Scheduled **\"all phases\"** every 10 minutes",
+          "intent_preview": "Scheduled **\"all phases\"** every 10 minutes (cron `*/10 * * * *`, job `e23b9f39`).",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "read",
+            "search",
+            "write"
+          ],
+          "tool_count": 5,
+          "step_count": 17
+        },
+        {
+          "index": 7,
+          "name_preview": "Now let me see how the",
+          "intent_preview": "Now let me see how the dashboard currently handles the \"Hand to Agent\" callback and how it uses FastAgentContext.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "edit",
+            "read",
+            "search",
+            "shell",
+            "write"
+          ],
+          "tool_count": 6,
+          "step_count": 107
+        },
+        {
+          "index": 8,
+          "name_preview": "Phases 1-6 are shipped. Phases 7-9",
+          "intent_preview": "Phases 1-6 are shipped.",
+          "has_trigger": true,
+          "trigger_length": 10,
+          "angle_count": 2,
+          "tool_classes": [
+            "edit",
+            "read",
+            "search",
+            "shell",
+            "write"
+          ],
+          "tool_count": 5,
+          "step_count": 43
+        },
+        {
+          "index": 9,
+          "name_preview": "Production build passes clean. The only",
+          "intent_preview": "Production build passes clean.",
+          "has_trigger": true,
+          "trigger_length": 8,
+          "angle_count": 1,
+          "tool_classes": [
+            "edit",
+            "read",
+            "search",
+            "shell",
+            "write"
+          ],
+          "tool_count": 5,
+          "step_count": 45
+        },
+        {
+          "index": 10,
+          "name_preview": "Phases 1-6 shipped, hardening done. Now",
+          "intent_preview": "Phases 1-6 shipped, hardening done.",
+          "has_trigger": true,
+          "trigger_length": 10,
+          "angle_count": 2,
+          "tool_classes": [
+            "edit",
+            "read",
+            "search",
+            "shell",
+            "write"
+          ],
+          "tool_count": 5,
+          "step_count": 59
+        },
+        {
+          "index": 11,
+          "name_preview": "All core phases and polish done",
+          "intent_preview": "All core phases and polish done.",
+          "has_trigger": true,
+          "trigger_length": 10,
+          "angle_count": 2,
+          "tool_classes": [
+            "edit",
+            "read",
+            "search",
+            "shell",
+            "write"
+          ],
+          "tool_count": 5,
+          "step_count": 31
+        }
+      ]
+    },
+    {
+      "session_id_prefix": "06c10633",
+      "total_steps": 862,
+      "phase_count": 26,
+      "dominant_tool_classes": [
+        "shell",
+        "write",
+        "edit",
+        "navigate",
+        "other"
+      ],
+      "phases_summary": [
+        {
+          "index": 0,
+          "name_preview": "Good. Now let me take screenshots",
+          "intent_preview": "Good. Now let me take screenshots of all surfaces simultaneously. First I need the navigate tool.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "navigate",
+            "other",
+            "read",
+            "search",
+            "shell"
+          ],
+          "tool_count": 12,
+          "step_count": 124
+        },
+        {
+          "index": 1,
+          "name_preview": "# NodeBench Redesign: Fixing Each Violation",
+          "intent_preview": "# NodeBench Redesign: Fixing Each Violation\n\nRedesigns per surface.",
+          "has_trigger": true,
+          "trigger_length": 91,
+          "angle_count": 1,
+          "tool_classes": [],
+          "tool_count": 0,
+          "step_count": 2
+        },
+        {
+          "index": 2,
+          "name_preview": "Yes \u2014 direct entry to Chat",
+          "intent_preview": "Yes \u2014 direct entry to Chat stays.",
+          "has_trigger": true,
+          "trigger_length": 80,
+          "angle_count": 1,
+          "tool_classes": [],
+          "tool_count": 0,
+          "step_count": 2
+        },
+        {
+          "index": 3,
+          "name_preview": "Starting the redesign. Let me load",
+          "intent_preview": "Starting the redesign.",
+          "has_trigger": true,
+          "trigger_length": 25,
+          "angle_count": 0,
+          "tool_classes": [
+            "edit",
+            "navigate",
+            "other",
+            "read",
+            "search",
+            "shell",
+            "write"
+          ],
+          "tool_count": 10,
+          "step_count": 255
+        },
+        {
+          "index": 4,
+          "name_preview": "Strong ship. Two specific observations and",
+          "intent_preview": "Strong ship.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 1,
+          "tool_classes": [],
+          "tool_count": 0,
+          "step_count": 2
+        },
+        {
+          "index": 5,
+          "name_preview": "Accepted. You're right \u2014 \"shipped and",
+          "intent_preview": "Accepted. You're right \u2014 \"shipped and verified\" overclaimed. The honest status is *implemented and visually verified*. Let me fix the one real bug you flagged a",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "edit",
+            "shell"
+          ],
+          "tool_count": 2,
+          "step_count": 14
+        },
+        {
+          "index": 6,
+          "name_preview": "Closing the gap. Let me examine",
+          "intent_preview": "Closing the gap.",
+          "has_trigger": true,
+          "trigger_length": 31,
+          "angle_count": 0,
+          "tool_classes": [
+            "edit",
+            "read",
+            "shell",
+            "write"
+          ],
+          "tool_count": 4,
+          "step_count": 93
+        },
+        {
+          "index": 7,
+          "name_preview": "I'll run a full end-to-end audit",
+          "intent_preview": "I'll run a full end-to-end audit of the pitch claim against the live site.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 2,
+          "tool_classes": [
+            "navigate",
+            "other",
+            "shell",
+            "write"
+          ],
+          "tool_count": 4,
+          "step_count": 107
+        },
+        {
+          "index": 8,
+          "name_preview": "Let me diagnose what's actually there",
+          "intent_preview": "Let me diagnose what's actually there before designing.",
+          "has_trigger": true,
+          "trigger_length": 41,
+          "angle_count": 1,
+          "tool_classes": [
+            "shell"
+          ],
+          "tool_count": 1,
+          "step_count": 6
+        },
+        {
+          "index": 9,
+          "name_preview": "That's a sharper design than mine",
+          "intent_preview": "That's a sharper design than mine.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 1,
+          "tool_classes": [],
+          "tool_count": 0,
+          "step_count": 2
+        },
+        {
+          "index": 10,
+          "name_preview": "That's a much stronger model than",
+          "intent_preview": "That's a much stronger model than what I inferred.",
+          "has_trigger": true,
+          "trigger_length": 235,
+          "angle_count": 0,
+          "tool_classes": [],
+          "tool_count": 0,
+          "step_count": 2
+        },
+        {
+          "index": 11,
+          "name_preview": "Each input changes something concrete in",
+          "intent_preview": "Each input changes something concrete in the build.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 1,
+          "tool_classes": [],
+          "tool_count": 0,
+          "step_count": 2
+        }
+      ]
+    },
+    {
+      "session_id_prefix": "024caa26",
+      "total_steps": 1231,
+      "phase_count": 22,
+      "dominant_tool_classes": [
+        "shell",
+        "read",
+        "edit",
+        "search",
+        "agent"
+      ],
+      "phases_summary": [
+        {
+          "index": 0,
+          "name_preview": "Let me find the notebook component",
+          "intent_preview": "Let me find the notebook component files first.",
+          "has_trigger": true,
+          "trigger_length": 107,
+          "angle_count": 0,
+          "tool_classes": [
+            "read",
+            "search"
+          ],
+          "tool_count": 2,
+          "step_count": 12
+        },
+        {
+          "index": 1,
+          "name_preview": "Context-mode has a broken native module",
+          "intent_preview": "Context-mode has a broken native module.",
+          "has_trigger": true,
+          "trigger_length": 107,
+          "angle_count": 0,
+          "tool_classes": [
+            "read",
+            "search",
+            "shell"
+          ],
+          "tool_count": 4,
+          "step_count": 25
+        },
+        {
+          "index": 2,
+          "name_preview": "Let me see the full block",
+          "intent_preview": "Let me see the full block render function to understand the empty block problem.",
+          "has_trigger": true,
+          "trigger_length": 107,
+          "angle_count": 1,
+          "tool_classes": [
+            "shell"
+          ],
+          "tool_count": 1,
+          "step_count": 12
+        },
+        {
+          "index": 3,
+          "name_preview": "Now I have a complete picture",
+          "intent_preview": "Now I have a complete picture.",
+          "has_trigger": true,
+          "trigger_length": 107,
+          "angle_count": 0,
+          "tool_classes": [
+            "shell"
+          ],
+          "tool_count": 1,
+          "step_count": 29
+        },
+        {
+          "index": 4,
+          "name_preview": "Now fix the CSS placeholder \u2014",
+          "intent_preview": "Now fix the CSS placeholder \u2014 add a rule that shows a subtle hint on ALL empty focused blocks, and also add `min-height` so empty tiptap editors don't collapse ",
+          "has_trigger": true,
+          "trigger_length": 107,
+          "angle_count": 1,
+          "tool_classes": [
+            "edit",
+            "navigate",
+            "read",
+            "search",
+            "shell"
+          ],
+          "tool_count": 10,
+          "step_count": 90
+        },
+        {
+          "index": 5,
+          "name_preview": "Looking at the full screenshot, the",
+          "intent_preview": "Looking at the full screenshot, the live notebook is only the bottom portion.",
+          "has_trigger": true,
+          "trigger_length": 35,
+          "angle_count": 0,
+          "tool_classes": [
+            "read",
+            "shell"
+          ],
+          "tool_count": 2,
+          "step_count": 29
+        },
+        {
+          "index": 6,
+          "name_preview": "Let me do a thorough deep-read",
+          "intent_preview": "Let me do a thorough deep-read of the whole entity page architecture before proposing the redesign.",
+          "has_trigger": true,
+          "trigger_length": 107,
+          "angle_count": 0,
+          "tool_classes": [
+            "agent"
+          ],
+          "tool_count": 1,
+          "step_count": 8
+        },
+        {
+          "index": 7,
+          "name_preview": "Now I have full understanding. Let",
+          "intent_preview": "Now I have full understanding.",
+          "has_trigger": true,
+          "trigger_length": 107,
+          "angle_count": 1,
+          "tool_classes": [
+            "shell"
+          ],
+          "tool_count": 1,
+          "step_count": 15
+        },
+        {
+          "index": 8,
+          "name_preview": "Here's my full diagnosis, then I'll",
+          "intent_preview": "Here's my full diagnosis, then I'll execute the highest-impact changes immediately.",
+          "has_trigger": true,
+          "trigger_length": 107,
+          "angle_count": 1,
+          "tool_classes": [
+            "edit",
+            "read",
+            "shell"
+          ],
+          "tool_count": 4,
+          "step_count": 35
+        },
+        {
+          "index": 9,
+          "name_preview": "Going into full execution mode. I'll",
+          "intent_preview": "Going into full execution mode.",
+          "has_trigger": true,
+          "trigger_length": 195,
+          "angle_count": 0,
+          "tool_classes": [
+            "edit",
+            "read",
+            "search",
+            "shell"
+          ],
+          "tool_count": 9,
+          "step_count": 243
+        },
+        {
+          "index": 10,
+          "name_preview": "Applying the ship-gate rubric. The critical",
+          "intent_preview": "Applying the ship-gate rubric.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "edit",
+            "read",
+            "shell"
+          ],
+          "tool_count": 4,
+          "step_count": 73
+        },
+        {
+          "index": 11,
+          "name_preview": "You're right \u2014 I've been patching",
+          "intent_preview": "You're right \u2014 I've been patching, not rebuilding.",
+          "has_trigger": true,
+          "trigger_length": 163,
+          "angle_count": 0,
+          "tool_classes": [
+            "agent",
+            "edit",
+            "read",
+            "shell",
+            "write"
+          ],
+          "tool_count": 7,
+          "step_count": 90
+        }
+      ]
+    },
+    {
+      "session_id_prefix": "30407b7e",
+      "total_steps": 978,
+      "phase_count": 76,
+      "dominant_tool_classes": [
+        "shell",
+        "write",
+        "read",
+        "search",
+        "edit"
+      ],
+      "phases_summary": [
+        {
+          "index": 0,
+          "name_preview": "I don't have browser automation (CDP)",
+          "intent_preview": "I don't have browser automation (CDP) tools available in this session \u2014 the Chrome automation from earlier sessions isn't connected right now.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "write"
+          ],
+          "tool_count": 1,
+          "step_count": 5
+        },
+        {
+          "index": 1,
+          "name_preview": "Let me check what browser tools",
+          "intent_preview": "Let me check what browser tools I actually have available to work with.",
+          "has_trigger": true,
+          "trigger_length": 12,
+          "angle_count": 1,
+          "tool_classes": [
+            "search"
+          ],
+          "tool_count": 1,
+          "step_count": 8
+        },
+        {
+          "index": 2,
+          "name_preview": "No `mcp__Claude_in_Chrome__*` tools found. The Chrome",
+          "intent_preview": "No `mcp__Claude_in_Chrome__*` tools found.",
+          "has_trigger": true,
+          "trigger_length": 3,
+          "angle_count": 1,
+          "tool_classes": [
+            "edit",
+            "other",
+            "read",
+            "search",
+            "shell",
+            "write"
+          ],
+          "tool_count": 8,
+          "step_count": 43
+        },
+        {
+          "index": 3,
+          "name_preview": "Credentials saved. Now let me make",
+          "intent_preview": "Credentials saved.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 1,
+          "tool_classes": [
+            "edit",
+            "read",
+            "shell",
+            "write"
+          ],
+          "tool_count": 4,
+          "step_count": 37
+        },
+        {
+          "index": 4,
+          "name_preview": "You're right \u2014 the first pass",
+          "intent_preview": "You're right \u2014 the first pass was too narrow (specific subject lines only).",
+          "has_trigger": true,
+          "trigger_length": 208,
+          "angle_count": 0,
+          "tool_classes": [
+            "shell",
+            "write"
+          ],
+          "tool_count": 2,
+          "step_count": 11
+        },
+        {
+          "index": 5,
+          "name_preview": "Done. **459 files** moved to `C:\\Users\\hshum\\Downloads\\2025-Tax-Bundle\\`",
+          "intent_preview": "Done. **459 files** moved to `C:\\Users\\hshum\\Downloads\\2025-Tax-Bundle\\`. Open it in Explorer \u2014 ready to zip and send to your mom's accountant.",
+          "has_trigger": true,
+          "trigger_length": 46,
+          "angle_count": 0,
+          "tool_classes": [
+            "shell"
+          ],
+          "tool_count": 1,
+          "step_count": 5
+        },
+        {
+          "index": 6,
+          "name_preview": "Let me search your Gmail for",
+          "intent_preview": "Let me search your Gmail for the tax service first \u2014 that's quick.",
+          "has_trigger": true,
+          "trigger_length": 172,
+          "angle_count": 4,
+          "tool_classes": [
+            "shell",
+            "write"
+          ],
+          "tool_count": 2,
+          "step_count": 7
+        },
+        {
+          "index": 7,
+          "name_preview": "Let me search for browser automation",
+          "intent_preview": "Let me search for browser automation tools one more time \u2014 the earlier session had Chrome tools active.",
+          "has_trigger": true,
+          "trigger_length": 41,
+          "angle_count": 0,
+          "tool_classes": [
+            "edit",
+            "read",
+            "search",
+            "shell",
+            "write"
+          ],
+          "tool_count": 5,
+          "step_count": 40
+        },
+        {
+          "index": 8,
+          "name_preview": "The script needs interactive terminal input",
+          "intent_preview": "The script needs interactive terminal input but it's running in the background.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "read",
+            "shell",
+            "write"
+          ],
+          "tool_count": 3,
+          "step_count": 23
+        },
+        {
+          "index": 9,
+          "name_preview": "That was the old Playwright task",
+          "intent_preview": "That was the old Playwright task \u2014 it already failed earlier and the PowerShell approach above succeeded.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [],
+          "tool_count": 0,
+          "step_count": 1
+        },
+        {
+          "index": 10,
+          "name_preview": "Got it \u2014 that old interactive",
+          "intent_preview": "Got it \u2014 that old interactive navigator task finally cleaned up.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [],
+          "tool_count": 0,
+          "step_count": 1
+        },
+        {
+          "index": 11,
+          "name_preview": "This changes everything \u2014 unemployment +",
+          "intent_preview": "This changes everything \u2014 unemployment + poverty + home-based LLC means you qualify for credits and deductions most people miss.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "read",
+            "search",
+            "shell",
+            "write"
+          ],
+          "tool_count": 6,
+          "step_count": 23
+        }
+      ]
+    },
+    {
+      "session_id_prefix": "1eb2aa83",
+      "total_steps": 3785,
+      "phase_count": 79,
+      "dominant_tool_classes": [
+        "shell",
+        "write",
+        "read",
+        "edit",
+        "agent"
+      ],
+      "phases_summary": [
+        {
+          "index": 0,
+          "name_preview": "The Invalid Date fix deploy just",
+          "intent_preview": "The Invalid Date fix deploy just completed.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 3,
+          "tool_classes": [
+            "read",
+            "search",
+            "shell",
+            "write"
+          ],
+          "tool_count": 7,
+          "step_count": 123
+        },
+        {
+          "index": 1,
+          "name_preview": "Here's the full audit against your",
+          "intent_preview": "Here's the full audit against your spec:\n\n## Audit: Repo vs.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "agent"
+          ],
+          "tool_count": 1,
+          "step_count": 4
+        },
+        {
+          "index": 2,
+          "name_preview": "Excellent exploration. Now let me design",
+          "intent_preview": "Excellent exploration.",
+          "has_trigger": true,
+          "trigger_length": 15,
+          "angle_count": 0,
+          "tool_classes": [
+            "agent",
+            "think"
+          ],
+          "tool_count": 2,
+          "step_count": 11
+        },
+        {
+          "index": 3,
+          "name_preview": "Now let me read the critical",
+          "intent_preview": "Now let me read the critical files I'll need to edit to finalize the plan.",
+          "has_trigger": true,
+          "trigger_length": 15,
+          "angle_count": 0,
+          "tool_classes": [
+            "agent",
+            "read",
+            "shell",
+            "think",
+            "write"
+          ],
+          "tool_count": 6,
+          "step_count": 37
+        },
+        {
+          "index": 4,
+          "name_preview": "Zero tsc errors. Now vite build",
+          "intent_preview": "Zero tsc errors.",
+          "has_trigger": true,
+          "trigger_length": 15,
+          "angle_count": 1,
+          "tool_classes": [
+            "shell",
+            "write"
+          ],
+          "tool_count": 3,
+          "step_count": 15
+        },
+        {
+          "index": 5,
+          "name_preview": "Push blocked \u2014 there's an API",
+          "intent_preview": "Push blocked \u2014 there's an API key in `scripts/career/.env`.",
+          "has_trigger": true,
+          "trigger_length": 15,
+          "angle_count": 0,
+          "tool_classes": [
+            "shell"
+          ],
+          "tool_count": 1,
+          "step_count": 29
+        },
+        {
+          "index": 6,
+          "name_preview": "Let me start with the CSS",
+          "intent_preview": "Let me start with the CSS tokens \u2014 that's the foundation.",
+          "has_trigger": true,
+          "trigger_length": 54,
+          "angle_count": 0,
+          "tool_classes": [
+            "agent",
+            "edit",
+            "read",
+            "search",
+            "shell",
+            "think",
+            "write"
+          ],
+          "tool_count": 10,
+          "step_count": 64
+        },
+        {
+          "index": 7,
+          "name_preview": "Zero errors, clean build in 17s",
+          "intent_preview": "Zero errors, clean build in 17s.",
+          "has_trigger": true,
+          "trigger_length": 54,
+          "angle_count": 1,
+          "tool_classes": [
+            "read",
+            "shell",
+            "write"
+          ],
+          "tool_count": 6,
+          "step_count": 17
+        },
+        {
+          "index": 8,
+          "name_preview": "Background vite task completed. The redesign",
+          "intent_preview": "Background vite task completed.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [],
+          "tool_count": 0,
+          "step_count": 1
+        },
+        {
+          "index": 9,
+          "name_preview": "`ReferenceError: Cannot access 'V' before initialization`",
+          "intent_preview": "`ReferenceError: Cannot access 'V' before initialization` \u2014 a variable ordering bug in the rewritten ChatHome.",
+          "has_trigger": true,
+          "trigger_length": 43,
+          "angle_count": 0,
+          "tool_classes": [
+            "edit",
+            "read",
+            "search",
+            "shell"
+          ],
+          "tool_count": 11,
+          "step_count": 59
+        },
+        {
+          "index": 10,
+          "name_preview": "Looking at the screenshot, I can",
+          "intent_preview": "Looking at the screenshot, I can see Reports is rendering as a single-column row list.",
+          "has_trigger": true,
+          "trigger_length": 75,
+          "angle_count": 1,
+          "tool_classes": [
+            "edit",
+            "read",
+            "shell"
+          ],
+          "tool_count": 5,
+          "step_count": 52
+        },
+        {
+          "index": 11,
+          "name_preview": "**Honest answer: No.** Here's the gap",
+          "intent_preview": "**Honest answer: No.** Here's the gap:",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "shell"
+          ],
+          "tool_count": 1,
+          "step_count": 4
+        }
+      ]
+    },
+    {
+      "session_id_prefix": "14848f3a",
+      "total_steps": 9587,
+      "phase_count": 226,
+      "dominant_tool_classes": [
+        "shell",
+        "read",
+        "edit",
+        "write",
+        "search"
+      ],
+      "phases_summary": [
+        {
+          "index": 0,
+          "name_preview": "Let me get situational awareness across",
+          "intent_preview": "Let me get situational awareness across all three tracks simultaneously.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "agent",
+            "edit",
+            "read",
+            "search",
+            "shell",
+            "write"
+          ],
+          "tool_count": 10,
+          "step_count": 229
+        },
+        {
+          "index": 1,
+          "name_preview": "The changes are observable in the",
+          "intent_preview": "The changes are observable in the browser \u2014 the shared context panel and EmailInboxView are both rendered surfaces.",
+          "has_trigger": true,
+          "trigger_length": 193,
+          "angle_count": 0,
+          "tool_classes": [
+            "read"
+          ],
+          "tool_count": 4,
+          "step_count": 16
+        },
+        {
+          "index": 2,
+          "name_preview": "EmailInboxView agent completed \u2014 all 15",
+          "intent_preview": "EmailInboxView agent completed \u2014 all 15 saturated color violations fixed with design system tokens.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "shell"
+          ],
+          "tool_count": 1,
+          "step_count": 4
+        },
+        {
+          "index": 3,
+          "name_preview": "SharedContext panel agent completed. Let me",
+          "intent_preview": "SharedContext panel agent completed.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "shell"
+          ],
+          "tool_count": 1,
+          "step_count": 6
+        },
+        {
+          "index": 4,
+          "name_preview": "All three background agents completed successfully",
+          "intent_preview": "All three background agents completed successfully.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [],
+          "tool_count": 0,
+          "step_count": 1
+        },
+        {
+          "index": 5,
+          "name_preview": "I'll record a live run showing",
+          "intent_preview": "I'll record a live run showing the full product flow: search \u2192 result \u2192 delegate \u2192 shared context.",
+          "has_trigger": true,
+          "trigger_length": 26,
+          "angle_count": 0,
+          "tool_classes": [
+            "navigate",
+            "other"
+          ],
+          "tool_count": 4,
+          "step_count": 10
+        },
+        {
+          "index": 6,
+          "name_preview": "No response requested",
+          "intent_preview": "No response requested.",
+          "has_trigger": true,
+          "trigger_length": 33,
+          "angle_count": 0,
+          "tool_classes": [],
+          "tool_count": 0,
+          "step_count": 1
+        },
+        {
+          "index": 7,
+          "name_preview": "This is the clearest articulation of",
+          "intent_preview": "This is the clearest articulation of the NodeBench-MCP vision yet.",
+          "has_trigger": true,
+          "trigger_length": 240,
+          "angle_count": 0,
+          "tool_classes": [
+            "edit",
+            "read",
+            "write"
+          ],
+          "tool_count": 3,
+          "step_count": 21
+        },
+        {
+          "index": 8,
+          "name_preview": "Now I have a complete picture",
+          "intent_preview": "Now I have a complete picture.",
+          "has_trigger": true,
+          "trigger_length": 110,
+          "angle_count": 0,
+          "tool_classes": [
+            "agent",
+            "think"
+          ],
+          "tool_count": 2,
+          "step_count": 10
+        },
+        {
+          "index": 9,
+          "name_preview": "Now let me write the final",
+          "intent_preview": "Now let me write the final plan file.",
+          "has_trigger": true,
+          "trigger_length": 110,
+          "angle_count": 0,
+          "tool_classes": [
+            "agent",
+            "think",
+            "write"
+          ],
+          "tool_count": 3,
+          "step_count": 8
+        },
+        {
+          "index": 10,
+          "name_preview": "Let me read the key files",
+          "intent_preview": "Let me read the key files I need to understand before writing code.",
+          "has_trigger": true,
+          "trigger_length": 7,
+          "angle_count": 0,
+          "tool_classes": [
+            "read",
+            "write"
+          ],
+          "tool_count": 2,
+          "step_count": 11
+        },
+        {
+          "index": 11,
+          "name_preview": "Now add the demo fixtures. Let",
+          "intent_preview": "Now add the demo fixtures.",
+          "has_trigger": true,
+          "trigger_length": 7,
+          "angle_count": 0,
+          "tool_classes": [
+            "agent",
+            "edit",
+            "navigate",
+            "other",
+            "read",
+            "search",
+            "shell",
+            "write"
+          ],
+          "tool_count": 20,
+          "step_count": 175
+        }
+      ]
+    }
+  ],
+  "aggregate": {
+    "session_count": 7,
+    "total_phases": 452,
+    "phases_with_user_trigger": 442,
+    "angles_extracted": 208,
+    "avg_phases_per_session": 64.6,
+    "trigger_capture_rate": 0.978,
+    "angle_capture_rate": 0.46
+  }
+}

@@ -48,13 +48,28 @@ def from_claude_code_jsonl(
             kind = str(row.get("type") or "")
             msg = row.get("message") or {}
             if kind == "user":
-                content = msg.get("content") or row.get("content") or ""
-                content_text = (
-                    content if isinstance(content, str) else _flatten_content(content)
+                raw_content = msg.get("content") or row.get("content") or ""
+                # Detect tool-result wrappers: Claude Code JSONL stores
+                # tool results as role=user messages whose content is a
+                # list containing one or more {"type": "tool_result"}
+                # blocks. We reclassify those as role="tool" so that
+                # downstream phase/meta-workflow distillers don't treat
+                # every tool round-trip as a human redirect.
+                is_tool_result_wrapper = isinstance(raw_content, list) and any(
+                    isinstance(b, dict) and b.get("type") == "tool_result"
+                    for b in raw_content
                 )
-                if not query:
-                    query = content_text
-                steps.append(TraceStep(role="user", content=content_text))
+                content_text = (
+                    raw_content
+                    if isinstance(raw_content, str)
+                    else _flatten_content(raw_content)
+                )
+                if is_tool_result_wrapper:
+                    steps.append(TraceStep(role="tool", content=content_text))
+                else:
+                    if not query:
+                        query = content_text
+                    steps.append(TraceStep(role="user", content=content_text))
             elif kind == "assistant":
                 content = msg.get("content") or []
                 model = msg.get("model") or ""

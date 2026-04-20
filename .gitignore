@@ -27,3 +27,18 @@ Thumbs.db
 *.sqlite
 ~/.nodebench-qa/
 NUL
+
+# DaaS result artifacts — raw captures from real Claude Code sessions
+# may contain API keys the user pasted into prompts. Never commit raw
+# captures; only the sanitized `*_public.json` aggregates are safe.
+daas/results/meta_workflows.json
+daas/results/meta_workflows.md
+daas/results/real_traces_specs.json
+daas/results/real_traces_specs_xl.json
+daas/results/real_traces_report.json
+daas/results/real_traces_report_xl.json
+daas/results/canonical_traces.json
+daas/results/workflow_specs.json
+daas/results/replays.json
+daas/results/judgments.json
+daas/results/*.log
