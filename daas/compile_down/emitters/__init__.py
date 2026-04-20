@@ -13,11 +13,21 @@ Dispatch table:
 from typing import Any
 
 from daas.compile_down.artifact import ArtifactBundle
-from daas.compile_down.emitters import simple_chain, tool_first_chain
+from daas.compile_down.emitters import (
+    simple_chain,
+    tool_first_chain,
+    orchestrator_worker,
+    openai_agents,
+    langgraph_python,
+)
 
 KNOWN_EMITTERS = {
     "simple_chain": simple_chain.emit_bundle,
     "tool_first_chain": tool_first_chain.emit_bundle,
+    "orchestrator_worker": orchestrator_worker.emit_bundle,
+    # Translation targets (emit same WorkflowSpec to different SDK/framework)
+    "openai_agents_sdk": openai_agents.emit_bundle,
+    "langgraph_python": langgraph_python.emit_bundle,
 }
 
 
