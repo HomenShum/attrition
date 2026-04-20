@@ -184,11 +184,38 @@ export const classify = action({
       return { ok: false, reason: "no_api_key" };
     }
 
+    // Pull Tier-1 Radar priors so the classifier reflects the CURRENT
+    // state of the agent-framework ecosystem, not stale training data.
+    let priors: Array<{
+      title: string;
+      stack: string;
+      prior: string;
+      summary: string;
+      changedAt: number;
+    }> = [];
+    try {
+      priors = await ctx.runQuery(api.domains.daas.radar.getClassifierPriors, {});
+    } catch {
+      // Priors are best-effort — classifier still runs without them.
+    }
+    const priorsBlock = priors.length
+      ? `\n\nRECENT ECOSYSTEM CHANGES (Tier-1 official, last ${priors.length}):\n${priors
+          .map(
+            (p) =>
+              `- [${p.stack}/${p.prior}] ${p.title} — ${p.summary.slice(0, 120)}`,
+          )
+          .join("\n")}\n\nWhen relevant, let these shift runtime or eval recommendations.`
+      : "";
+
     const body = {
       contents: [
         {
           role: "user",
-          parts: [{ text: `${SYSTEM_PROMPT}\n\nUSER PROMPT:\n${args.prompt}` }],
+          parts: [
+            {
+              text: `${SYSTEM_PROMPT}${priorsBlock}\n\nUSER PROMPT:\n${args.prompt}`,
+            },
+          ],
         },
       ],
       generationConfig: {

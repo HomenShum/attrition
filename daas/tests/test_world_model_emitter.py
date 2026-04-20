@@ -56,6 +56,7 @@ def test_full_emits_all_eight_files() -> None:
         "outcomes.table.ts",
         "evidence_refs.json",
         "interpretive_boundary.md",
+        "policy_engine.py",
         "README.md",
     }
     assert paths == expected

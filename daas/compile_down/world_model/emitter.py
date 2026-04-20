@@ -84,8 +84,49 @@ def _emit_full(spec: Any, hints: dict[str, Any]) -> ArtifactBundle:
         _interpretive_boundary_md(entities, states, policies),
         "markdown",
     )
+    bundle.add("policy_engine.py", _policy_engine_bootstrap_py(), "python")
     bundle.add("README.md", _readme_full(entities, policies, actions), "markdown")
     return bundle
+
+
+def _policy_engine_bootstrap_py() -> str:
+    """Minimal bootstrap that imports the attrition policy engine.
+    Users vendoring this bundle can either:
+      (a) `pip install daas-policy-engine` when we publish it, or
+      (b) copy daas/compile_down/world_model/policy_engine.py next to
+          this file and import it locally.
+    """
+    return (
+        '"""Policy engine bootstrap for the world-model substrate.\n\n'
+        'Usage in your generated runtime (e.g. orchestrator.py):\n\n'
+        '    from policy_engine import PolicyEngine, PolicyViolation\n\n'
+        '    engine = PolicyEngine.from_yaml_file("policies.yaml")\n\n'
+        '    try:\n'
+        '        engine.validate_action(action_name, args, context)\n'
+        '        # proceed to emit\n'
+        '    except PolicyViolation as e:\n'
+        '        engine.record_denial(e)\n'
+        '        # handle (block / human-escalate / fall back)\n\n'
+        "To vendor: copy attrition's policy_engine.py into this\n"
+        "package, or import from the attrition daas package if\n"
+        "you've installed it.\n"
+        '"""\n\n'
+        'try:\n'
+        '    from daas.compile_down.world_model.policy_engine import (\n'
+        '        PolicyEngine,\n'
+        '        PolicyViolation,\n'
+        '        Policy,\n'
+        '    )\n'
+        'except ImportError:  # vendored path fallback\n'
+        '    # Copy daas/compile_down/world_model/policy_engine.py next\n'
+        '    # to this file for zero-dep use.\n'
+        '    raise ImportError(\n'
+        '        "policy_engine.py not found. Either `pip install -e ."\n'
+        '        " the attrition repo or copy the module next to this"\n'
+        '        " file."\n'
+        '    )\n\n'
+        '__all__ = ["PolicyEngine", "PolicyViolation", "Policy"]\n'
+    )
 
 
 # ---------------------------------------------------------------------------

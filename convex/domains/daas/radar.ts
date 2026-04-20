@@ -131,6 +131,44 @@ export const listItems = query({
 });
 
 /**
+ * Architect classifier feedback — pulls the 10 most recent Tier-1
+ * items that `updatesPrior = "runtime"` or `"eval"`. The classifier
+ * action threads these into its prompt as "RECENT ECOSYSTEM CHANGES"
+ * context so the recommendation reflects the current state of the
+ * agent-framework world, not the state when the prompt was written.
+ *
+ * Bounded small (10) so the classifier prompt stays under the
+ * token budget.
+ */
+export const getClassifierPriors = query({
+  args: {},
+  handler: async (ctx) => {
+    const rows = await ctx.db
+      .query("radarItems")
+      .withIndex("by_sourceTier_changedAt", (q) =>
+        q.eq("sourceTier", "tier1_official"),
+      )
+      .order("desc")
+      .take(30);
+    const filtered = rows
+      .filter(
+        (r) =>
+          !r.dismissed &&
+          (r.updatesPrior === "runtime" || r.updatesPrior === "eval"),
+      )
+      .slice(0, 10)
+      .map((r) => ({
+        title: r.title,
+        stack: r.stack,
+        prior: r.updatesPrior,
+        summary: r.summary,
+        changedAt: r.changedAt,
+      }));
+    return filtered;
+  },
+});
+
+/**
  * Ingest health — powers the Radar page's reliability card.
  * Surfaces the most recent `radar.ingestAll` and `radar.ingestHn` audit
  * rows so operators see ingest cadence + error counts without paging
