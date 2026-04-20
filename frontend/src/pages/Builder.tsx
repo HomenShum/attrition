@@ -205,16 +205,17 @@ export function Builder() {
             }}
           >
             <TabBtn active={tab === "scaffold"} onClick={() => setTab("scaffold")}>
-              Scaffold
+              Scaffold plan
             </TabBtn>
             <TabBtn active={tab === "eval"} onClick={() => setTab("eval")}>
-              Eval
+              Eval plan
             </TabBtn>
             <TabBtn active={tab === "world_model"} onClick={() => setTab("world_model")}>
-              World Model
+              World model plan
             </TabBtn>
           </div>
           <div style={{ padding: 24 }}>
+            <BetaBanner />
             {tab === "scaffold" && <ScaffoldTab runtimeLane={session.runtimeLane ?? ""} />}
             {tab === "eval" && <EvalTab runtimeLane={session.runtimeLane ?? ""} />}
             {tab === "world_model" && (
@@ -223,6 +224,30 @@ export function Builder() {
           </div>
         </section>
       </div>
+    </div>
+  );
+}
+
+function BetaBanner() {
+  return (
+    <div
+      style={{
+        marginBottom: 20,
+        padding: "10px 14px",
+        background: "rgba(245,158,11,0.08)",
+        border: "1px solid rgba(245,158,11,0.3)",
+        borderRadius: 8,
+        fontSize: 12,
+        color: "rgba(245,158,11,0.95)",
+        lineHeight: 1.5,
+      }}
+    >
+      <strong>Beta — plans only.</strong> These tabs show <em>what would be
+      generated</em> for the accepted runtime / world-model / eval lanes.
+      Scaffold code generation, connector wiring, and benchmark runs are
+      being shipped incrementally — see{" "}
+      <code style={{ fontSize: 11 }}>/_internal/fidelity</code> for the live
+      3-measurement fidelity trials.
     </div>
   );
 }
