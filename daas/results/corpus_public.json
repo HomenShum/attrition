@@ -1,0 +1,37 @@
+{
+  "corpus_level": {
+    "sessions_clustered": 15,
+    "clusters_formed": 12,
+    "clusters_with_min_2_members": 2,
+    "playbooks_induced": 2,
+    "playbooks_coherent": 2
+  },
+  "meta_workflow_quality": {
+    "sessions": 7,
+    "total_phases": 455,
+    "shippable_phases_pct_3_or_4_slots": 78.9
+  },
+  "structural_fidelity": {
+    "sessions": 5,
+    "total_bytes_ingested": 149446860,
+    "total_steps": 18363,
+    "structural_fidelity_pct": 100.0,
+    "ast_valid_lane_rate_pct": 100.0,
+    "orchestrator_plan_rate_pct": 100.0,
+    "runtime_lanes_per_session": 5
+  },
+  "live_replay": {
+    "sessions_replayed_live": 5,
+    "transfers": 0,
+    "lossy": 0,
+    "regression": 3,
+    "insufficient_data": 2,
+    "decided_denom": 3,
+    "transfer_rate_pct": 0.0,
+    "regression_rate_pct": 100.0,
+    "total_usd": 0.024809,
+    "flash_model": "gemini-3.1-flash-lite-preview",
+    "judge_model": "gemini-3.1-pro-preview",
+    "honest_note": "Current heuristic playbook induction abstracts too aggressively to reproduce specific-file Claude outputs. Regression rate exposes the limit; insufficient_data flags sessions where the baseline answer itself was too trivial to judge."
+  }
+}

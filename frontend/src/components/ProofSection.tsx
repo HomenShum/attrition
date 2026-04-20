@@ -424,7 +424,7 @@ export function ProofSection() {
         </ul>
       </div>
 
-      {/* Loop C proof — meta-workflow distillation on real Claude Code JSONL */}
+      {/* Loop C proof — corpus-level compile (both directions) + live replay + SDK matrix */}
       <div
         style={{
           marginTop: 0,
@@ -444,7 +444,7 @@ export function ProofSection() {
             marginBottom: 6,
           }}
         >
-          Proof · Loop C · meta-workflow distillation · n=7 real sessions
+          Proof · Loop C · corpus of real traces · both directions · live replay
         </div>
         <div
           style={{
@@ -454,13 +454,24 @@ export function ProofSection() {
             marginBottom: 10,
           }}
         >
-          compile-down isn&apos;t a tool inventory — it&apos;s{" "}
-          <em style={{ color: "#d97757", fontStyle: "normal" }}>
-            why · when · because-of-what
-          </em>
-          . We segment a raw transcript into phases, each answering:
-          what is this section doing, targeting which angles, triggered
-          by which user message?
+          The product is bidirectional: compile-DOWN extracts a shared
+          playbook from many traces, compile-UP adds structure a sparse
+          trace was missing. Both land in the same{" "}
+          <code>WorkflowSpec</code> and we measure fidelity live against
+          a Pro baseline.
+        </div>
+
+        {/* Compile-DOWN numbers (corpus level) */}
+        <div
+          style={{
+            fontSize: 10,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.5)",
+            marginBottom: 6,
+          }}
+        >
+          Compile-down · corpus
         </div>
         <div
           style={{
@@ -471,24 +482,172 @@ export function ProofSection() {
             fontFamily: "'JetBrains Mono', monospace",
           }}
         >
-          <Metric label="sessions" value="7" />
-          <Metric label="trace steps (ingested)" value="17,213" />
-          <Metric label="meta-phases distilled" value="452" accent="#d97757" />
+          <Metric label="sessions clustered" value="15" />
+          <Metric label="clusters formed" value="12" />
+          <Metric label="playbooks induced (coherent)" value="2 / 2" accent="#22c55e" />
+          <Metric label="meta-phases distilled" value="455" />
           <Metric
-            label="phases w/ user trigger"
-            value="442 (97.8%)"
+            label="phases w/ ≥3/4 playbook slots"
+            value="78.9%"
             accent="#22c55e"
           />
-          <Metric
-            label="angles auto-extracted"
-            value="208"
-            accent="#22c55e"
-          />
-          <Metric
-            label="avg phases / session"
-            value="64.6"
-          />
+          <Metric label="bytes ingested (largest 5)" value="149 MB" />
         </div>
+
+        {/* Compile-UP numbers (structural) */}
+        <div
+          style={{
+            fontSize: 10,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.5)",
+            marginBottom: 6,
+          }}
+        >
+          Compile-up · structure added
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+            gap: 8,
+            marginBottom: 12,
+            fontFamily: "'JetBrains Mono', monospace",
+          }}
+        >
+          <Metric label="runtime lanes" value="5" />
+          <Metric label="AST-valid (lane × session)" value="25 / 25" accent="#22c55e" />
+          <Metric label="orchestrator plan/dispatch/compact" value="100%" accent="#22c55e" />
+          <Metric label="structural fidelity" value="100%" accent="#22c55e" />
+        </div>
+
+        {/* Live replay verdict */}
+        <div
+          style={{
+            fontSize: 10,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.5)",
+            marginBottom: 6,
+          }}
+        >
+          Live replay · Flash Lite vs Pro-judged baseline · $0.025 total
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+            gap: 8,
+            marginBottom: 10,
+            fontFamily: "'JetBrains Mono', monospace",
+          }}
+        >
+          <Metric label="sessions replayed live" value="5" />
+          <Metric label="transfers" value="0" accent="#ef4444" />
+          <Metric label="lossy" value="0" />
+          <Metric label="regression" value="3" accent="#ef4444" />
+          <Metric label="insufficient_data" value="2" />
+          <Metric label="transfer rate" value="0 / 3" accent="#ef4444" />
+        </div>
+        <p
+          style={{
+            fontSize: 11.5,
+            color: "rgba(255,255,255,0.7)",
+            lineHeight: 1.55,
+            margin: "0 0 12px",
+            padding: "8px 12px",
+            background: "rgba(239,68,68,0.06)",
+            border: "1px solid rgba(239,68,68,0.25)",
+            borderRadius: 8,
+          }}
+        >
+          <strong style={{ color: "rgba(255,255,255,0.9)" }}>
+            Honest replay verdict:
+          </strong>{" "}
+          zero transfers on the first live run. Current heuristic
+          induction abstracts too aggressively — the playbook
+          captures goal / method / angles, but loses the specific
+          filenames, counts, and status lines that the expensive
+          baseline produced. This is the{" "}
+          <em style={{ color: "#d97757", fontStyle: "normal" }}>
+            &ldquo;know when you can&rsquo;t&rdquo;
+          </em>{" "}
+          half of the product working. Flash Lite + judge cost{" "}
+          <code>$0.025</code> total; the regression signal tells us
+          exactly which phases need tighter schema-level contracts.
+        </p>
+
+        {/* SDK matrix */}
+        <div
+          style={{
+            fontSize: 10,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.5)",
+            marginBottom: 6,
+          }}
+        >
+          SDK matrix · ingress + egress substrate
+        </div>
+        <table
+          style={{
+            width: "100%",
+            fontSize: 11.5,
+            fontFamily: "'JetBrains Mono', monospace",
+            color: "rgba(255,255,255,0.8)",
+            borderCollapse: "collapse",
+            marginBottom: 12,
+          }}
+        >
+          <thead>
+            <tr
+              style={{
+                color: "rgba(255,255,255,0.45)",
+                fontSize: 10,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                textAlign: "left",
+              }}
+            >
+              <th style={{ padding: "6px 8px", fontWeight: 500 }}>SDK</th>
+              <th style={{ padding: "6px 8px", fontWeight: 500 }}>Ingest</th>
+              <th style={{ padding: "6px 8px", fontWeight: 500 }}>Emit</th>
+              <th style={{ padding: "6px 8px", fontWeight: 500 }}>Scenario tests</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+              <td style={{ padding: "6px 8px", color: "rgba(255,255,255,0.9)" }}>Anthropic Claude Code</td>
+              <td style={{ padding: "6px 8px", color: "#22c55e" }}>✓ JSONL</td>
+              <td style={{ padding: "6px 8px" }}>simple_chain</td>
+              <td style={{ padding: "6px 8px" }}>—</td>
+            </tr>
+            <tr style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+              <td style={{ padding: "6px 8px", color: "rgba(255,255,255,0.9)" }}>OpenAI Agents SDK</td>
+              <td style={{ padding: "6px 8px", color: "#22c55e" }}>✓ chat + runs</td>
+              <td style={{ padding: "6px 8px", color: "#22c55e" }}>✓ openai_agents_sdk</td>
+              <td style={{ padding: "6px 8px", color: "#22c55e" }}>5 / 5</td>
+            </tr>
+            <tr style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+              <td style={{ padding: "6px 8px", color: "rgba(255,255,255,0.9)" }}>Google Gemini</td>
+              <td style={{ padding: "6px 8px", color: "#22c55e" }}>✓ generateContent</td>
+              <td style={{ padding: "6px 8px", color: "#22c55e" }}>✓ default runtime</td>
+              <td style={{ padding: "6px 8px", color: "#22c55e" }}>4 / 4</td>
+            </tr>
+            <tr style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+              <td style={{ padding: "6px 8px", color: "rgba(255,255,255,0.9)" }}>LangGraph</td>
+              <td style={{ padding: "6px 8px", color: "#22c55e" }}>✓ graph import</td>
+              <td style={{ padding: "6px 8px", color: "#22c55e" }}>✓ langgraph_python</td>
+              <td style={{ padding: "6px 8px" }}>symmetric</td>
+            </tr>
+            <tr style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+              <td style={{ padding: "6px 8px", color: "rgba(255,255,255,0.9)" }}>LangChain callbacks</td>
+              <td style={{ padding: "6px 8px", color: "#22c55e" }}>✓ BaseCallbackHandler</td>
+              <td style={{ padding: "6px 8px" }}>via LangGraph</td>
+              <td style={{ padding: "6px 8px", color: "#22c55e" }}>3 / 3</td>
+            </tr>
+          </tbody>
+        </table>
 
         {/* Inline example phase — from session 30393b87, phase 2 */}
         <div

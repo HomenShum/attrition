@@ -1,0 +1,76 @@
+{
+  "flash_model": "gemini-3.1-flash-lite-preview",
+  "judge_model": "gemini-3.1-pro-preview",
+  "clusters": [
+    {
+      "cluster_id": "cluster_0",
+      "cluster_label_preview": "able/accepted/access",
+      "sessions_replayed": 3,
+      "transfers": 0,
+      "lossy": 0,
+      "regression": 2,
+      "insufficient_data": 1,
+      "transfer_rate": 0.0,
+      "transfer_rate_ci95_lo": 0.0,
+      "transfer_rate_ci95_hi": 0.658,
+      "total_usd": 0.014491,
+      "per_session_verdicts": [
+        {
+          "session_id_prefix": "6df2731c",
+          "verdict": "insufficient_data",
+          "reason_redacted": "The original answer discusses hallucination mitigation and grounding, which is completely unrelated to the user prompt about search functionality, entity resolution, and message queues, making a meani",
+          "flash_tokens": 3051,
+          "judge_tokens": 2816,
+          "usd": 0.004753
+        },
+        {
+          "session_id_prefix": "30393b87",
+          "verdict": "regression",
+          "reason_redacted": "The replay answer completely hallucinates a different set of files and phases, missing the specific 16-field packet completeness checklist and the exact files modified in the original answer.",
+          "flash_tokens": 2867,
+          "judge_tokens": 2449,
+          "usd": 0.004713
+        },
+        {
+          "session_id_prefix": "3ba17d8b",
+          "verdict": "regression",
+          "reason_redacted": "The replay answer completely misses the specific UI/UX diagnosis and recommendations for the local dashboard that were provided in the original answer, focusing instead on the product architecture of ",
+          "flash_tokens": 2928,
+          "judge_tokens": 2843,
+          "usd": 0.005025
+        }
+      ]
+    },
+    {
+      "cluster_id": "cluster_1",
+      "cluster_label_preview": "abc123/able/absolutely",
+      "sessions_replayed": 2,
+      "transfers": 0,
+      "lossy": 0,
+      "regression": 1,
+      "insufficient_data": 1,
+      "transfer_rate": 0.0,
+      "transfer_rate_ci95_lo": 0.0,
+      "transfer_rate_ci95_hi": 0.793,
+      "total_usd": 0.010318,
+      "per_session_verdicts": [
+        {
+          "session_id_prefix": "75b80dc2",
+          "verdict": "insufficient_data",
+          "reason_redacted": "The original answer responds to missing conversational context about mobile UX docs and a dogfood verdict, making it impossible to meaningfully compare with the replay answer that addresses the actual",
+          "flash_tokens": 3039,
+          "judge_tokens": 2602,
+          "usd": 0.004386
+        },
+        {
+          "session_id_prefix": "14848f3a",
+          "verdict": "regression",
+          "reason_redacted": "The replay answer hallucinates a completely different set of tasks (Shared Context Protocol) and fails to address any of the 9 specific UI, architectural, and functional fixes detailed in the original",
+          "flash_tokens": 3357,
+          "judge_tokens": 3031,
+          "usd": 0.005932
+        }
+      ]
+    }
+  ]
+}

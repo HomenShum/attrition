@@ -42,3 +42,11 @@ daas/results/workflow_specs.json
 daas/results/replays.json
 daas/results/judgments.json
 daas/results/*.log
+# Cluster / playbook / replay raw artifacts include session text that may
+# embed API keys pasted into prompts. Only the `*_public.json` aggregates
+# and `corpus_public.json` are safe to commit.
+daas/results/clusters.json
+daas/results/playbooks.json
+daas/results/playbooks.md
+daas/results/replay_results.json
+daas/results/_judge_raw/

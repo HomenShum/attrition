@@ -158,6 +158,125 @@ class Phase:
     step_span_start: int
     step_span_end: int  # exclusive
     step_count: int
+    # Playbook-entry slots (added Cycle 25 — Goal / Angles / Method / Stop)
+    goal: str = ""
+    method: list[str] = field(default_factory=list)  # ordered tool-class sequence
+    stop_condition: str = ""
+    playbook_score: int = 0  # 0-4, count of filled slots (goal/angles/method/stop)
+
+
+# --- goal / method / stop extractors (heuristic, no LLM) -----------------
+_IMPERATIVE_VERBS = (
+    "write", "save", "persist", "emit", "create", "build", "implement",
+    "verify", "validate", "test", "check", "prove",
+    "search", "find", "look", "gather", "collect", "ingest",
+    "read", "load", "fetch", "inspect", "review",
+    "refactor", "update", "modify", "edit", "patch", "fix",
+    "run", "execute", "compile", "deploy",
+    "distill", "summarize", "analyze", "compare", "measure",
+    "add", "remove", "delete", "rename", "move",
+    "plan", "design", "propose", "draft",
+)
+
+_STOP_SIGNALS = (
+    "done", "complete", "finished", "all pass", "all tests pass",
+    "zero errors", "clean", "ok", "success", "verified",
+    "build clean", "tsc clean", "committed", "pushed", "deployed",
+    "ready", "shipped", "landed",
+)
+
+_GOAL_CUES = re.compile(
+    r"(?:"
+    r"(?:goal|objective|target)(?:\s+is)?[:\-]\s+(?P<g1>[^.?!\n]{3,120})"
+    r"|in\s+order\s+to\s+(?P<g2>[^.?!\n]{3,120})"
+    r"|so\s+that\s+(?P<g3>[^.?!\n]{3,120})"
+    r"|to\s+(?P<g4>(?:"
+    + "|".join(_IMPERATIVE_VERBS)
+    + r")\b[^.?!\n]{0,120})"
+    r")",
+    re.IGNORECASE,
+)
+
+
+def _extract_goal(texts: list[str]) -> str:
+    """Derive a noun-phrase goal from the phase's assistant text.
+
+    Priority:
+      1. Explicit "goal:" / "objective:" cue
+      2. "in order to X" / "so that X" / "to <imperative>" cue
+      3. First imperative-verb-headed sentence from the opener
+      4. Empty (caller can fall back to dominant tool class)
+    """
+    if not texts:
+        return ""
+    joined = " ".join(texts[:3])
+    m = _GOAL_CUES.search(joined)
+    if m:
+        for g in m.groupdict().values():
+            if g:
+                return g.strip().rstrip(",.:;")[:120]
+    # Fallback: first sentence starting with an imperative verb
+    opener = texts[0]
+    first = _first_sentence(opener, max_len=200)
+    if first:
+        low = first.lower().lstrip()
+        for v in _IMPERATIVE_VERBS:
+            if low.startswith(v + " ") or low.startswith(v + "ing "):
+                return first.rstrip(".:;")[:120]
+    return ""
+
+
+def _extract_method(steps_span: list, sget) -> list[str]:
+    """Ordered list of tool classes, with adjacent duplicates collapsed."""
+    seq: list[str] = []
+    last = None
+    for s in steps_span:
+        tool_calls = sget(s, "tool_calls", []) or []
+        for tc in tool_calls:
+            name = tc.get("name") if isinstance(tc, dict) else getattr(tc, "name", "")
+            if not name:
+                continue
+            klass = _tool_class(name)
+            if klass and klass != last:
+                seq.append(klass)
+                last = klass
+    # Cap at 8 classes so the method reads as a recipe, not a log
+    return seq[:8]
+
+
+def _extract_stop_condition(texts: list[str], method: list[str]) -> str:
+    """Look at the final assistant text for success / exit signals."""
+    if texts:
+        tail = texts[-1].lower()
+        for sig in _STOP_SIGNALS:
+            if sig in tail:
+                # Return the phrase verbatim with context
+                idx = tail.find(sig)
+                window = texts[-1][max(0, idx - 20) : idx + len(sig) + 40]
+                return window.strip().rstrip(",.:;")[:120]
+    if method:
+        # Fallback: phase ends after the last tool class completes
+        return f"after final {method[-1]} step"
+    return ""
+
+
+def _fallback_goal_from_method(method: list[str]) -> str:
+    """When no text cue is found, synthesize a goal from the method."""
+    if not method:
+        return ""
+    GOAL_MAP = {
+        "search": "gather information",
+        "read": "load relevant context",
+        "edit": "modify existing code",
+        "write": "persist new artifact",
+        "shell": "execute a verification step",
+        "navigate": "move across resources",
+        "agent": "delegate to a sub-agent",
+        "think": "plan or reason explicitly",
+        "other": "perform a generic action",
+    }
+    # Use the last (most decisive) class as the goal driver
+    return GOAL_MAP.get(method[-1], "")
 
 
 @dataclass
@@ -296,6 +415,17 @@ def distill_meta_workflow(trace: Any) -> MetaWorkflow:
             name = _short_name(opener) or f"phase-{len(phases) + 1}"
             intent = _first_sentence(opener) or name
             angles = _extract_angles(" ".join(texts_in_sub[:3]))
+
+            # --- Playbook-entry slots (Cycle 25) ---------------------
+            steps_span = steps[global_start:global_end]
+            method = _extract_method(steps_span, sget)
+            goal = _extract_goal(texts_in_sub) or _fallback_goal_from_method(method)
+            stop = _extract_stop_condition(texts_in_sub, method)
+            # playbook_score = how many of the 4 slots we filled
+            playbook_score = sum(
+                1 for slot in (goal, angles, method, stop) if slot
+            )
+
             phases.append(
                 Phase(
                     index=len(phases),
@@ -308,6 +438,10 @@ def distill_meta_workflow(trace: Any) -> MetaWorkflow:
                     step_span_start=global_start,
                     step_span_end=global_end,
                     step_count=global_end - global_start,
+                    goal=goal,
+                    method=method,
+                    stop_condition=stop,
+                    playbook_score=playbook_score,
                 )
             )
 

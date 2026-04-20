@@ -35,6 +35,11 @@ def from_claude_code_jsonl(
     steps: list[TraceStep] = []
     total_in = 0
     total_out = 0
+    # Keep all substantive assistant texts so we can pick the best one
+    # as final_answer. The raw "last assistant text" is often a trivial
+    # closing line ("Done." / "Committed.") — a terrible baseline for
+    # replay evaluation. We pick the LONGEST assistant text instead.
+    _all_assistant_texts: list[str] = []
 
     with p.open("r", encoding="utf-8") as fh:
         for line in fh:
@@ -92,7 +97,8 @@ def from_claude_code_jsonl(
                 out_tok = int(usage.get("output_tokens", 0))
                 total_in += in_tok
                 total_out += out_tok
-                final_answer = text_content or final_answer
+                if text_content:
+                    _all_assistant_texts.append(text_content)
                 steps.append(
                     TraceStep(
                         role="assistant",
@@ -125,6 +131,13 @@ def from_claude_code_jsonl(
                         content=_flatten_content(content),
                     )
                 )
+
+    # Pick the LONGEST substantive assistant text as final_answer.
+    # This protects replay evaluation from being dominated by trivial
+    # closing lines ("Committed." / "Done.") that don't represent what
+    # the expensive agent actually produced.
+    if _all_assistant_texts:
+        final_answer = max(_all_assistant_texts, key=len)
 
     return CanonicalTrace(
         session_id=session_id or p.stem,
