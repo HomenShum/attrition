@@ -19,4 +19,11 @@ crons.interval(
   internal.domains.daas.radarIngest.ingestAllInternal,
 );
 
+// HN tier3 weak-signal runs more often — new stories appear continuously.
+crons.interval(
+  "radar-ingest-hackernews",
+  { hours: 2 },
+  internal.domains.daas.radarHnIngest.ingestHnInternal,
+);
+
 export default crons;

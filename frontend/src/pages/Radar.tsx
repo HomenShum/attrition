@@ -12,8 +12,8 @@
  * tier3_weak) so the user can see the confidence level at a glance.
  */
 
-import { useState } from "react";
-import { useQuery } from "convex/react";
+import { useMemo, useState } from "react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../_convex/api";
 import { Nav } from "../components/Nav";
 
@@ -43,12 +43,45 @@ const PRIOR_LOOK: Record<string, { label: string; color: string }> = {
 
 export function Radar() {
   const [category, setCategory] = useState<Category>("all");
+  const [stackFilter, setStackFilter] = useState<string>("all");
+  const [deltaOnly, setDeltaOnly] = useState(false);
+  const [search, setSearch] = useState("");
 
+  const dismissItem = useMutation(api.domains.daas.radar.dismissItem);
   const items = useQuery(api.domains.daas.radar.listItems, {
     category: category === "all" ? undefined : category,
-    limit: 100,
+    limit: 200,
   });
   const counts = useQuery(api.domains.daas.radar.getCategoryCounts, {});
+
+  // Client-side derived filters — stack, delta-since-24h, free-text search.
+  const DAY_MS = 86_400_000;
+  const now = Date.now();
+  const filtered = useMemo(() => {
+    if (!items) return items;
+    let out = items;
+    if (stackFilter !== "all") {
+      out = out.filter((r) => r.stack === stackFilter);
+    }
+    if (deltaOnly) {
+      out = out.filter((r) => now - r.changedAt <= DAY_MS);
+    }
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      out = out.filter(
+        (r) =>
+          r.title.toLowerCase().includes(q) ||
+          r.summary.toLowerCase().includes(q) ||
+          r.stack.toLowerCase().includes(q),
+      );
+    }
+    return out;
+  }, [items, stackFilter, deltaOnly, search, now]);
+
+  const allStacks = useMemo(() => {
+    if (!items) return [] as string[];
+    return Array.from(new Set(items.map((r) => r.stack))).sort();
+  }, [items]);
 
   return (
     <div
@@ -92,6 +125,69 @@ export function Radar() {
           </p>
         </header>
 
+        {/* Filter bar: category pills + stack dropdown + delta toggle + search */}
+        <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap", alignItems: "center" }}>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search title / summary / stack…"
+            style={{
+              flex: "1 1 260px",
+              padding: "7px 12px",
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: 6,
+              color: "rgba(255,255,255,0.92)",
+              fontSize: 13,
+              fontFamily: "inherit",
+            }}
+          />
+          <select
+            value={stackFilter}
+            onChange={(e) => setStackFilter(e.target.value)}
+            style={{
+              padding: "7px 10px",
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: 6,
+              color: "rgba(255,255,255,0.85)",
+              fontSize: 13,
+              fontFamily: "inherit",
+              cursor: "pointer",
+            }}
+          >
+            <option value="all">All stacks ({allStacks.length})</option>
+            {allStacks.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "7px 12px",
+              background: deltaOnly ? "rgba(217,119,87,0.12)" : "rgba(255,255,255,0.03)",
+              border: `1px solid ${deltaOnly ? "rgba(217,119,87,0.4)" : "rgba(255,255,255,0.1)"}`,
+              borderRadius: 6,
+              color: deltaOnly ? "#fff" : "rgba(255,255,255,0.75)",
+              fontSize: 12,
+              cursor: "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={deltaOnly}
+              onChange={(e) => setDeltaOnly(e.target.checked)}
+              style={{ accentColor: "#d97757" }}
+            />
+            Last 24h only
+          </label>
+        </div>
+
         <div style={{ display: "flex", gap: 6, marginBottom: 24, flexWrap: "wrap" }}>
           {(Object.keys(CATEGORY_LABEL) as Category[]).map((c) => {
             const active = c === category;
@@ -125,9 +221,9 @@ export function Radar() {
           })}
         </div>
 
-        {items === undefined ? (
+        {filtered === undefined ? (
           <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>Loading…</div>
-        ) : items.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div
             style={{
               padding: 20,
@@ -138,11 +234,14 @@ export function Radar() {
               fontSize: 13,
             }}
           >
-            No {CATEGORY_LABEL[category].toLowerCase()} items recorded yet.
+            No matches for the current filters
+            {search ? <> — search: <strong>{search}</strong></> : null}
+            {stackFilter !== "all" ? <> — stack: <strong>{stackFilter}</strong></> : null}
+            {deltaOnly ? <> — last 24h only</> : null}.
           </div>
         ) : (
           <div style={{ display: "grid", gap: 12 }}>
-            {items.map((item) => {
+            {filtered.map((item) => {
               const tierLook = TIER_LOOK[item.sourceTier] ?? TIER_LOOK.tier3_weak;
               const priorLook = PRIOR_LOOK[item.updatesPrior] ?? PRIOR_LOOK.none;
               const lanes: string[] = (() => {
@@ -181,9 +280,25 @@ export function Radar() {
                         {item.title}
                       </a>
                     </h3>
-                    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                    <div style={{ display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }}>
                       <Badge label={tierLook.label} color={tierLook.color} />
                       <Badge label={priorLook.label} color={priorLook.color} />
+                      <button
+                        type="button"
+                        onClick={() => void dismissItem({ itemId: item.itemId })}
+                        title="Dismiss item"
+                        style={{
+                          padding: "2px 8px",
+                          background: "transparent",
+                          border: "1px solid rgba(255,255,255,0.15)",
+                          borderRadius: 4,
+                          color: "rgba(255,255,255,0.55)",
+                          fontSize: 11,
+                          cursor: "pointer",
+                        }}
+                      >
+                        Dismiss
+                      </button>
                     </div>
                   </div>
                   <p
