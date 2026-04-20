@@ -294,16 +294,34 @@ def _args_match(expected: dict[str, Any], actual: dict[str, Any]) -> bool:
 
 
 def _loose_eq(a: Any, b: Any) -> bool:
-    """BFCL-style loose equality: numeric coercion + whitespace-insensitive."""
+    """BFCL-style loose equality — NUMERIC coercion only.
+
+    BFCL's reference AST checker (bfcl_eval.eval_checker.ast_eval) is
+    case-sensitive on string values. An earlier version of this helper
+    lowercased strings and was lenient by default; that inflated pass
+    rates by accepting ``"san francisco" == "San Francisco"`` which the
+    reference would reject.
+
+    Allowed loose matches:
+      * Integer / float coercion (``"10" == 10``, ``"10.0" == 10``)
+      * Whitespace-trim on strings (leading/trailing only)
+
+    Rejected:
+      * Case differences on strings (matches BFCL reference)
+      * Type coercion across bool / None
+    """
     if a == b:
         return True
-    try:
-        if float(a) == float(b):
-            return True
-    except (TypeError, ValueError):
-        pass
+    # Numeric coercion — BFCL explicitly documents this in the leaderboard docs
+    if not isinstance(a, bool) and not isinstance(b, bool):
+        try:
+            if float(a) == float(b):
+                return True
+        except (TypeError, ValueError):
+            pass
+    # Whitespace-trim only — NO case folding
     if isinstance(a, str) and isinstance(b, str):
-        return a.strip().lower() == b.strip().lower()
+        return a.strip() == b.strip()
     return False
 
 
