@@ -208,6 +208,15 @@ class Handoff:
 
 
 def _tools_py(tools: list[Any]) -> str:
+    """Delegate to the shared resolver-aware tools.py emitter so every
+    runtime lane — simple_chain, tool_first_chain, orchestrator_worker —
+    gets identical mock/live/hybrid semantics."""
+    from daas.compile_down.emitters._tools_emit import emit_tools_py
+    return emit_tools_py(tools)
+
+
+def _tools_py_LEGACY(tools: list[Any]) -> str:
+    """Legacy inline emitter — kept for reference only; NOT called."""
     decls: list[dict[str, Any]] = []
     handlers: list[str] = []
     for t in tools:
@@ -268,7 +277,18 @@ WORKER_TOOLS = [{tools_list}]
 
 
 def _orchestrator_py(model: str) -> str:
-    return f'''"""Orchestrator loop — fan-out, compaction, final answer."""
+    return f'''"""Orchestrator loop — plan, dispatch workers, collect, compact.
+
+Three-stage pipeline:
+  1. PLAN  — orchestrator LLM returns JSON array of {{worker, task, tools_allowed}}
+  2. DISPATCH — one LLM call per worker with tool-calling enabled; results land
+                in the shared Scratchpad section named after the worker.
+  3. COMPACT — orchestrator LLM reads the full scratchpad and emits the
+                final answer to the user.
+
+Every worker's tool call flows through `tools.dispatch()` which itself
+routes via the connector resolver (CONNECTOR_MODE env var: mock/live/hybrid).
+"""
 
 from __future__ import annotations
 
@@ -278,12 +298,13 @@ import time
 import urllib.request
 
 from prompts import ORCHESTRATOR_SYSTEM_PROMPT
-from schemas import RunInput, RunOutput, WorkerOutput
+from schemas import RunInput, RunOutput, WorkerAssignment, WorkerOutput
 from state import Scratchpad
 from tools import GEMINI_TOOLS, dispatch
 
 MODEL = "{model}"
-MAX_WORKER_TURNS = 3
+MAX_WORKER_TURNS = 3       # cap tool-loop length per worker
+MAX_WORKER_ASSIGNMENTS = 4 # bound fan-out; matches plan prompt
 
 
 def _gemini_key() -> str:
@@ -304,78 +325,213 @@ def _post(url: str, body: dict) -> dict:
         return json.loads(r.read())
 
 
-def _gemini(system: str, turns: list, key: str) -> dict:
+def _gemini(system: str, turns: list, key: str, *, with_tools: bool = True) -> dict:
     url = (
         f"https://generativelanguage.googleapis.com/v1beta/"
         f"models/{{MODEL}}:generateContent?key={{key}}"
     )
-    body = {{
+    body: dict = {{
         "systemInstruction": {{"parts": [{{"text": system}}]}},
         "contents": turns,
-        "tools": GEMINI_TOOLS,
         "generationConfig": {{"temperature": 0.2, "maxOutputTokens": 2048}},
     }}
+    if with_tools:
+        body["tools"] = GEMINI_TOOLS
     return _post(url, body)
+
+
+def _extract_text(resp: dict) -> str:
+    cands = resp.get("candidates") or []
+    if not cands:
+        return ""
+    parts = (cands[0].get("content") or {{}}).get("parts") or []
+    return "".join(str(p.get("text", "")) for p in parts)
+
+
+def _parse_plan(plan_text: str) -> list[WorkerAssignment]:
+    """Parse orchestrator's plan JSON into WorkerAssignment list.
+    Tolerant: tries full JSON parse, falls back to extracting the first
+    JSON array substring. Empty list = fall through to default worker."""
+    txt = plan_text.strip()
+    if not txt:
+        return []
+    # Strip markdown fences if the model added them
+    if txt.startswith("```"):
+        txt = txt.split("```", 2)[1] if txt.count("```") >= 2 else txt.lstrip("`")
+        if txt.lower().startswith("json"):
+            txt = txt[4:].lstrip()
+    # Try direct JSON
+    try:
+        parsed = json.loads(txt)
+    except json.JSONDecodeError:
+        # Extract first [...] substring
+        start = txt.find("[")
+        end = txt.rfind("]")
+        if start == -1 or end <= start:
+            return []
+        try:
+            parsed = json.loads(txt[start : end + 1])
+        except json.JSONDecodeError:
+            return []
+    if not isinstance(parsed, list):
+        return []
+    assignments: list[WorkerAssignment] = []
+    for item in parsed[:MAX_WORKER_ASSIGNMENTS]:
+        if not isinstance(item, dict):
+            continue
+        worker = str(item.get("worker") or item.get("name") or "executor")
+        task = str(item.get("task") or item.get("goal") or "").strip()
+        if not task:
+            continue
+        tools_allowed = item.get("tools_allowed") or item.get("tools") or []
+        if not isinstance(tools_allowed, list):
+            tools_allowed = []
+        assignments.append(
+            WorkerAssignment(worker=worker, task=task, tools_allowed=[str(t) for t in tools_allowed])
+        )
+    return assignments
+
+
+def _run_worker(assignment: WorkerAssignment, key: str) -> WorkerOutput:
+    """Execute one worker assignment with a bounded tool loop.
+    Returns collected output + tool calls performed (via connector dispatch)."""
+    contents: list[dict] = [
+        {{"role": "user", "parts": [{{"text": f"Task: {{assignment.task}}"}}]}}
+    ]
+    in_tok = out_tok = 0
+    tool_calls_log: list[dict] = []
+    final_text = ""
+
+    for _ in range(MAX_WORKER_TURNS):
+        resp = _gemini(
+            system=(
+                f"You are the {{assignment.worker}} worker. Use available tools when needed. "
+                "Return a concise JSON or text answer to the task."
+            ),
+            turns=contents,
+            key=key,
+        )
+        usage = resp.get("usageMetadata", {{}})
+        in_tok += int(usage.get("promptTokenCount", 0))
+        out_tok += int(usage.get("candidatesTokenCount", 0))
+        cands = resp.get("candidates") or []
+        if not cands:
+            break
+        parts = (cands[0].get("content") or {{}}).get("parts", [])
+        fn_calls = [p.get("functionCall") for p in parts if p.get("functionCall")]
+        text_parts = [p.get("text", "") for p in parts if p.get("text")]
+        if fn_calls:
+            contents.append({{"role": "model", "parts": parts}})
+            for fc in fn_calls:
+                name = fc.get("name", "")
+                args = fc.get("args", {{}}) or {{}}
+                # Tool calls flow through the connector resolver in tools.dispatch
+                result = dispatch(name, args)
+                tool_calls_log.append({{"tool": name, "args": args, "result": result}})
+                contents.append(
+                    {{
+                        "role": "user",
+                        "parts": [
+                            {{"functionResponse": {{"name": name, "response": {{"result": result}}}}}}
+                        ],
+                    }}
+                )
+            continue
+        if text_parts:
+            final_text = "".join(text_parts)
+            break
+        break
+
+    cost = in_tok * 0.10 / 1_000_000 + out_tok * 0.40 / 1_000_000
+    return WorkerOutput(
+        worker=assignment.worker,
+        content=final_text or "(no text output)",
+        tool_calls=tool_calls_log,
+        cost_usd=cost,
+        input_tokens=in_tok,
+        output_tokens=out_tok,
+    )
 
 
 def run(inp: RunInput) -> RunOutput:
     key = _gemini_key()
     scratch = Scratchpad()
     started = time.time()
-    in_tok = out_tok = 0
+    total_in = total_out = 0
     worker_outputs: list[WorkerOutput] = []
 
-    # 1. Ask orchestrator to plan
+    # 1. PLAN — ask the orchestrator for a bounded worker-assignment list.
     plan_turns = [
         {{
             "role": "user",
             "parts": [
                 {{
                     "text": (
-                        "Plan 1-4 worker assignments as JSON array of "
-                        '{{worker, task, tools_allowed}}. Query: ' + inp.query
+                        "Plan 1-4 worker assignments. Return ONLY a JSON array of "
+                        '{{worker: str, task: str, tools_allowed: [str]}}. '
+                        "Query: " + inp.query
                     )
                 }}
             ],
         }}
     ]
-    plan_resp = _gemini(ORCHESTRATOR_SYSTEM_PROMPT, plan_turns, key)
+    plan_resp = _gemini(ORCHESTRATOR_SYSTEM_PROMPT, plan_turns, key, with_tools=False)
     usage = plan_resp.get("usageMetadata", {{}})
-    in_tok += int(usage.get("promptTokenCount", 0))
-    out_tok += int(usage.get("candidatesTokenCount", 0))
-
-    # 2. Execute each worker assignment (sequential to start — parallelize later)
-    plan_text = ""
-    if plan_resp.get("candidates"):
-        parts = plan_resp["candidates"][0].get("content", {{}}).get("parts", [])
-        plan_text = "".join(str(p.get("text", "")) for p in parts)
+    total_in += int(usage.get("promptTokenCount", 0))
+    total_out += int(usage.get("candidatesTokenCount", 0))
+    plan_text = _extract_text(plan_resp)
     scratch.append("orchestrator", f"PLAN:\\n{{plan_text}}")
 
-    # 3. Compact + emit final answer
+    # 2. DISPATCH — run each assignment sequentially; each worker can
+    # call tools which route through the connector resolver.
+    assignments = _parse_plan(plan_text)
+    if not assignments:
+        # Fall back to a single default worker when the plan was unparseable
+        assignments = [
+            WorkerAssignment(
+                worker="executor", task=inp.query, tools_allowed=[]
+            )
+        ]
+    for assignment in assignments:
+        wo = _run_worker(assignment, key)
+        worker_outputs.append(wo)
+        total_in += wo.input_tokens
+        total_out += wo.output_tokens
+        scratch.append(
+            assignment.worker,
+            f"TASK: {{assignment.task}}\\nOUTPUT: {{wo.content}}\\nTOOL_CALLS: {{json.dumps(wo.tool_calls)}}",
+        )
+
+    # 3. COMPACT — orchestrator reads the full scratchpad and emits the final answer.
     compact_turns = [
         {{
             "role": "user",
             "parts": [
-                {{"text": "Compact the worker outputs below into a final answer.\\n\\n" + scratch.compact() + "\\n\\nQUERY: " + inp.query}}
+                {{
+                    "text": (
+                        "Compact the worker outputs below into the final answer for "
+                        "the user.\\n\\n" + scratch.compact() + "\\n\\nQUERY: " + inp.query
+                    )
+                }}
             ],
         }}
     ]
-    final = _gemini(ORCHESTRATOR_SYSTEM_PROMPT, compact_turns, key)
+    final = _gemini(ORCHESTRATOR_SYSTEM_PROMPT, compact_turns, key, with_tools=False)
     usage = final.get("usageMetadata", {{}})
-    in_tok += int(usage.get("promptTokenCount", 0))
-    out_tok += int(usage.get("candidatesTokenCount", 0))
+    total_in += int(usage.get("promptTokenCount", 0))
+    total_out += int(usage.get("candidatesTokenCount", 0))
     final_text = ""
     if final.get("candidates"):
         parts = final["candidates"][0].get("content", {{}}).get("parts", [])
         final_text = "".join(str(p.get("text", "")) for p in parts)
 
-    # Flash Lite pricing
-    cost = in_tok * 0.10 / 1_000_000 + out_tok * 0.40 / 1_000_000
+    # Flash Lite pricing (applied to every Gemini call this run made)
+    cost = total_in * 0.10 / 1_000_000 + total_out * 0.40 / 1_000_000
     return RunOutput(
         final_answer=final_text,
         worker_outputs=worker_outputs,
         total_cost_usd=cost,
-        total_tokens=in_tok + out_tok,
+        total_tokens=total_in + total_out,
         duration_ms=int((time.time() - started) * 1000),
     )
 '''

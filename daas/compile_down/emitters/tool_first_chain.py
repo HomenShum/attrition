@@ -48,6 +48,17 @@ def _safe_py_string(s: str) -> str:
     return repr(s)
 
 
+def _snake(s: str) -> str:
+    """Python-identifier-safe snake_case. Used for generated handler fn names."""
+    return (
+        str(s)
+        .replace(".", "_")
+        .replace("-", "_")
+        .replace(" ", "_")
+        .lower()
+    )
+
+
 def _prompts_py(system_prompt: str, success_criteria: list[str], rules: list[str], trace_id: str) -> str:
     criteria_block = "\n".join(f"  - {c}" for c in success_criteria) if success_criteria else "  (none)"
     rules_block = "\n".join(f"  - {r}" for r in rules) if rules else "  (none)"
@@ -67,9 +78,36 @@ def _prompts_py(system_prompt: str, success_criteria: list[str], rules: list[str
 
 
 def _tools_py(tools: list[Any]) -> str:
-    """Emit tool specs in Gemini's functionDeclarations shape + a dispatch map."""
+    """Delegate to the shared resolver-aware emitter so every runtime
+    lane produces identical connector semantics (mock / live / hybrid).
+    Single source of truth lives at
+    ``daas.compile_down.emitters._tools_emit.emit_tools_py``.
+    """
+    from daas.compile_down.emitters._tools_emit import emit_tools_py
+    return emit_tools_py(tools)
+
+
+def _tools_py_LEGACY(tools: list[Any]) -> str:
+    """Legacy inline emitter — kept for reference only; NOT called.
+
+    Every tool ships with TWO handlers:
+      _stub_<name>  — mock output; safe default
+      _live_<name>  — raises NotImplementedError until the user wires it
+                       to a real DB/API/MCP server
+
+    A `_resolve_handler(name)` function reads the CONNECTOR_MODE env var
+    at dispatch time and picks between stub and live:
+      mock    — always _stub_<name>
+      live    — always _live_<name>
+      hybrid  — checks CONNECTOR_OVERRIDES[name]; defaults to stub
+
+    Swap the UI toggle on Builder's Scaffold tab -> set `attrition:connector_mode`
+    in localStorage -> export CONNECTOR_MODE=<mode> before running the
+    emitted runner.py. Changing the mode changes WHAT each tool call
+    returns at runtime.
+    """
     decls: list[dict[str, Any]] = []
-    handlers = []
+    handlers: list[str] = []
     for t in tools:
         name = getattr(t, "name", None) or (t.get("name") if isinstance(t, dict) else None)
         purpose = getattr(t, "purpose", None) or (t.get("purpose") if isinstance(t, dict) else "")
@@ -90,20 +128,47 @@ def _tools_py(tools: list[Any]) -> str:
         handlers.append(name)
 
     decls_json = json.dumps(decls, indent=2, ensure_ascii=False)
-    handler_map = ",\n    ".join(f'"{n}": _stub_{n}' for n in handlers) or ""
+    safe_handlers = [(n, _snake(n)) for n in handlers]
+    stub_map = ",\n    ".join(f'"{n}": _stub_{snake}' for n, snake in safe_handlers) or ""
+    live_map = ",\n    ".join(f'"{n}": _live_{snake}' for n, snake in safe_handlers) or ""
     stub_fns = "\n\n".join(
-        f'def _stub_{n}(args: dict) -> dict:\n    """TODO: implement tool {n}. Return JSON-serializable dict."""\n    return {{"status": "not_implemented", "tool": "{n}", "args": args}}'
-        for n in handlers
-    ) or '# No tools emitted — add handlers here when the spec has tools.'
+        f'def _stub_{snake}(args: dict) -> dict:\n'
+        f'    """Mock handler for `{n}` — safe default, returns fixture."""\n'
+        f'    return {{"status": "mock", "tool": "{n}", "args": args, "_result": "fixture-placeholder"}}'
+        for n, snake in safe_handlers
+    ) or "# No tools in distilled spec."
+    live_fns = "\n\n".join(
+        f'def _live_{snake}(args: dict) -> dict:\n'
+        f'    """Live handler for `{n}` — REPLACE with real DB/API/MCP call."""\n'
+        f'    raise NotImplementedError(\n'
+        f'        "live handler for {n} not wired. Flip CONNECTOR_MODE=mock or "\n'
+        f'        "implement _live_{snake} with the actual integration."\n'
+        f'    )'
+        for n, snake in safe_handlers
+    ) or "# No tools in distilled spec."
 
-    return f'''"""Tool declarations (Gemini function-calling shape) + local handlers.
+    return f'''"""Tool declarations + connector-mode-aware dispatch.
 
-Replace each `_stub_*` function with a real implementation before
-replaying against production data.
+Three modes (set via CONNECTOR_MODE env var, default "mock"):
+  mock    — every call returns stub fixture data. Safe for dev.
+  live    — every call hits the real _live_<name> handler.
+            Raises NotImplementedError until you implement them.
+  hybrid  — per-tool override via CONNECTOR_OVERRIDES env JSON.
+            e.g. CONNECTOR_OVERRIDES=\'{{"lookup_sku": "live"}}\'
+            Unlisted tools fall back to mock.
+
+Every handler pair (_stub_<name>, _live_<name>) should return a JSON-
+serializable dict. The dispatcher calls _resolve_handler(name)(args).
+
+This file is the connector-resolver's executing layer — flipping the
+Builder UI toggle sets CONNECTOR_MODE, which materially changes
+what dispatch() returns for every tool.
 """
 
 from __future__ import annotations
 
+import json
+import os
 from typing import Any, Callable
 
 GEMINI_TOOLS = [
@@ -112,19 +177,57 @@ GEMINI_TOOLS = [
     }}
 ]
 
+# --- stub handlers (safe defaults; always available) ---
+
 {stub_fns}
 
+# --- live handlers (user implements; NotImplementedError until wired) ---
 
-HANDLERS: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {{
-    {handler_map}
+{live_fns}
+
+
+STUB_HANDLERS: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {{
+    {stub_map}
+}}
+
+LIVE_HANDLERS: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {{
+    {live_map}
 }}
 
 
+def _resolve_handler(name: str) -> Callable[[dict[str, Any]], dict[str, Any]] | None:
+    """Pick stub vs live based on CONNECTOR_MODE + CONNECTOR_OVERRIDES."""
+    mode = (os.environ.get("CONNECTOR_MODE") or "mock").lower()
+    if mode == "live":
+        return LIVE_HANDLERS.get(name)
+    if mode == "hybrid":
+        try:
+            overrides = json.loads(os.environ.get("CONNECTOR_OVERRIDES") or "{{}}")
+        except json.JSONDecodeError:
+            overrides = {{}}
+        target = overrides.get(name, "mock")
+        if target == "live":
+            return LIVE_HANDLERS.get(name)
+        return STUB_HANDLERS.get(name)
+    # Default = mock (also handles unknown mode values honestly)
+    return STUB_HANDLERS.get(name)
+
+
 def dispatch(name: str, args: dict[str, Any]) -> dict[str, Any]:
-    fn = HANDLERS.get(name)
+    """Route one tool call through the connector resolver."""
+    fn = _resolve_handler(name)
     if fn is None:
-        return {{"error": f"no handler for tool '{{name}}'"}}
-    return fn(args)
+        return {{"error": f"no handler registered for tool '{{name}}'"}}
+    try:
+        return fn(args)
+    except NotImplementedError as exc:
+        # Surface honestly rather than silently failing
+        return {{
+            "error": "not_implemented",
+            "tool": name,
+            "detail": str(exc),
+            "mode": (os.environ.get("CONNECTOR_MODE") or "mock"),
+        }}
 '''
 
 

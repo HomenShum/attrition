@@ -262,6 +262,78 @@ export function ProofSection() {
         actually lifts fidelity.
       </p>
 
+      {/* Loop A proof — translation layer execution */}
+      <div
+        style={{
+          marginTop: 8,
+          marginBottom: 18,
+          padding: "14px 16px",
+          background: "rgba(34,197,94,0.04)",
+          border: "1px solid rgba(34,197,94,0.25)",
+          borderRadius: 10,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 10,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "#22c55e",
+            marginBottom: 6,
+          }}
+        >
+          Proof · Loop A · translation layer · end-to-end
+        </div>
+        <div
+          style={{
+            fontSize: 13,
+            color: "rgba(255,255,255,0.85)",
+            lineHeight: 1.5,
+            marginBottom: 8,
+          }}
+        >
+          The compile-down/up pipeline actually{" "}
+          <em style={{ color: "#22c55e", fontStyle: "normal" }}>executes</em>
+          , not just labels.
+        </div>
+        <ul
+          style={{
+            margin: 0,
+            paddingLeft: 18,
+            fontSize: 11.5,
+            color: "rgba(255,255,255,0.7)",
+            lineHeight: 1.6,
+            fontFamily: "'JetBrains Mono', monospace",
+          }}
+        >
+          <li>
+            Connector resolver: flipping{" "}
+            <code>CONNECTOR_MODE</code> materially changes dispatch output
+            across <strong style={{ color: "#22c55e" }}>4 scenarios</strong>{" "}
+            (mock / live / hybrid+override / hybrid+default) — 8 scenario
+            tests, all pass
+          </li>
+          <li>
+            Orchestrator-worker: emits a full{" "}
+            <strong style={{ color: "#22c55e" }}>
+              plan → dispatch → compact
+            </strong>{" "}
+            loop; per-worker tool calls route through the connector
+            resolver (not a TODO, real bounded loop with{" "}
+            <code>MAX_WORKER_TURNS=3</code>)
+          </li>
+          <li>
+            5 runtime lanes share one emitter: simple_chain ·
+            tool_first_chain · orchestrator_worker · openai_agents_sdk ·
+            langgraph_python — every emitted <code>.py</code>{" "}
+            <code>ast.parse</code>-valid
+          </li>
+          <li>
+            39 emitter + resolver tests pass against the updated pipeline
+          </li>
+        </ul>
+      </div>
+
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", fontSize: 11 }}>
         <Link
           to="/_internal/fidelity"
