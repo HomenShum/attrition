@@ -24,7 +24,7 @@
 
 import { useMemo, useState } from "react";
 import { useQuery, useAction } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "../_convex/api";
 
 type VerdictKind = "pass" | "partial" | "fail";
 
@@ -79,33 +79,7 @@ function VerdictBadge({ verdict }: { verdict?: string | null }) {
   );
 }
 
-function Bar({ value, max, color }: { value: number; max: number; color: string }) {
-  const pct = Math.max(0, Math.min(100, (value / (max || 1)) * 100));
-  return (
-    <div
-      style={{
-        position: "relative",
-        height: 12,
-        background: "rgba(255,255,255,0.04)",
-        borderRadius: 4,
-        overflow: "hidden",
-      }}
-      role="progressbar"
-      aria-valuenow={value}
-      aria-valuemin={0}
-      aria-valuemax={max}
-    >
-      <div
-        style={{
-          height: "100%",
-          width: `${pct}%`,
-          background: color,
-          transition: "width 0.3s",
-        }}
-      />
-    </div>
-  );
-}
+// <Bar /> helper removed — bar visuals now inlined where needed.
 
 // Detail subcomponent rendered below the run list when a run is selected.
 function RunDetail({ sessionId }: { sessionId: string }) {

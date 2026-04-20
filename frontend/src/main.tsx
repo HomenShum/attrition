@@ -1,8 +1,17 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ChatProvider } from "./contexts/ChatContext";
 import { Landing } from "./pages/Landing";
+import { DaasPage } from "./pages/DaasPage";
+
+// Attrition's own Convex deployment (daas domain).
+// Override via VITE_CONVEX_URL if running against dev deployment.
+const CONVEX_URL =
+  (import.meta.env.VITE_CONVEX_URL as string | undefined) ||
+  "https://joyous-walrus-428.convex.cloud";
+const convex = new ConvexReactClient(CONVEX_URL);
 import { Dashboard } from "./pages/Dashboard";
 import { Results } from "./pages/Results";
 import { Sitemap } from "./pages/Sitemap";
@@ -24,10 +33,12 @@ import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <ChatProvider>
-        <Routes>
-          <Route path="/" element={<Landing />} />
+    <ConvexProvider client={convex}>
+      <BrowserRouter>
+        <ChatProvider>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/daas" element={<DaasPage />} />
           <Route path="/scan/:id" element={<ScanResult />} />
           <Route path="/docs" element={<Docs />} />
           <Route path="/live" element={<Live />} />
@@ -46,8 +57,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="/results/:id" element={<Results />} />
           <Route path="/sitemap" element={<Sitemap />} />
           <Route path="/audit" element={<Audit />} />
-        </Routes>
-      </ChatProvider>
-    </BrowserRouter>
+          </Routes>
+        </ChatProvider>
+      </BrowserRouter>
+    </ConvexProvider>
   </React.StrictMode>,
 );

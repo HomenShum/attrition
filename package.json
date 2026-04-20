@@ -1,0 +1,14 @@
+{
+  "name": "attrition-convex",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Attrition.sh Convex backend — DaaS domain (distill / generate / replay / judge)",
+  "scripts": {
+    "convex:dev": "convex dev",
+    "convex:deploy": "convex deploy",
+    "convex:codegen": "convex codegen"
+  },
+  "dependencies": {
+    "convex": "^1.35.0"
+  }
+}
