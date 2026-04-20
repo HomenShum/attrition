@@ -242,6 +242,121 @@ def scenario_rate_limit_exhaustion():
     return f"RATE_LIMIT ok ({ok} allowed, {limited} limited)"
 
 
+def scenario_per_key_quota():
+    """
+    Scenario: registered API key with custom quota override
+    User: integration partner with higher-than-default quota
+    Goal: after registerApiKey(rateLimitPerMinute=3), that key's bucket
+          allows 3 requests before 429, regardless of the 120 default.
+    Expected: first 3 succeed, then 429; rate headers report the override.
+    """
+    import secrets
+    cleanup_prefix("scen_pkq_")
+    c = ConvexClient(CONVEX_CLOUD)
+    raw_key = secrets.token_urlsafe(32)  # >= 32 chars
+    owner = f"scen-pkq-{int(time.time())}"
+    reg = c.action("domains/daas/admin:runAdminOp", {
+        "op": "registerApiKey",
+        "rawKey": raw_key,
+        "owner": owner,
+        "rateLimitPerMinute": 3,
+    })
+    assert reg.get("apiKeyId"), f"register failed: {reg}"
+
+    # Send 5 requests with this key
+    results = []
+    for i in range(5):
+        status, hdrs, _ = post_ingest(
+            _minimal(f"scen_pkq_{i}"),
+            headers={"x-daas-api-key": raw_key},
+        )
+        limit_hdr = int(hdrs.get("X-RateLimit-Limit") or hdrs.get("x-ratelimit-limit") or 0)
+        results.append((status, limit_hdr))
+
+    # Clean up key
+    c.action("domains/daas/admin:runAdminOp", {
+        "op": "setApiKeyEnabled",
+        "apiKeyId": reg["apiKeyId"],
+        "enabled": False,
+    })
+
+    ok = sum(1 for s, _ in results if s == 201)
+    limited = sum(1 for s, _ in results if s == 429)
+    limits_seen = {lh for _, lh in results if lh > 0}
+    assert ok == 3, f"expected 3 allowed got {ok}; results={results}"
+    assert limited == 2, f"expected 2 limited got {limited}"
+    assert 3 in limits_seen, f"expected X-RateLimit-Limit=3, got {limits_seen}"
+    cleanup_prefix("scen_pkq_")
+    return f"PER_KEY_QUOTA ok ({ok} allowed, {limited} limited, limit={limits_seen})"
+
+
+def _hmac_sha256_hex(secret: str, body: str) -> str:
+    import hashlib, hmac
+    return hmac.new(secret.encode(), body.encode(), hashlib.sha256).hexdigest()
+
+
+def scenario_hmac_signed():
+    """
+    Scenario: key with webhookSecret — client must sign each body
+    User: trusted partner whose registration requires signed ingest
+    Goal: unsigned or bad-signed requests return 401; valid sig returns 201
+    """
+    import secrets
+    cleanup_prefix("scen_hmac_")
+    c = ConvexClient(CONVEX_CLOUD)
+    raw_key = secrets.token_urlsafe(32)
+    secret = secrets.token_urlsafe(32)
+    reg = c.action("domains/daas/admin:runAdminOp", {
+        "op": "registerApiKey",
+        "rawKey": raw_key,
+        "owner": f"scen-hmac-{int(time.time())}",
+        "webhookSecret": secret,
+        "rateLimitPerMinute": 10,
+    })
+    assert reg.get("apiKeyId"), f"register failed: {reg}"
+
+    try:
+        # 1) Unsigned → 401
+        payload = _minimal("scen_hmac_unsigned_1")
+        status, _, body = post_ingest(payload, headers={"x-daas-api-key": raw_key})
+        assert status == 401, f"expected 401 for unsigned, got {status}: {body[:200]}"
+        assert "signature_missing" in body
+
+        # 2) Bad signature → 401
+        payload = _minimal("scen_hmac_bad_1")
+        status, _, body = post_ingest(payload, headers={
+            "x-daas-api-key": raw_key,
+            "x-daas-signature": "0" * 64,
+        })
+        assert status == 401, f"expected 401 for bad sig, got {status}"
+        assert "signature_mismatch" in body
+
+        # 3) Valid signature → 201
+        payload = _minimal("scen_hmac_good_1")
+        body_str = json.dumps(payload)
+        sig = _hmac_sha256_hex(secret, body_str)
+        req = urllib.request.Request(
+            f"{CONVEX_SITE}/api/daas/ingest",
+            data=body_str.encode(),
+            headers={
+                "Content-Type": "application/json",
+                "x-daas-api-key": raw_key,
+                "x-daas-signature": sig,
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=15) as r:
+            assert r.status == 201, f"expected 201 for valid sig, got {r.status}"
+    finally:
+        c.action("domains/daas/admin:runAdminOp", {
+            "op": "setApiKeyEnabled",
+            "apiKeyId": reg["apiKeyId"],
+            "enabled": False,
+        })
+        cleanup_prefix("scen_hmac_")
+    return "HMAC_SIGNED ok (unsigned 401, bad sig 401, valid sig 201)"
+
+
 # ─── Runner ─────────────────────────────────────────────────────────────────
 
 SCENARIOS = [
@@ -252,6 +367,8 @@ SCENARIOS = [
     ("adv_nan_tokens", scenario_adversarial_non_finite_tokens),
     ("concurrent_burst", scenario_concurrent_burst),
     ("rate_limit", scenario_rate_limit_exhaustion),
+    ("per_key_quota", scenario_per_key_quota),
+    ("hmac_signed", scenario_hmac_signed),
 ]
 
 
