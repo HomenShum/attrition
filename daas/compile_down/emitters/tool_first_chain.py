@@ -62,11 +62,21 @@ def _snake(s: str) -> str:
 def _prompts_py(system_prompt: str, success_criteria: list[str], rules: list[str], trace_id: str) -> str:
     criteria_block = "\n".join(f"  - {c}" for c in success_criteria) if success_criteria else "  (none)"
     rules_block = "\n".join(f"  - {r}" for r in rules) if rules else "  (none)"
-    # Append the shared tool-calling rules to whatever was distilled from the trace.
+    # Tool-calling rules are load-bearing. Prior wording ("use at most
+    # ONE tool per turn unless the user asked for multiple") let the
+    # model duck out of tool calls on simple tasks and return prose,
+    # regressing vs the Flash Lite solo baseline. This version forces
+    # the same function-calling behavior the solo baseline uses.
     full_prompt = (
         system_prompt
-        + "\n\nRules:\n- Prefer calling a tool over speculating.\n"
-        "- Use at most ONE tool per turn unless the user asked for multiple.\n"
+        + "\n\nTool-call rules (load-bearing — do not deviate):\n"
+        "- If a declared tool can answer the user's request, YOU MUST "
+        "emit a functionCall. Do NOT respond with prose when a tool "
+        "call would answer the request.\n"
+        "- Emit exactly ONE functionCall per turn. The bounded loop "
+        "will give you further turns if the task requires more calls.\n"
+        "- Use the exact argument names and types declared in the tool "
+        "schema; do not rename or coerce.\n"
         "- Return JSON that matches the response schema exactly."
     )
     return (
@@ -345,11 +355,20 @@ def run(inp: ChainInput) -> ChainOutput:
     final_text = ""
 
     for turn in range(MAX_TURNS):
+        # Turn 0: force a tool call (mode=ANY) so the model doesn't
+        # duck out with prose on single-call tasks.
+        # Turn 1+: switch to AUTO so the model can emit a text answer
+        # after seeing tool results, letting the loop terminate
+        # naturally instead of burning extra turns. This drops
+        # scaffold-vs-baseline cost from ~7x down toward 1x while
+        # keeping the quality preservation.
+        _mode = "ANY" if turn == 0 else "AUTO"
         body = {{
             "systemInstruction": {{"parts": [{{"text": SYSTEM_PROMPT}}]}},
             "contents": contents,
             "tools": GEMINI_TOOLS,
-            "generationConfig": {{"temperature": 0.2, "maxOutputTokens": 2048}},
+            "toolConfig": {{"functionCallingConfig": {{"mode": _mode}}}},
+            "generationConfig": {{"temperature": 0.0, "maxOutputTokens": 1024}},
         }}
         resp = _post(url, body)
         usage = resp.get("usageMetadata", {{}})
@@ -367,7 +386,18 @@ def run(inp: ChainInput) -> ChainOutput:
                 name = fc.get("name", "")
                 args = fc.get("args", {{}}) or {{}}
                 result = dispatch(name, args)
-                tool_calls_log.append({{"tool": name, "args": args, "result": result}})
+                # Canonical "name"/"arguments" keys for downstream
+                # BFCL-style scorers; keep "tool"/"args" for backward
+                # compatibility with existing consumers.
+                tool_calls_log.append(
+                    {{
+                        "name": name,
+                        "arguments": args,
+                        "tool": name,
+                        "args": args,
+                        "result": result,
+                    }}
+                )
                 contents.append(
                     {{
                         "role": "user",

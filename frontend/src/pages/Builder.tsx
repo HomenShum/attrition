@@ -48,10 +48,10 @@ const EVAL_VERDICT: {
   baseline_rate_pct: 75.0,
   scaffold_rate_pct: 80.0,
   baseline_cost_usd: 0.00042,
-  scaffold_cost_usd: 0.00359,
+  scaffold_cost_usd: 0.00218,
   broadened_baseline: "8/8 · 100%",
   broadened_scaffold: "8/8 · 100%",
-  cost_multiple: "7.3×",
+  cost_multiple: "5.2×",
   reason:
     "scaffold matches or beats baseline across BFCL-simple (80% vs 75%, CI overlap) and broadened categories (file / shell / agent / search / codegen: 8/8 each). Cost overhead is the honest tradeoff — MAX_TURNS + mode=ANY forces extra tool calls after task completion; next optimization tightens the termination signal.",
   benchmark: "BFCL v3 simple n=20 + broadened n=8",

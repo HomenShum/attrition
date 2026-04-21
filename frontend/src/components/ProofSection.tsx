@@ -738,10 +738,13 @@ export function ProofSection() {
             <strong style={{ color: "rgba(255,255,255,0.95)" }}>
               both baseline and scaffold score 8/8
             </strong>
-            . Honest caveat: scaffold costs 7.3× baseline because
-            mode=ANY + MAX_TURNS=4 forces extra tool calls after task
-            completion — next optimization tightens the termination
-            signal.
+            . Honest caveat: scaffold costs 5.2× baseline. Down from the
+            initial 7.3× after switching <code>toolConfig.mode</code>{" "}
+            from <code>ANY</code> on turn 0 (forces tool call) to{" "}
+            <code>AUTO</code> on turn 1+ (lets the model terminate with
+            a text answer after seeing the tool result). Next
+            optimization adds a task-complete detector to reduce
+            MAX_TURNS dynamically.
           </p>
           <div
             style={{
@@ -754,7 +757,7 @@ export function ProofSection() {
             <Metric label="baseline · BFCL n=20" value="15 / 20 · 75%" accent="#22c55e" />
             <Metric label="scaffold · BFCL n=20" value="16 / 20 · 80%" accent="#22c55e" />
             <Metric label="broadened · 5 categories" value="8/8 · 8/8" accent="#22c55e" />
-            <Metric label="scaffold / baseline cost" value="7.3×" accent="#f59e0b" />
+            <Metric label="scaffold / baseline cost" value="5.2×" accent="#f59e0b" />
           </div>
           <p
             style={{

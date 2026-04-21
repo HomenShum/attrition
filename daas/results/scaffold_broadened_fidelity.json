@@ -21,7 +21,7 @@
       ],
       "in_tok": 75,
       "out_tok": 20,
-      "elapsed_s": 1.52,
+      "elapsed_s": 1.07,
       "error": ""
     },
     {
@@ -42,7 +42,7 @@
       ],
       "in_tok": 94,
       "out_tok": 52,
-      "elapsed_s": 0.92,
+      "elapsed_s": 1.11,
       "error": ""
     },
     {
@@ -61,7 +61,7 @@
       ],
       "in_tok": 52,
       "out_tok": 18,
-      "elapsed_s": 0.68,
+      "elapsed_s": 1.63,
       "error": ""
     },
     {
@@ -82,7 +82,7 @@
       ],
       "in_tok": 90,
       "out_tok": 80,
-      "elapsed_s": 1.11,
+      "elapsed_s": 2.21,
       "error": ""
     },
     {
@@ -101,7 +101,7 @@
       ],
       "in_tok": 77,
       "out_tok": 27,
-      "elapsed_s": 0.9,
+      "elapsed_s": 1.33,
       "error": ""
     },
     {
@@ -120,7 +120,7 @@
       ],
       "in_tok": 63,
       "out_tok": 36,
-      "elapsed_s": 0.85,
+      "elapsed_s": 0.87,
       "error": ""
     },
     {
@@ -139,7 +139,7 @@
       ],
       "in_tok": 48,
       "out_tok": 36,
-      "elapsed_s": 0.9,
+      "elapsed_s": 1.85,
       "error": ""
     },
     {
@@ -159,7 +159,7 @@
       ],
       "in_tok": 80,
       "out_tok": 102,
-      "elapsed_s": 0.82,
+      "elapsed_s": 1.47,
       "error": ""
     },
     {
@@ -196,7 +196,7 @@
       ],
       "in_tok": 1182,
       "out_tok": 80,
-      "elapsed_s": 3.26,
+      "elapsed_s": 5.46,
       "error": ""
     },
     {
@@ -209,39 +209,15 @@
         {
           "name": "edit_file",
           "arguments": {
-            "path": "src/config.py",
             "old_string": "VERSION = '1.0.0'",
+            "path": "src/config.py",
             "new_string": "VERSION = '1.1.0'"
-          }
-        },
-        {
-          "name": "edit_file",
-          "arguments": {
-            "old_string": "VERSION = '1.0.0'",
-            "new_string": "VERSION = '1.1.0'",
-            "path": "src/config.py"
-          }
-        },
-        {
-          "name": "edit_file",
-          "arguments": {
-            "new_string": "VERSION = '1.1.0'",
-            "path": "src/config.py",
-            "old_string": "VERSION = '1.0.0'"
-          }
-        },
-        {
-          "name": "edit_file",
-          "arguments": {
-            "path": "src/config.py",
-            "new_string": "VERSION = '1.1.0'",
-            "old_string": "VERSION = '1.0.0'"
           }
         }
       ],
-      "in_tok": 1642,
-      "out_tok": 208,
-      "elapsed_s": 4.89,
+      "in_tok": 563,
+      "out_tok": 76,
+      "elapsed_s": 2.39,
       "error": ""
     },
     {
@@ -278,7 +254,7 @@
       ],
       "in_tok": 1060,
       "out_tok": 81,
-      "elapsed_s": 3.81,
+      "elapsed_s": 4.69,
       "error": ""
     },
     {
@@ -291,39 +267,15 @@
         {
           "name": "task",
           "arguments": {
-            "subagent_type": "researcher",
             "description": "Research the release date of Next.js 16.",
+            "subagent_type": "researcher",
             "prompt": "Find out when Next.js 16 was released. If it has not been released yet, state that clearly."
-          }
-        },
-        {
-          "name": "task",
-          "arguments": {
-            "description": "Research the release date of Next.js 16.",
-            "prompt": "Find out when Next.js 16 was released. If it has not been released yet, state that clearly.",
-            "subagent_type": "researcher"
-          }
-        },
-        {
-          "name": "task",
-          "arguments": {
-            "subagent_type": "researcher",
-            "prompt": "Find out when Next.js 16 was released. If it has not been released yet, state that clearly.",
-            "description": "Research the release date of Next.js 16."
-          }
-        },
-        {
-          "name": "task",
-          "arguments": {
-            "description": "Research the release date of Next.js 16.",
-            "prompt": "Find out when Next.js 16 was released. If it has not been released yet, state that clearly.",
-            "subagent_type": "researcher"
           }
         }
       ],
-      "in_tok": 1758,
-      "out_tok": 256,
-      "elapsed_s": 4.69,
+      "in_tok": 577,
+      "out_tok": 92,
+      "elapsed_s": 2.4,
       "error": ""
     },
     {
@@ -360,7 +312,7 @@
       ],
       "in_tok": 1276,
       "out_tok": 102,
-      "elapsed_s": 4.42,
+      "elapsed_s": 4.55,
       "error": ""
     },
     {
@@ -397,7 +349,7 @@
       ],
       "in_tok": 1300,
       "out_tok": 135,
-      "elapsed_s": 4.97,
+      "elapsed_s": 4.17,
       "error": ""
     },
     {
@@ -434,7 +386,7 @@
       ],
       "in_tok": 990,
       "out_tok": 56,
-      "elapsed_s": 3.29,
+      "elapsed_s": 4.74,
       "error": ""
     },
     {
@@ -447,35 +399,14 @@
         {
           "name": "write_file",
           "arguments": {
-            "contents": "/**\n * Formats a date into an ISO 8601 string (YYYY-MM-DD).\n * @param date The date to format.\n * @returns The ISO formatted date string.\n */\nexport function formatDate(date: Date): string {\n  return date.toISOString().split('T')[0];\n}\n",
-            "path": "src/lib/formatDate.ts"
-          }
-        },
-        {
-          "name": "write_file",
-          "arguments": {
-            "path": "src/lib/index.ts",
-            "contents": "export * from './formatDate';\n"
-          }
-        },
-        {
-          "name": "write_file",
-          "arguments": {
-            "contents": "import { formatDate } from './formatDate';\n\ndescribe('formatDate', () => {\n  it('should format a date to YYYY-MM-DD', () => {\n    const date = new Date('2023-10-27T10:00:00Z');\n    expect(formatDate(date)).toBe('2023-10-27');\n  });\n});\n",
-            "path": "src/lib/formatDate.test.ts"
-          }
-        },
-        {
-          "name": "write_file",
-          "arguments": {
             "path": "src/lib/formatDate.ts",
             "contents": "/**\n * Formats a date into an ISO 8601 string (YYYY-MM-DD).\n * @param date The date to format.\n * @returns The ISO formatted date string.\n */\nexport function formatDate(date: Date): string {\n  return date.toISOString().split('T')[0];\n}\n"
           }
         }
       ],
-      "in_tok": 1956,
-      "out_tok": 360,
-      "elapsed_s": 4.49,
+      "in_tok": 633,
+      "out_tok": 124,
+      "elapsed_s": 3.0,
       "error": ""
     }
   ],
@@ -518,15 +449,15 @@
     "tool_first_chain/file": {
       "pass": 3,
       "total": 3,
-      "in_tok": 3884,
-      "out_tok": 369,
+      "in_tok": 2805,
+      "out_tok": 237,
       "pass_rate": 100.0
     },
     "tool_first_chain/agent": {
       "pass": 1,
       "total": 1,
-      "in_tok": 1758,
-      "out_tok": 256,
+      "in_tok": 577,
+      "out_tok": 92,
       "pass_rate": 100.0
     },
     "tool_first_chain/search": {
@@ -546,8 +477,8 @@
     "tool_first_chain/codegen": {
       "pass": 1,
       "total": 1,
-      "in_tok": 1956,
-      "out_tok": 360,
+      "in_tok": 633,
+      "out_tok": 124,
       "pass_rate": 100.0
     }
   }
