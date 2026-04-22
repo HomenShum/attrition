@@ -22,6 +22,8 @@ import {
   scaffoldPings,
   agentRuns,
   agentTraceSpans,
+  agentEvaluators,
+  agentEvaluationResults,
 } from "./domains/daas/schema";
 
 export default defineSchema({
@@ -42,4 +44,6 @@ export default defineSchema({
   scaffoldPings,
   agentRuns,
   agentTraceSpans,
+  agentEvaluators,
+  agentEvaluationResults,
 });

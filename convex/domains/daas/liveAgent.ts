@@ -351,6 +351,14 @@ export const runLiveAgent = action({
               ? (parsed.error as string).slice(0, 500)
               : `executor HTTP ${execRes.status}`,
         });
+        // Auto-run evaluators on the executor path too
+        try {
+          await ctx.runAction(api.domains.daas.agentEvaluator.runAllActive, {
+            runId: args.runId,
+          });
+        } catch (err) {
+          console.error("evaluators runAllActive (executor path) failed", err);
+        }
         return { runId: args.runId, status: ok ? "complete" : "failed" };
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -554,6 +562,18 @@ export const runLiveAgent = action({
       finalOutput: finalOutput || undefined,
       errorMessage,
     });
+
+    // Fire off evaluators asynchronously — don't block the response on
+    // judge latency. Each evaluator records its own result via mutation
+    // so the /runs page subscription picks them up as they land.
+    try {
+      await ctx.runAction(api.domains.daas.agentEvaluator.runAllActive, {
+        runId: args.runId,
+      });
+    } catch (err) {
+      // Evaluators are best-effort; a judge failure shouldn't fail the run.
+      console.error("evaluators runAllActive failed", err);
+    }
 
     return { runId: args.runId, status: errorMessage ? "failed" : "complete" };
   },

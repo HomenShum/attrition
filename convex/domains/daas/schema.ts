@@ -627,6 +627,75 @@ export const agentRuns = defineTable({
  * truncated with a "...(truncated)" marker; full blobs are NOT
  * stored on this row — keep in object storage if needed.
  */
+/**
+ * agentEvaluators — reusable LLM-as-a-judge templates (Arize-AX pattern).
+ *
+ * Each evaluator is a named template with a system prompt + output schema.
+ * Run against any agentRuns row via agentEvaluator.runEvaluator.
+ *
+ * See docs/LIVE_RUN_AND_TRACE_ADR.md for context. References:
+ *   - Arize AX Evaluators: arize.com/docs/ax/evaluate/evaluators
+ *   - Anthropic cookbook tool_evaluation/evaluation.xml (ground-truth pattern)
+ *
+ * Bounded: maintained by seed migration (`convex/domains/daas/
+ * evaluatorSeed.ts`). User-defined evaluators land here too, but MVP
+ * is read-mostly — active flag controls whether auto-run picks them up.
+ */
+export const agentEvaluators = defineTable({
+  /** Stable name, e.g. "output_quality", "hallucination_check" */
+  name: v.string(),
+  /** Short human label shown in UI */
+  label: v.string(),
+  /** One-line description */
+  description: v.string(),
+  /** "llm-as-judge" | "deterministic" (MVP: llm-as-judge only) */
+  kind: v.string(),
+  /** System prompt for the judge */
+  systemPrompt: v.string(),
+  /** User-turn template — supports {{RUN_INPUT}}, {{FINAL_OUTPUT}}, {{SPANS_SUMMARY}} */
+  userTemplate: v.string(),
+  /** Judge model alias (default claude-haiku-4-5) */
+  judgeModel: v.string(),
+  /** Whether auto-run picks it up for every completed run */
+  active: v.boolean(),
+  /** Higher priority runs first */
+  priority: v.number(),
+  /** Seeded builtin vs user-created */
+  seeded: v.boolean(),
+  createdAt: v.number(),
+})
+  .index("by_name", ["name"])
+  .index("by_active_priority", ["active", "priority"]);
+
+/**
+ * agentEvaluationResults — one row per (run × evaluator).
+ *
+ * Written by agentEvaluator.runEvaluator after the judge call completes.
+ * /runs/:runId subscribes to these so scores land live as judges finish.
+ */
+export const agentEvaluationResults = defineTable({
+  runId: v.string(),
+  evaluatorName: v.string(),
+  evaluatorLabel: v.string(),
+  /** 0..1 numeric score (higher = better) */
+  score: v.number(),
+  /** "pass" | "fail" | "warn" | "skip" */
+  verdict: v.string(),
+  /** One-sentence explanation from the judge */
+  rationale: v.string(),
+  /** Judge model used */
+  judgeModel: v.string(),
+  /** Judge's own usage */
+  judgeInputTokens: v.number(),
+  judgeOutputTokens: v.number(),
+  judgeCostUsd: v.number(),
+  judgeElapsedMs: v.number(),
+  ranAt: v.number(),
+})
+  .index("by_runId_ranAt", ["runId", "ranAt"])
+  .index("by_evaluator_ranAt", ["evaluatorName", "ranAt"])
+  .index("by_verdict_ranAt", ["verdict", "ranAt"]);
+
 export const agentTraceSpans = defineTable({
   runId: v.string(),
   /** ULID — sortable by time, unique per run */

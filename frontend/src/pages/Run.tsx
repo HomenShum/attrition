@@ -81,6 +81,10 @@ export function Run() {
     api.domains.daas.agentTrace.listSpansForRun,
     runId ? { runId } : "skip",
   );
+  const evalResults = useQuery(
+    api.domains.daas.agentEvaluator.listResultsForRun,
+    runId ? { runId } : "skip",
+  );
   const [filter, setFilter] = useState<FilterMode>("all");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
@@ -315,6 +319,66 @@ export function Run() {
           ) : null}
         </header>
 
+        {/* Evaluations panel — Arize-AX-style LLM-as-judge results */}
+        {evalResults && evalResults.length > 0 ? (
+          <section
+            aria-label="Evaluations"
+            style={{
+              marginBottom: 14,
+              padding: "12px 14px",
+              background: "rgba(139,92,246,0.05)",
+              border: "1px solid rgba(139,92,246,0.25)",
+              borderRadius: 8,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 10,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                color: "#8b5cf6",
+                marginBottom: 8,
+                fontWeight: 600,
+                display: "flex",
+                justifyContent: "space-between",
+              }}
+            >
+              <span>Evaluations · LLM-as-judge</span>
+              <Link
+                to="/evaluators"
+                style={{ color: "#8b5cf6", textDecoration: "none" }}
+              >
+                manage →
+              </Link>
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: 8,
+              }}
+            >
+              {evalResults.map((r) => (
+                <EvaluationCard key={r._id} result={r} />
+              ))}
+            </div>
+          </section>
+        ) : run?.status === "complete" ? (
+          <section
+            style={{
+              marginBottom: 14,
+              padding: "10px 14px",
+              background: "rgba(139,92,246,0.03)",
+              border: "1px dashed rgba(139,92,246,0.2)",
+              borderRadius: 8,
+              fontSize: 12,
+              color: "rgba(255,255,255,0.55)",
+            }}
+          >
+            Running evaluators… results will stream in shortly.
+          </section>
+        ) : null}
+
         {/* Filter chips */}
         <div
           style={{
@@ -381,15 +445,30 @@ export function Run() {
                 gap: 6,
               }}
             >
-              {filteredSpans.map((span) => (
-                <SpanCard
-                  key={span.spanId}
-                  span={span}
-                  expanded={expanded.has(span.spanId)}
-                  onToggle={() => toggle(span.spanId)}
-                  runStartedAt={timeBaseline}
-                />
-              ))}
+              {filteredSpans.map((span) => {
+                // Depth = number of ancestors in the span tree. Capped
+                // at 4 levels for visual sanity.
+                let depth = 0;
+                let cur: string | null = span.parentSpanId;
+                const seen = new Set<string>();
+                while (cur && depth < 4 && !seen.has(cur)) {
+                  seen.add(cur);
+                  const parent = spans?.find((s) => s.spanId === cur);
+                  if (!parent) break;
+                  cur = parent.parentSpanId;
+                  depth++;
+                }
+                return (
+                  <SpanCard
+                    key={span.spanId}
+                    span={span}
+                    expanded={expanded.has(span.spanId)}
+                    onToggle={() => toggle(span.spanId)}
+                    runStartedAt={timeBaseline}
+                    depth={depth}
+                  />
+                );
+              })}
             </ol>
           )}
         </section>
@@ -465,11 +544,13 @@ function SpanCard({
   expanded,
   onToggle,
   runStartedAt,
+  depth = 0,
 }: {
   span: Span;
   expanded: boolean;
   onToggle: () => void;
   runStartedAt: number;
+  depth?: number;
 }) {
   const kind = (span.kind as SpanKind) in KIND_ACCENT ? (span.kind as SpanKind) : "meta";
   const accent = KIND_ACCENT[kind];
@@ -494,13 +575,30 @@ function SpanCard({
   return (
     <li
       style={{
+        marginLeft: depth * 18,
         background: span.errorMessage ? "rgba(239,68,68,0.04)" : "rgba(255,255,255,0.02)",
         border: `1px solid ${span.errorMessage ? "rgba(239,68,68,0.3)" : `${accent}2a`}`,
         borderLeft: `3px solid ${accent}`,
         borderRadius: 8,
         overflow: "hidden",
+        position: "relative",
       }}
     >
+      {depth > 0 ? (
+        <span
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            left: -12,
+            top: 14,
+            fontSize: 10,
+            color: `${accent}80`,
+            fontFamily: "'JetBrains Mono', monospace",
+          }}
+        >
+          └─
+        </span>
+      ) : null}
       <button
         type="button"
         onClick={onToggle}
@@ -631,6 +729,93 @@ function SpanCard({
         </div>
       ) : null}
     </li>
+  );
+}
+
+// ------------------------------------------------------------------ EvaluationCard
+
+type EvalResult = {
+  _id: string;
+  evaluatorName: string;
+  evaluatorLabel: string;
+  score: number;
+  verdict: string;
+  rationale: string;
+  judgeModel: string;
+  judgeCostUsd: number;
+  judgeElapsedMs: number;
+  ranAt: number;
+};
+
+function EvaluationCard({ result }: { result: EvalResult }) {
+  const verdictAccent: Record<string, string> = {
+    pass: "#22c55e",
+    warn: "#f59e0b",
+    fail: "#ef4444",
+    skip: "rgba(255,255,255,0.35)",
+  };
+  const accent = verdictAccent[result.verdict] ?? "rgba(255,255,255,0.35)";
+  const pctScore = Math.round(result.score * 100);
+  return (
+    <div
+      style={{
+        padding: "10px 12px",
+        background: "rgba(255,255,255,0.02)",
+        border: `1px solid ${accent}40`,
+        borderRadius: 7,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          marginBottom: 4,
+        }}
+      >
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 600,
+            color: "rgba(255,255,255,0.92)",
+          }}
+        >
+          {result.evaluatorLabel}
+        </span>
+        <span
+          style={{
+            fontSize: 10,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: accent,
+            fontWeight: 700,
+          }}
+        >
+          {result.verdict} · {pctScore}
+        </span>
+      </div>
+      <p
+        style={{
+          margin: 0,
+          fontSize: 11,
+          color: "rgba(255,255,255,0.7)",
+          lineHeight: 1.5,
+        }}
+      >
+        {result.rationale}
+      </p>
+      <div
+        style={{
+          marginTop: 6,
+          fontSize: 10,
+          color: "rgba(255,255,255,0.4)",
+          fontFamily: "'JetBrains Mono', monospace",
+        }}
+      >
+        {result.judgeModel} · ${result.judgeCostUsd.toFixed(4)} ·{" "}
+        {(result.judgeElapsedMs / 1000).toFixed(1)}s
+      </div>
+    </div>
   );
 }
 

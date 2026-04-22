@@ -11,6 +11,7 @@
 import type * as crons from "../crons.js";
 import type * as domains_daas_actions from "../domains/daas/actions.js";
 import type * as domains_daas_admin from "../domains/daas/admin.js";
+import type * as domains_daas_agentEvaluator from "../domains/daas/agentEvaluator.js";
 import type * as domains_daas_agentTrace from "../domains/daas/agentTrace.js";
 import type * as domains_daas_architect from "../domains/daas/architect.js";
 import type * as domains_daas_architectClassifier from "../domains/daas/architectClassifier.js";
@@ -18,6 +19,7 @@ import type * as domains_daas_architectRate from "../domains/daas/architectRate.
 import type * as domains_daas_benchmarks from "../domains/daas/benchmarks.js";
 import type * as domains_daas_compileDown from "../domains/daas/compileDown.js";
 import type * as domains_daas_costCap from "../domains/daas/costCap.js";
+import type * as domains_daas_evaluatorSeed from "../domains/daas/evaluatorSeed.js";
 import type * as domains_daas_fidelity from "../domains/daas/fidelity.js";
 import type * as domains_daas_health from "../domains/daas/health.js";
 import type * as domains_daas_http from "../domains/daas/http.js";
@@ -43,6 +45,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   "domains/daas/actions": typeof domains_daas_actions;
   "domains/daas/admin": typeof domains_daas_admin;
+  "domains/daas/agentEvaluator": typeof domains_daas_agentEvaluator;
   "domains/daas/agentTrace": typeof domains_daas_agentTrace;
   "domains/daas/architect": typeof domains_daas_architect;
   "domains/daas/architectClassifier": typeof domains_daas_architectClassifier;
@@ -50,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   "domains/daas/benchmarks": typeof domains_daas_benchmarks;
   "domains/daas/compileDown": typeof domains_daas_compileDown;
   "domains/daas/costCap": typeof domains_daas_costCap;
+  "domains/daas/evaluatorSeed": typeof domains_daas_evaluatorSeed;
   "domains/daas/fidelity": typeof domains_daas_fidelity;
   "domains/daas/health": typeof domains_daas_health;
   "domains/daas/http": typeof domains_daas_http;
