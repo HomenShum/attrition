@@ -619,11 +619,51 @@ if __name__ == "__main__":
         except Exception:
             parsed = {"raw_stdout": stdout[-400:]}
 
+    # Collect the scaffold files so the caller can persist them as an
+    # artifact. Without this they get rmtree'd and users can never take
+    # the scaffold home. We skip our internal dispatch runner and any
+    # __pycache__ / binary droppings.
+    scaffold_files: list[dict[str, Any]] = []
+    SKIP_NAMES = {"_exec_runner.py"}
+    SKIP_DIRS = {"__pycache__", ".pytest_cache", ".mypy_cache", ".venv", "node_modules"}
+    TEXT_EXTS = {".py", ".md", ".txt", ".sh", ".yaml", ".yml", ".json", ".toml", ".env", ".example", ".cfg", ".ini"}
+    LANG_BY_EXT = {
+        ".py": "python", ".md": "markdown", ".txt": "text", ".sh": "bash",
+        ".yaml": "yaml", ".yml": "yaml", ".json": "json", ".toml": "toml",
+        ".cfg": "ini", ".ini": "ini", ".env": "dotenv", ".example": "dotenv",
+    }
+    try:
+        for p in sorted(workdir.rglob("*")):
+            if not p.is_file():
+                continue
+            if p.name in SKIP_NAMES:
+                continue
+            if any(part in SKIP_DIRS for part in p.relative_to(workdir).parts):
+                continue
+            suffix = p.suffix.lower()
+            if suffix and suffix not in TEXT_EXTS:
+                continue
+            try:
+                content = p.read_text(encoding="utf-8")
+            except Exception:
+                continue
+            if len(content) > 200_000:
+                continue
+            scaffold_files.append({
+                "path": str(p.relative_to(workdir)).replace("\\", "/"),
+                "content": content,
+                "language": LANG_BY_EXT.get(suffix, "text"),
+            })
+    except Exception as e:
+        scaffold_files = []
+        stderr = (stderr or "") + f"\n[scaffold-collect error: {e}]"
+
     return {
         "ok": result.returncode == 0,
         "exit_code": result.returncode,
         "parsed": parsed,
         "stderr_tail": stderr[-800:] if stderr else "",
+        "scaffold_files": scaffold_files,
     }
 
 
@@ -700,6 +740,8 @@ def execute(req: ExecuteRequest) -> JSONResponse:
             "exit_code": result["exit_code"],
             "parsed": result["parsed"],
             "stderr_tail": result["stderr_tail"],
+            "scaffold_files": result.get("scaffold_files", []),
+            "scaffold_file_count": len(result.get("scaffold_files", [])),
         },
     )
 

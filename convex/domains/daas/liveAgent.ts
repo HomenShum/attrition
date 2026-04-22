@@ -341,6 +341,35 @@ export const runLiveAgent = action({
               ? (parsed.raw as string)
               : "(no final_output from executor)";
         const ok = execRes.ok && parsed.ok !== false;
+
+        // Persist the literal scaffold files the executor just ran so
+        // /build/:slug can show the file tree and Download ZIP unlocks.
+        // Without this the scaffold lives for ~9 seconds on Cloud Run
+        // then gets rmtree'd — users can never take it home.
+        try {
+          const scaffoldFiles = Array.isArray(parsed.scaffold_files)
+            ? (parsed.scaffold_files as Array<{ path: string; content: string; language: string }>)
+            : [];
+          if (scaffoldFiles.length > 0) {
+            const bundleJson = JSON.stringify({ files: scaffoldFiles });
+            const totalBytes = scaffoldFiles.reduce(
+              (sum, f) => sum + (f.content?.length ?? 0),
+              0,
+            );
+            await ctx.runMutation(api.domains.daas.compileDown.upsertArtifact, {
+              sessionSlug: args.sessionSlug,
+              runtimeLane: lane,
+              targetModel: "claude-haiku-4-5",
+              artifactBundleJson: bundleJson,
+              filesCount: scaffoldFiles.length,
+              totalBytes,
+              emitterVersion: "executor-live-v1",
+            });
+          }
+        } catch (err) {
+          console.error("scaffold persist failed (non-fatal)", err);
+        }
+
         await ctx.runMutation(api.domains.daas.agentTrace.finishRun, {
           runId: args.runId,
           status: ok ? "complete" : "failed",
