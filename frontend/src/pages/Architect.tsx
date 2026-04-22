@@ -255,6 +255,46 @@ function generateOwnerToken(): string {
     .join("");
 }
 
+// Recent-sessions panel — cross-session continuity without server
+// queries. We write a compact record to localStorage every time the
+// user submits a prompt; Architect reads the last 10 on mount.
+const RECENT_SESSIONS_KEY = "attrition:recent_sessions";
+type RecentSession = {
+  slug: string;
+  prompt_preview: string;
+  ts: number;
+};
+function recordRecentSession(slug: string, prompt: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = window.localStorage.getItem(RECENT_SESSIONS_KEY);
+    const list: RecentSession[] = raw ? JSON.parse(raw) : [];
+    const entry: RecentSession = {
+      slug,
+      prompt_preview: prompt.slice(0, 180),
+      ts: Date.now(),
+    };
+    const deduped = [entry, ...list.filter((r) => r.slug !== slug)].slice(0, 10);
+    window.localStorage.setItem(
+      RECENT_SESSIONS_KEY,
+      JSON.stringify(deduped),
+    );
+  } catch {
+    /* storage full / disabled — silent no-op */
+  }
+}
+function loadRecentSessions(): RecentSession[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(RECENT_SESSIONS_KEY);
+    if (!raw) return [];
+    const list = JSON.parse(raw);
+    return Array.isArray(list) ? list.slice(0, 10) : [];
+  } catch {
+    return [];
+  }
+}
+
 function ownerTokenStorageKey(slug: string): string {
   return `attrition:owner:${slug}`;
 }
@@ -304,6 +344,9 @@ export function Architect() {
         // Ownership claim is best-effort — classification still proceeds
       }
       setSlug(s);
+      // Persist a local record so the Recent sessions panel can show
+      // continuity across visits (in-browser only, no server query).
+      recordRecentSession(s, prompt.trim());
       // Kick off classifier (doesn't await the full run — it writes back
       // to the session via mutations and the query below re-renders).
       void classify({ sessionSlug: s, prompt: prompt.trim() });
@@ -534,6 +577,8 @@ export function Architect() {
 
             {/* Measured proof — BFCL v3 n=200 result, rendered first so
                 a visitor sees real numbers before any scripted demo. */}
+            <RecentSessionsPanel />
+
             <ProofSection />
 
             {/* Animated hero demo loop — 3 scripted sample triages */}
@@ -1205,6 +1250,121 @@ export function Architect() {
         )}
       </main>
     </div>
+  );
+}
+
+function RecentSessionsPanel() {
+  const [items, setItems] = useState<RecentSession[]>(() => loadRecentSessions());
+  // Refresh list when the page regains focus (user came back from Builder)
+  useEffect(() => {
+    const refresh = () => setItems(loadRecentSessions());
+    window.addEventListener("focus", refresh);
+    return () => window.removeEventListener("focus", refresh);
+  }, []);
+  if (items.length === 0) return null;
+  return (
+    <section
+      aria-label="Recent sessions"
+      style={{
+        margin: "28px 0 0",
+        padding: "14px 16px",
+        background: "rgba(255,255,255,0.02)",
+        border: "1px solid rgba(255,255,255,0.06)",
+        borderRadius: 10,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          marginBottom: 10,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 10,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.6)",
+          }}
+        >
+          Recent sessions · local to this browser
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            if (typeof window !== "undefined") {
+              window.localStorage.removeItem(RECENT_SESSIONS_KEY);
+            }
+            setItems([]);
+          }}
+          style={{
+            fontSize: 10,
+            padding: "2px 8px",
+            background: "transparent",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 4,
+            color: "rgba(255,255,255,0.55)",
+            cursor: "pointer",
+          }}
+        >
+          Clear
+        </button>
+      </div>
+      <ul
+        style={{
+          listStyle: "none",
+          padding: 0,
+          margin: 0,
+          display: "grid",
+          gap: 6,
+        }}
+      >
+        {items.map((r) => (
+          <li key={r.slug}>
+            <a
+              href={`/build/${r.slug}`}
+              style={{
+                display: "flex",
+                gap: 10,
+                padding: "8px 10px",
+                background: "rgba(0,0,0,0.2)",
+                border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 6,
+                color: "rgba(255,255,255,0.82)",
+                textDecoration: "none",
+                fontSize: 12,
+                lineHeight: 1.45,
+              }}
+            >
+              <code
+                style={{
+                  fontSize: 10,
+                  color: "#d97757",
+                  fontFamily: "'JetBrains Mono', monospace",
+                  flex: "0 0 auto",
+                }}
+              >
+                {r.slug.slice(0, 8)}
+              </code>
+              <span style={{ flex: "1 1 auto", opacity: 0.85 }}>
+                {r.prompt_preview || "(no prompt preview)"}
+              </span>
+              <span
+                style={{
+                  flex: "0 0 auto",
+                  fontSize: 10,
+                  color: "rgba(255,255,255,0.45)",
+                }}
+              >
+                {new Date(r.ts).toLocaleDateString()}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

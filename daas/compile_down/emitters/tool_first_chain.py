@@ -317,7 +317,7 @@ from schemas import ChainInput, ChainOutput
 from tools import GEMINI_TOOLS, dispatch
 
 MODEL = "{model}"
-MAX_TURNS = 4   # bounded tool loop
+MAX_TURNS = 2   # bounded tool loop: turn 0 calls a tool, turn 1 summarizes (mode=AUTO)
 FLASH_LITE_IN = 0.10 / 1_000_000
 FLASH_LITE_OUT = 0.40 / 1_000_000
 

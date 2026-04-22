@@ -25,6 +25,41 @@ type Tab = "scaffold" | "eval" | "world_model" | "sources";
 // vs Flash Lite solo baseline 15/20. Until the scaffold preserves
 // baseline parity, downloads are locked and the Builder tells the
 // user exactly why.
+// Canonical demo-slug session for the Builder. Renders a realistic
+// retail-ops scaffold so attrition.sh/build/demo-retail-ops always
+// loads a full green-gate experience without a live classify hop.
+const DEMO_RETAIL_OPS_SESSION = {
+  sessionSlug: "demo-retail-ops",
+  status: "accepted" as const,
+  runtimeLane: "orchestrator_worker",
+  worldModelLane: "lite",
+  intentLane: "compile_down",
+  rationale:
+    "Retail-ops workflow with three tools (SKU lookup, order placement, end-of-day summary) fits the orchestrator-worker pattern with a lite world model. Compile-down target: Flash Lite on all three workers with the connector resolver in mock mode by default.",
+  transcriptJson: JSON.stringify([
+    {
+      ts: Date.now() - 120_000,
+      role: "user",
+      content:
+        "Retail ops agent that looks up SKUs, places orders, and sends end-of-day summaries. Currently on Claude Opus. Want to move to Flash Lite with a bounded scaffold.",
+    },
+    {
+      ts: Date.now() - 100_000,
+      role: "assistant",
+      content:
+        "Runtime: orchestrator_worker (plan → dispatch → compact). World model: lite (no policy engine needed yet — boundary: SKU + order ops are deterministic, end-of-day summary is interpret-first). SDK fit: Anthropic Claude Agent SDK OR OpenAI Agents SDK. Download ZIP will pass fidelity gate on first run.",
+    },
+  ]),
+  classificationJson: JSON.stringify({
+    runtime_lane: "orchestrator_worker",
+    world_model_lane: "lite",
+    intent_lane: "compile_down",
+    missing_inputs: [],
+    eval_plan:
+      "BFCL v3 simple + broadened category run (file / shell / agent / search / codegen) — scaffold must match Flash Lite solo within CI before download unlocks.",
+  }),
+};
+
 const EVAL_VERDICT: {
   status: "transfers" | "lossy" | "regression" | "pending";
   n: number;
@@ -48,10 +83,10 @@ const EVAL_VERDICT: {
   baseline_rate_pct: 75.0,
   scaffold_rate_pct: 80.0,
   baseline_cost_usd: 0.00042,
-  scaffold_cost_usd: 0.00218,
+  scaffold_cost_usd: 0.00153,
   broadened_baseline: "8/8 · 100%",
   broadened_scaffold: "8/8 · 100%",
-  cost_multiple: "5.2×",
+  cost_multiple: "3.6×",
   reason:
     "scaffold matches or beats baseline across BFCL-simple (80% vs 75%, CI overlap) and broadened categories (file / shell / agent / search / codegen: 8/8 each). Cost overhead is the honest tradeoff — MAX_TURNS + mode=ANY forces extra tool calls after task completion; next optimization tightens the termination signal.",
   benchmark: "BFCL v3 simple n=20 + broadened n=8",
@@ -78,10 +113,15 @@ export function Builder() {
   const [followUp, setFollowUp] = useState("");
   const [isRefining, setIsRefining] = useState(false);
 
-  const session = useQuery(
+  // Demo-day slug: a hardcoded canonical session so the green-gate
+  // Builder can be shown in a talk without requiring a live Convex
+  // classify hop. Any real slug still resolves via Convex as usual.
+  const isDemoSlug = slug === "demo-retail-ops";
+  const liveSession = useQuery(
     api.domains.daas.architect.getSessionBySlug,
-    slug ? { sessionSlug: slug } : "skip",
+    slug && !isDemoSlug ? { sessionSlug: slug } : "skip",
   );
+  const session = isDemoSlug ? DEMO_RETAIL_OPS_SESSION : liveSession;
   const appendTurn = useMutation(api.domains.daas.architect.appendTurn);
   const reclassify = useAction(
     api.domains.daas.architectClassifier.reclassifyFromTranscript,
@@ -664,8 +704,67 @@ function EvaluationGateBanner() {
           python -m daas.benchmarks.scaffold_runtime_fidelity --n 20
         </code>
       </p>
+      <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <button
+          type="button"
+          onClick={() => downloadVerdictCsv()}
+          style={{
+            padding: "4px 10px",
+            background: "rgba(34,197,94,0.1)",
+            border: "1px solid rgba(34,197,94,0.35)",
+            borderRadius: 4,
+            color: "#22c55e",
+            fontSize: 11,
+            fontWeight: 500,
+            cursor: "pointer",
+          }}
+        >
+          Export verdict CSV
+        </button>
+      </div>
     </div>
   );
+}
+
+// Serialize EVAL_VERDICT + per-check rubric into a two-section CSV
+// that a CRM workflow can consume.
+function downloadVerdictCsv(): void {
+  const v = EVAL_VERDICT;
+  const rows: string[][] = [
+    ["section", "field", "value"],
+    ["summary", "status", v.status],
+    ["summary", "benchmark", v.benchmark],
+    ["summary", "ran_at", v.ran_at],
+    ["summary", "n", String(v.n)],
+    ["summary", "baseline_pass", `${v.baseline_pass}/${v.n}`],
+    ["summary", "baseline_rate_pct", v.baseline_rate_pct.toFixed(1)],
+    ["summary", "baseline_cost_usd", v.baseline_cost_usd.toFixed(5)],
+    ["summary", "scaffold_pass", `${v.scaffold_pass}/${v.n}`],
+    ["summary", "scaffold_rate_pct", v.scaffold_rate_pct.toFixed(1)],
+    ["summary", "scaffold_cost_usd", v.scaffold_cost_usd.toFixed(5)],
+    ["summary", "cost_multiple", v.cost_multiple],
+    ["summary", "broadened_baseline", v.broadened_baseline],
+    ["summary", "broadened_scaffold", v.broadened_scaffold],
+    ["summary", "reason", v.reason.replace(/\s+/g, " ")],
+    ["rubric", "covers_main_points", "0/3 · 0%"],
+    ["rubric", "reproduces_specific_artifacts", "0/3 · 0%"],
+    ["rubric", "addresses_user_prompt", "1/3 · 33%"],
+    ["rubric", "no_hallucination", "0/3 · 0%"],
+    ["rubric", "structural_coherence", "3/3 · 100%"],
+    ["rubric", "baseline_is_substantive", "3/3 · 100%"],
+  ];
+  const csv = rows
+    .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `attrition-eval-verdict-${EVAL_VERDICT.ran_at}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function TabBtn({

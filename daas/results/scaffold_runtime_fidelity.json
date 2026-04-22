@@ -12,7 +12,7 @@
       "total_in_tok": 2529,
       "total_out_tok": 423,
       "total_usd": 0.000422,
-      "wall_clock_s": 29.45,
+      "wall_clock_s": 35.84,
       "errors": 0
     },
     {
@@ -22,10 +22,10 @@
       "pass_rate": 0.8,
       "ci95_lo": 0.584,
       "ci95_hi": 0.919,
-      "total_in_tok": 16835,
-      "total_out_tok": 1231,
-      "total_usd": 0.002176,
-      "wall_clock_s": 62.51,
+      "total_in_tok": 11558,
+      "total_out_tok": 924,
+      "total_usd": 0.001525,
+      "wall_clock_s": 55.19,
       "errors": 0
     }
   ],
@@ -41,7 +41,7 @@
         "total_in_tok": 2529,
         "total_out_tok": 423,
         "total_usd": 0.000422,
-        "wall_clock_s": 29.45,
+        "wall_clock_s": 35.84,
         "errors": 0
       },
       "per_task": [
@@ -52,15 +52,15 @@
             {
               "name": "calculate_triangle_area",
               "arguments": {
+                "unit": "units",
                 "base": 10,
-                "height": 5,
-                "unit": "units"
+                "height": 5
               }
             }
           ],
           "in_tok": 134,
           "out_tok": 27,
-          "elapsed_s": 1.33,
+          "elapsed_s": 1.4,
           "error": ""
         },
         {
@@ -76,7 +76,7 @@
           ],
           "in_tok": 71,
           "out_tok": 10,
-          "elapsed_s": 0.95,
+          "elapsed_s": 1.1,
           "error": ""
         },
         {
@@ -86,14 +86,14 @@
             {
               "name": "math.hypot",
               "arguments": {
-                "y": 5,
-                "x": 4
+                "x": 4,
+                "y": 5
               }
             }
           ],
           "in_tok": 160,
           "out_tok": 15,
-          "elapsed_s": 1.85,
+          "elapsed_s": 1.39,
           "error": ""
         },
         {
@@ -103,15 +103,15 @@
             {
               "name": "algebra.quadratic_roots",
               "arguments": {
-                "a": 1,
                 "b": -3,
-                "c": 2
+                "c": 2,
+                "a": 1
               }
             }
           ],
           "in_tok": 131,
           "out_tok": 20,
-          "elapsed_s": 1.66,
+          "elapsed_s": 1.23,
           "error": ""
         },
         {
@@ -121,15 +121,15 @@
             {
               "name": "solve_quadratic_equation",
               "arguments": {
-                "b": 6,
+                "a": 2,
                 "c": 5,
-                "a": 2
+                "b": 6
               }
             }
           ],
           "in_tok": 120,
           "out_tok": 24,
-          "elapsed_s": 1.1,
+          "elapsed_s": 0.98,
           "error": ""
         },
         {
@@ -140,14 +140,14 @@
               "name": "solve_quadratic",
               "arguments": {
                 "b": -11,
-                "c": -4,
-                "a": 3
+                "a": 3,
+                "c": -4
               }
             }
           ],
           "in_tok": 221,
           "out_tok": 23,
-          "elapsed_s": 0.95,
+          "elapsed_s": 1.55,
           "error": ""
         },
         {
@@ -157,15 +157,15 @@
             {
               "name": "solve_quadratic",
               "arguments": {
-                "c": 3,
                 "b": 5,
-                "a": 2
+                "a": 2,
+                "c": 3
               }
             }
           ],
           "in_tok": 121,
           "out_tok": 22,
-          "elapsed_s": 1.12,
+          "elapsed_s": 0.85,
           "error": ""
         },
         {
@@ -182,7 +182,7 @@
           ],
           "in_tok": 107,
           "out_tok": 21,
-          "elapsed_s": 1.74,
+          "elapsed_s": 1.34,
           "error": ""
         },
         {
@@ -198,7 +198,7 @@
           ],
           "in_tok": 104,
           "out_tok": 13,
-          "elapsed_s": 1.24,
+          "elapsed_s": 0.97,
           "error": ""
         },
         {
@@ -208,14 +208,14 @@
             {
               "name": "geometry.calculate_area_circle",
               "arguments": {
-                "radius": 5,
-                "unit": "units"
+                "unit": "units",
+                "radius": 5
               }
             }
           ],
           "in_tok": 105,
           "out_tok": 20,
-          "elapsed_s": 1.47,
+          "elapsed_s": 1.29,
           "error": ""
         },
         {
@@ -225,15 +225,15 @@
             {
               "name": "calculate_area",
               "arguments": {
-                "base": 6,
                 "unit": "cm",
+                "base": 6,
                 "height": 10
               }
             }
           ],
           "in_tok": 150,
           "out_tok": 25,
-          "elapsed_s": 0.92,
+          "elapsed_s": 1.01,
           "error": ""
         },
         {
@@ -243,14 +243,14 @@
             {
               "name": "calculate_triangle_area",
               "arguments": {
-                "base": 10,
-                "height": 5
+                "height": 5,
+                "base": 10
               }
             }
           ],
           "in_tok": 113,
           "out_tok": 21,
-          "elapsed_s": 1.01,
+          "elapsed_s": 1.28,
           "error": ""
         },
         {
@@ -266,7 +266,7 @@
           ],
           "in_tok": 95,
           "out_tok": 11,
-          "elapsed_s": 0.93,
+          "elapsed_s": 0.79,
           "error": ""
         },
         {
@@ -276,17 +276,17 @@
             {
               "name": "calculate_area_under_curve",
               "arguments": {
+                "function": "x^2",
                 "interval": [
                   1,
                   3
-                ],
-                "function": "x^2"
+                ]
               }
             }
           ],
           "in_tok": 165,
           "out_tok": 28,
-          "elapsed_s": 0.94,
+          "elapsed_s": 1.11,
           "error": ""
         },
         {
@@ -302,7 +302,7 @@
           ],
           "in_tok": 110,
           "out_tok": 28,
-          "elapsed_s": 1.03,
+          "elapsed_s": 0.74,
           "error": ""
         },
         {
@@ -312,16 +312,16 @@
             {
               "name": "integrate",
               "arguments": {
+                "end_x": 3,
                 "start_x": -2,
-                "method": "simpson",
                 "function": "x^3",
-                "end_x": 3
+                "method": "simpson"
               }
             }
           ],
           "in_tok": 203,
           "out_tok": 35,
-          "elapsed_s": 1.36,
+          "elapsed_s": 2.08,
           "error": ""
         },
         {
@@ -338,7 +338,7 @@
           ],
           "in_tok": 143,
           "out_tok": 21,
-          "elapsed_s": 1.06,
+          "elapsed_s": 1.49,
           "error": ""
         },
         {
@@ -355,7 +355,7 @@
           ],
           "in_tok": 104,
           "out_tok": 22,
-          "elapsed_s": 1.22,
+          "elapsed_s": 1.31,
           "error": ""
         },
         {
@@ -371,7 +371,7 @@
           ],
           "in_tok": 76,
           "out_tok": 19,
-          "elapsed_s": 0.88,
+          "elapsed_s": 1.2,
           "error": ""
         },
         {
@@ -381,14 +381,14 @@
             {
               "name": "math.gcd",
               "arguments": {
-                "num1": 40,
-                "num2": 50
+                "num2": 50,
+                "num1": 40
               }
             }
           ],
           "in_tok": 96,
           "out_tok": 18,
-          "elapsed_s": 1.61,
+          "elapsed_s": 1.5,
           "error": ""
         }
       ]
@@ -401,10 +401,10 @@
         "pass_rate": 0.8,
         "ci95_lo": 0.584,
         "ci95_hi": 0.919,
-        "total_in_tok": 16835,
-        "total_out_tok": 1231,
-        "total_usd": 0.002176,
-        "wall_clock_s": 62.51,
+        "total_in_tok": 11558,
+        "total_out_tok": 924,
+        "total_usd": 0.001525,
+        "wall_clock_s": 55.19,
         "errors": 0
       },
       "per_task": [
@@ -415,23 +415,23 @@
             {
               "name": "calculate_triangle_area",
               "arguments": {
+                "base": 10,
                 "unit": "units",
-                "height": 5,
-                "base": 10
+                "height": 5
               },
               "tool": "calculate_triangle_area",
               "args": {
+                "base": 10,
                 "unit": "units",
-                "height": 5,
-                "base": 10
+                "height": 5
               },
               "result": {
                 "status": "mock",
                 "tool": "calculate_triangle_area",
                 "args": {
+                  "base": 10,
                   "unit": "units",
-                  "height": 5,
-                  "base": 10
+                  "height": 5
                 },
                 "_result": "fixture-placeholder"
               }
@@ -439,7 +439,7 @@
           ],
           "in_tok": 601,
           "out_tok": 54,
-          "elapsed_s": 2.54,
+          "elapsed_s": 3.22,
           "error": ""
         },
         {
@@ -467,34 +467,13 @@
           ],
           "in_tok": 447,
           "out_tok": 13,
-          "elapsed_s": 2.31,
+          "elapsed_s": 2.58,
           "error": ""
         },
         {
           "id": "simple_2",
           "passed": true,
           "tool_calls": [
-            {
-              "name": "math.hypot",
-              "arguments": {
-                "y": 5,
-                "x": 4
-              },
-              "tool": "math.hypot",
-              "args": {
-                "y": 5,
-                "x": 4
-              },
-              "result": {
-                "status": "mock",
-                "tool": "math.hypot",
-                "args": {
-                  "y": 5,
-                  "x": 4
-                },
-                "_result": "fixture-placeholder"
-              }
-            },
             {
               "name": "math.hypot",
               "arguments": {
@@ -512,27 +491,6 @@
                 "args": {
                   "x": 4,
                   "y": 5
-                },
-                "_result": "fixture-placeholder"
-              }
-            },
-            {
-              "name": "math.hypot",
-              "arguments": {
-                "y": 5,
-                "x": 4
-              },
-              "tool": "math.hypot",
-              "args": {
-                "y": 5,
-                "x": 4
-              },
-              "result": {
-                "status": "mock",
-                "tool": "math.hypot",
-                "args": {
-                  "y": 5,
-                  "x": 4
                 },
                 "_result": "fixture-placeholder"
               }
@@ -559,9 +517,9 @@
               }
             }
           ],
-          "in_tok": 1528,
-          "out_tok": 60,
-          "elapsed_s": 4.41,
+          "in_tok": 636,
+          "out_tok": 30,
+          "elapsed_s": 2.53,
           "error": ""
         },
         {
@@ -572,22 +530,22 @@
               "name": "algebra.quadratic_roots",
               "arguments": {
                 "b": -3,
-                "c": 2,
-                "a": 1
+                "a": 1,
+                "c": 2
               },
               "tool": "algebra.quadratic_roots",
               "args": {
                 "b": -3,
-                "c": 2,
-                "a": 1
+                "a": 1,
+                "c": 2
               },
               "result": {
                 "status": "mock",
                 "tool": "algebra.quadratic_roots",
                 "args": {
                   "b": -3,
-                  "c": 2,
-                  "a": 1
+                  "a": 1,
+                  "c": 2
                 },
                 "_result": "fixture-placeholder"
               }
@@ -595,7 +553,7 @@
           ],
           "in_tok": 589,
           "out_tok": 55,
-          "elapsed_s": 2.36,
+          "elapsed_s": 2.56,
           "error": ""
         },
         {
@@ -605,23 +563,23 @@
             {
               "name": "solve_quadratic_equation",
               "arguments": {
+                "b": 6,
                 "c": 5,
-                "a": 2,
-                "b": 6
+                "a": 2
               },
               "tool": "solve_quadratic_equation",
               "args": {
+                "b": 6,
                 "c": 5,
-                "a": 2,
-                "b": 6
+                "a": 2
               },
               "result": {
                 "status": "mock",
                 "tool": "solve_quadratic_equation",
                 "args": {
+                  "b": 6,
                   "c": 5,
-                  "a": 2,
-                  "b": 6
+                  "a": 2
                 },
                 "_result": "fixture-placeholder"
               }
@@ -629,7 +587,7 @@
           ],
           "in_tok": 567,
           "out_tok": 62,
-          "elapsed_s": 3.13,
+          "elapsed_s": 2.23,
           "error": ""
         },
         {
@@ -639,80 +597,26 @@
             {
               "name": "solve_quadratic",
               "arguments": {
-                "a": 3,
-                "root_type": "all",
                 "c": -4,
-                "b": -11
-              },
-              "tool": "solve_quadratic",
-              "args": {
-                "a": 3,
-                "root_type": "all",
-                "c": -4,
-                "b": -11
-              },
-              "result": {
-                "status": "mock",
-                "tool": "solve_quadratic",
-                "args": {
-                  "a": 3,
-                  "root_type": "all",
-                  "c": -4,
-                  "b": -11
-                },
-                "_result": "fixture-placeholder"
-              }
-            },
-            {
-              "name": "solve_quadratic",
-              "arguments": {
-                "root_type": "all",
-                "a": 3,
-                "c": -4,
-                "b": -11
-              },
-              "tool": "solve_quadratic",
-              "args": {
-                "root_type": "all",
-                "a": 3,
-                "c": -4,
-                "b": -11
-              },
-              "result": {
-                "status": "mock",
-                "tool": "solve_quadratic",
-                "args": {
-                  "root_type": "all",
-                  "a": 3,
-                  "c": -4,
-                  "b": -11
-                },
-                "_result": "fixture-placeholder"
-              }
-            },
-            {
-              "name": "solve_quadratic",
-              "arguments": {
-                "a": 3,
                 "b": -11,
                 "root_type": "all",
-                "c": -4
+                "a": 3
               },
               "tool": "solve_quadratic",
               "args": {
-                "a": 3,
+                "c": -4,
                 "b": -11,
                 "root_type": "all",
-                "c": -4
+                "a": 3
               },
               "result": {
                 "status": "mock",
                 "tool": "solve_quadratic",
                 "args": {
-                  "a": 3,
+                  "c": -4,
                   "b": -11,
                   "root_type": "all",
-                  "c": -4
+                  "a": 3
                 },
                 "_result": "fixture-placeholder"
               }
@@ -720,34 +624,34 @@
             {
               "name": "solve_quadratic",
               "arguments": {
-                "root_type": "all",
+                "b": -11,
                 "c": -4,
                 "a": 3,
-                "b": -11
+                "root_type": "all"
               },
               "tool": "solve_quadratic",
               "args": {
-                "root_type": "all",
+                "b": -11,
                 "c": -4,
                 "a": 3,
-                "b": -11
+                "root_type": "all"
               },
               "result": {
                 "status": "mock",
                 "tool": "solve_quadratic",
                 "args": {
-                  "root_type": "all",
+                  "b": -11,
                   "c": -4,
                   "a": 3,
-                  "b": -11
+                  "root_type": "all"
                 },
                 "_result": "fixture-placeholder"
               }
             }
           ],
-          "in_tok": 1910,
-          "out_tok": 124,
-          "elapsed_s": 6.64,
+          "in_tok": 781,
+          "out_tok": 62,
+          "elapsed_s": 2.83,
           "error": ""
         },
         {
@@ -757,47 +661,23 @@
             {
               "name": "solve_quadratic",
               "arguments": {
-                "c": 3,
-                "a": 2,
-                "b": 5
-              },
-              "tool": "solve_quadratic",
-              "args": {
-                "c": 3,
-                "a": 2,
-                "b": 5
-              },
-              "result": {
-                "status": "mock",
-                "tool": "solve_quadratic",
-                "args": {
-                  "c": 3,
-                  "a": 2,
-                  "b": 5
-                },
-                "_result": "fixture-placeholder"
-              }
-            },
-            {
-              "name": "solve_quadratic",
-              "arguments": {
                 "b": 5,
-                "a": 2,
-                "c": 3
+                "c": 3,
+                "a": 2
               },
               "tool": "solve_quadratic",
               "args": {
                 "b": 5,
-                "a": 2,
-                "c": 3
+                "c": 3,
+                "a": 2
               },
               "result": {
                 "status": "mock",
                 "tool": "solve_quadratic",
                 "args": {
                   "b": 5,
-                  "a": 2,
-                  "c": 3
+                  "c": 3,
+                  "a": 2
                 },
                 "_result": "fixture-placeholder"
               }
@@ -805,55 +685,31 @@
             {
               "name": "solve_quadratic",
               "arguments": {
-                "a": 2,
+                "b": 5,
                 "c": 3,
-                "b": 5
+                "a": 2
               },
               "tool": "solve_quadratic",
               "args": {
-                "a": 2,
+                "b": 5,
                 "c": 3,
-                "b": 5
+                "a": 2
               },
               "result": {
                 "status": "mock",
                 "tool": "solve_quadratic",
                 "args": {
-                  "a": 2,
+                  "b": 5,
                   "c": 3,
-                  "b": 5
-                },
-                "_result": "fixture-placeholder"
-              }
-            },
-            {
-              "name": "solve_quadratic",
-              "arguments": {
-                "c": 3,
-                "a": 2,
-                "b": 5
-              },
-              "tool": "solve_quadratic",
-              "args": {
-                "c": 3,
-                "a": 2,
-                "b": 5
-              },
-              "result": {
-                "status": "mock",
-                "tool": "solve_quadratic",
-                "args": {
-                  "c": 3,
-                  "a": 2,
-                  "b": 5
+                  "a": 2
                 },
                 "_result": "fixture-placeholder"
               }
             }
           ],
-          "in_tok": 1402,
-          "out_tok": 88,
-          "elapsed_s": 5.1,
+          "in_tok": 563,
+          "out_tok": 44,
+          "elapsed_s": 2.9,
           "error": ""
         },
         {
@@ -863,20 +719,20 @@
             {
               "name": "calculate_circumference",
               "arguments": {
-                "radius": 4,
-                "unit": "inches"
+                "unit": "inches",
+                "radius": 4
               },
               "tool": "calculate_circumference",
               "args": {
-                "radius": 4,
-                "unit": "inches"
+                "unit": "inches",
+                "radius": 4
               },
               "result": {
                 "status": "mock",
                 "tool": "calculate_circumference",
                 "args": {
-                  "radius": 4,
-                  "unit": "inches"
+                  "unit": "inches",
+                  "radius": 4
                 },
                 "_result": "fixture-placeholder"
               }
@@ -884,7 +740,7 @@
           ],
           "in_tok": 534,
           "out_tok": 43,
-          "elapsed_s": 2.24,
+          "elapsed_s": 2.69,
           "error": ""
         },
         {
@@ -912,7 +768,7 @@
           ],
           "in_tok": 521,
           "out_tok": 37,
-          "elapsed_s": 2.38,
+          "elapsed_s": 2.52,
           "error": ""
         },
         {
@@ -943,7 +799,7 @@
           ],
           "in_tok": 539,
           "out_tok": 43,
-          "elapsed_s": 1.96,
+          "elapsed_s": 2.6,
           "error": ""
         },
         {
@@ -953,22 +809,22 @@
             {
               "name": "calculate_area",
               "arguments": {
-                "base": 6,
                 "unit": "cm",
+                "base": 6,
                 "height": 10
               },
               "tool": "calculate_area",
               "args": {
-                "base": 6,
                 "unit": "cm",
+                "base": 6,
                 "height": 10
               },
               "result": {
                 "status": "mock",
                 "tool": "calculate_area",
                 "args": {
-                  "base": 6,
                   "unit": "cm",
+                  "base": 6,
                   "height": 10
                 },
                 "_result": "fixture-placeholder"
@@ -977,7 +833,7 @@
           ],
           "in_tok": 627,
           "out_tok": 54,
-          "elapsed_s": 2.17,
+          "elapsed_s": 2.44,
           "error": ""
         },
         {
@@ -1008,7 +864,7 @@
           ],
           "in_tok": 547,
           "out_tok": 48,
-          "elapsed_s": 2.07,
+          "elapsed_s": 3.97,
           "error": ""
         },
         {
@@ -1036,7 +892,7 @@
           ],
           "in_tok": 498,
           "out_tok": 32,
-          "elapsed_s": 2.56,
+          "elapsed_s": 2.42,
           "error": ""
         },
         {
@@ -1046,29 +902,29 @@
             {
               "name": "calculate_area_under_curve",
               "arguments": {
-                "function": "x^2",
                 "interval": [
                   1,
                   3
-                ]
+                ],
+                "function": "x^2"
               },
               "tool": "calculate_area_under_curve",
               "args": {
-                "function": "x^2",
                 "interval": [
                   1,
                   3
-                ]
+                ],
+                "function": "x^2"
               },
               "result": {
                 "status": "mock",
                 "tool": "calculate_area_under_curve",
                 "args": {
-                  "function": "x^2",
                   "interval": [
                     1,
                     3
-                  ]
+                  ],
+                  "function": "x^2"
                 },
                 "_result": "fixture-placeholder"
               }
@@ -1104,9 +960,9 @@
               }
             }
           ],
-          "in_tok": 1128,
-          "out_tok": 101,
-          "elapsed_s": 3.41,
+          "in_tok": 667,
+          "out_tok": 56,
+          "elapsed_s": 3.63,
           "error": ""
         },
         {
@@ -1134,7 +990,7 @@
           ],
           "in_tok": 553,
           "out_tok": 54,
-          "elapsed_s": 2.23,
+          "elapsed_s": 3.28,
           "error": ""
         },
         {
@@ -1145,25 +1001,25 @@
               "name": "integrate",
               "arguments": {
                 "method": "simpson",
+                "end_x": 3,
                 "start_x": -2,
-                "function": "x^3",
-                "end_x": 3
+                "function": "x^3"
               },
               "tool": "integrate",
               "args": {
                 "method": "simpson",
+                "end_x": 3,
                 "start_x": -2,
-                "function": "x^3",
-                "end_x": 3
+                "function": "x^3"
               },
               "result": {
                 "status": "mock",
                 "tool": "integrate",
                 "args": {
                   "method": "simpson",
+                  "end_x": 3,
                   "start_x": -2,
-                  "function": "x^3",
-                  "end_x": 3
+                  "function": "x^3"
                 },
                 "_result": "fixture-placeholder"
               }
@@ -1171,7 +1027,7 @@
           ],
           "in_tok": 751,
           "out_tok": 76,
-          "elapsed_s": 2.76,
+          "elapsed_s": 2.09,
           "error": ""
         },
         {
@@ -1202,7 +1058,7 @@
           ],
           "in_tok": 614,
           "out_tok": 43,
-          "elapsed_s": 2.57,
+          "elapsed_s": 2.0,
           "error": ""
         },
         {
@@ -1212,27 +1068,6 @@
             {
               "name": "get_prime_factors",
               "arguments": {
-                "number": 450,
-                "formatted": true
-              },
-              "tool": "get_prime_factors",
-              "args": {
-                "number": 450,
-                "formatted": true
-              },
-              "result": {
-                "status": "mock",
-                "tool": "get_prime_factors",
-                "args": {
-                  "number": 450,
-                  "formatted": true
-                },
-                "_result": "fixture-placeholder"
-              }
-            },
-            {
-              "name": "get_prime_factors",
-              "arguments": {
                 "formatted": true,
                 "number": 450
               },
@@ -1268,35 +1103,14 @@
                 "args": {
                   "formatted": true,
                   "number": 450
-                },
-                "_result": "fixture-placeholder"
-              }
-            },
-            {
-              "name": "get_prime_factors",
-              "arguments": {
-                "number": 450,
-                "formatted": true
-              },
-              "tool": "get_prime_factors",
-              "args": {
-                "number": 450,
-                "formatted": true
-              },
-              "result": {
-                "status": "mock",
-                "tool": "get_prime_factors",
-                "args": {
-                  "number": 450,
-                  "formatted": true
                 },
                 "_result": "fixture-placeholder"
               }
             }
           ],
-          "in_tok": 1346,
-          "out_tok": 88,
-          "elapsed_s": 4.19,
+          "in_tok": 531,
+          "out_tok": 44,
+          "elapsed_s": 2.9,
           "error": ""
         },
         {
@@ -1340,57 +1154,15 @@
               }
             }
           ],
-          "in_tok": 831,
-          "out_tok": 84,
-          "elapsed_s": 3.56,
+          "in_tok": 479,
+          "out_tok": 38,
+          "elapsed_s": 2.57,
           "error": ""
         },
         {
           "id": "simple_19",
           "passed": true,
           "tool_calls": [
-            {
-              "name": "math.gcd",
-              "arguments": {
-                "num1": 40,
-                "num2": 50
-              },
-              "tool": "math.gcd",
-              "args": {
-                "num1": 40,
-                "num2": 50
-              },
-              "result": {
-                "status": "mock",
-                "tool": "math.gcd",
-                "args": {
-                  "num1": 40,
-                  "num2": 50
-                },
-                "_result": "fixture-placeholder"
-              }
-            },
-            {
-              "name": "math.gcd",
-              "arguments": {
-                "num2": 50,
-                "num1": 40
-              },
-              "tool": "math.gcd",
-              "args": {
-                "num2": 50,
-                "num1": 40
-              },
-              "result": {
-                "status": "mock",
-                "tool": "math.gcd",
-                "args": {
-                  "num2": 50,
-                  "num1": 40
-                },
-                "_result": "fixture-placeholder"
-              }
-            },
             {
               "name": "math.gcd",
               "arguments": {
@@ -1434,9 +1206,9 @@
               }
             }
           ],
-          "in_tok": 1302,
-          "out_tok": 72,
-          "elapsed_s": 3.53,
+          "in_tok": 513,
+          "out_tok": 36,
+          "elapsed_s": 2.68,
           "error": ""
         }
       ]
