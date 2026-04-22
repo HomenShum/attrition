@@ -1,0 +1,67 @@
+{
+  "harness_version": "attrition.v1",
+  "schema": "daas/benchmarks/attrition_eval_template_v1.csv",
+  "dry": false,
+  "elapsed_s": 23.95,
+  "rows_total": 1,
+  "pass": 0,
+  "fail": 1,
+  "skip": 0,
+  "total_cost_usd": 0.0053,
+  "per_row": [
+    {
+      "case_id": "AE01",
+      "overall_pass": false,
+      "overall_rationale": "failed: correct_lane_picked (1/10 eval'd failed)",
+      "run_elapsed_s": 21.81,
+      "run_cost_usd": 0.0053,
+      "dispatch_error": null,
+      "gates": {
+        "scaffold_compiles": {
+          "passed": true,
+          "rationale": "12 .py files ast-parse valid"
+        },
+        "nine_layers_present": {
+          "passed": true,
+          "rationale": "all 10 required layers present"
+        },
+        "scaffold_runs_mock": {
+          "passed": true,
+          "rationale": "runner.py parses + references mock/CONNECTOR_MODE"
+        },
+        "connector_resolver_working": {
+          "passed": true,
+          "rationale": "CONNECTOR_MODE referenced in 3 file(s): server.py"
+        },
+        "mcp_server_importable": {
+          "passed": true,
+          "rationale": "mcp_server.py ast-parses + references mcp/stdio"
+        },
+        "workflow_spec_roundtrip": {
+          "passed": true,
+          "rationale": "valid JSON, 3 top-level keys, roundtrip stable"
+        },
+        "cost_under_budget": {
+          "passed": true,
+          "rationale": "$0.0053 <= $0.0150 budget"
+        },
+        "latency_under_budget": {
+          "passed": true,
+          "rationale": "21.81s <= 30.0s budget"
+        },
+        "runtime_used_correctly": {
+          "passed": true,
+          "rationale": "runtime_label=gemini_agent matches emit_lane driver"
+        },
+        "correct_lane_picked": {
+          "passed": false,
+          "rationale": "Flash Lite judge: The emitted bundle includes files for state persistence, MCP server tools, and FastAPI wrappers, which violate the simple_chain contract prohibiting multi-turn orchestration and tool dispatch loops."
+        },
+        "baseline_parity": {
+          "passed": null,
+          "rationale": "not-yet-wired: requires BFCL/broadened benchmark replay for the emitted scaffold"
+        }
+      }
+    }
+  ]
+}

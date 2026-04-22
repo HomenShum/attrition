@@ -54,6 +54,8 @@ import json
 import os
 import sys
 import time
+import urllib.error
+import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -266,13 +268,105 @@ def gate_runtime_used_correctly(expected_runtime: str, run_result: Any) -> GateR
 # ------------------------------------------------------------------ judged gates (stubbed)
 
 
-def gate_correct_lane_picked_stub(expected_lane: str) -> GateResult:
-    """Stub — real implementation requires an LLM judge over the emitted
-    bundle + expected_runtime_behavior. Wired in the next cycle."""
-    return GateResult(
-        None,
-        f"not-yet-wired: requires LLM judge against lane={expected_lane!r}",
+def gate_correct_lane_picked(
+    *,
+    expected_lane: str,
+    expected_behavior: str,
+    bundle: ArtifactBundle,
+    api_key: str | None,
+) -> GateResult:
+    """Flash Lite judge — does the bundle's shape match the lane contract?
+
+    Asks the model a single bounded question with a JSON schema response
+    so the verdict is parseable without regex. Cost per call ≈ $0.0005.
+    Returns GateResult(None, ...) if the judge itself fails (network,
+    missing key) — a judge-unavailable failure is NOT a gate failure.
+    """
+    if not api_key:
+        return GateResult(None, "judge unavailable: GEMINI_API_KEY not set")
+
+    # Lane-contract summary passed to the judge so it has a deterministic
+    # anchor for what "correct" means per lane.
+    lane_contracts: dict[str, str] = {
+        "simple_chain": "exactly one LLM call + output schema; no tool dispatch loop; no multi-turn orchestration",
+        "tool_first_chain": "bounded single-agent tool loop with MAX_TURNS cap; one LLM + one tools.py registry",
+        "orchestrator_worker": "orchestrator that plans then dispatches N named workers with shared scratchpad + compaction",
+        "openai_agents_sdk": "uses the openai-agents SDK (Agent + Runner.run_sync + @function_tool)",
+        "langgraph_python": "uses langgraph's StateGraph + create_react_agent + checkpointer",
+        "claude_agent_sdk": "uses claude-agent-sdk's ClaudeSDKClient + @tool + create_sdk_mcp_server",
+        "manus": "virtual-workspace single-agent with sandboxed file-based memory",
+        "deerflow": "ByteDance-style multi-agent deep-research graph with supervisor + researcher + coder",
+        "hermes": "Hermes long-form agent with tool-planning + self-correction loops",
+        "convex_functions": "Convex queries/mutations/actions with schema.ts + per-function files",
+        "vercel_ai_sdk": "Vercel AI SDK streaming pattern with streamText + generateText",
+        "gemini_deep_research": "Gemini Interactions API with researchSteps + citations synthesis",
+    }
+    contract = lane_contracts.get(expected_lane, "<no contract on file for this lane>")
+
+    # Compact file manifest: path + first-40-chars-of-content for each file,
+    # capped to a total of ~2000 chars so the judge prompt stays small.
+    manifest_lines: list[str] = []
+    total_chars = 0
+    for f in bundle.files[:30]:
+        head = f.content.replace("\n", " ")[:80]
+        line = f"  - {f.path}: {head}"
+        if total_chars + len(line) > 2000:
+            manifest_lines.append(f"  ... ({len(bundle.files) - len(manifest_lines)} more files elided)")
+            break
+        manifest_lines.append(line)
+        total_chars += len(line)
+    manifest = "\n".join(manifest_lines)
+
+    prompt = (
+        "You are evaluating whether an emitted scaffold bundle matches the "
+        "contract for its declared emit_lane. Reply with STRICT JSON only, "
+        "matching this schema: {\"matches\": boolean, \"rationale\": string}.\n\n"
+        f"Declared emit_lane: {expected_lane}\n"
+        f"Lane contract: {contract}\n"
+        f"Expected runtime behavior (from eval CSV): {expected_behavior or '(unspecified)'}\n\n"
+        "Emitted bundle manifest:\n"
+        f"{manifest}\n\n"
+        "Does the emitted bundle's shape match the declared lane contract? "
+        'Return {"matches": true, "rationale": "<one sentence>"} if yes, '
+        '{"matches": false, "rationale": "<one sentence pointing at the mismatch>"} if no. '
+        "One sentence only. No markdown. No preamble."
     )
+
+    endpoint = (
+        "https://generativelanguage.googleapis.com/v1beta/models/"
+        "gemini-3.1-flash-lite-preview:generateContent?key=" + api_key
+    )
+    body = {
+        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "temperature": 0.0,
+            "maxOutputTokens": 200,
+            "responseMimeType": "application/json",
+        },
+    }
+
+    try:
+        req = urllib.request.Request(
+            endpoint,
+            data=json.dumps(body).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            raw = resp.read().decode("utf-8")
+    except (urllib.error.URLError, TimeoutError) as e:
+        return GateResult(None, f"judge network error: {e}")
+
+    try:
+        data = json.loads(raw)
+        text = data["candidates"][0]["content"]["parts"][0]["text"]
+        parsed = json.loads(text)
+        matches = bool(parsed["matches"])
+        rationale = str(parsed.get("rationale", ""))[:200]
+    except (KeyError, ValueError, IndexError) as e:
+        return GateResult(None, f"judge returned malformed JSON: {e}")
+
+    return GateResult(matches, f"Flash Lite judge: {rationale}")
 
 
 def gate_baseline_parity_stub() -> GateResult:
@@ -388,8 +482,15 @@ def evaluate_row(row: dict[str, str], *, dry: bool) -> RowOutcome:
     gates["cost_under_budget"] = gate_cost_under_budget(budget_cost, run_result)
     gates["latency_under_budget"] = gate_latency_under_budget(budget_latency, run_result)
     gates["runtime_used_correctly"] = gate_runtime_used_correctly(runtime, run_result)
-    # Stubbed gates — wired in next cycle
-    gates["correct_lane_picked"] = gate_correct_lane_picked_stub(lane)
+    # correct_lane_picked — wired to Flash Lite judge. Uses GEMINI_API_KEY
+    # from the environment; if unset, gate abstains (passed=None).
+    gates["correct_lane_picked"] = gate_correct_lane_picked(
+        expected_lane=lane,
+        expected_behavior=row.get("expected_runtime_behavior", ""),
+        bundle=bundle,
+        api_key=os.environ.get("GEMINI_API_KEY"),
+    )
+    # baseline_parity still stubbed — needs benchmark replay infra
     gates["baseline_parity"] = gate_baseline_parity_stub()
 
     # Compute overall verdict across evaluated gates only (skipped = abstain)
