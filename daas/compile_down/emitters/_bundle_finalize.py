@@ -50,10 +50,28 @@ _LANE_DEPS: dict[str, list[str]] = {
         "openai>=1.60.0",
         "openai-agents>=0.0.9 ; python_version>='3.10'",
     ],
+    "claude_agent_sdk": [
+        "anthropic>=0.42.0",
+        "claude-agent-sdk>=0.1.0 ; python_version>='3.10'",
+    ],
     "langgraph_python": [
         "langgraph>=0.2.0",
+        "langgraph-checkpoint>=2.0.0",  # MemorySaver / PostgresSaver lives here
         "langchain>=0.3.0",
         "langchain-google-genai>=2.0.0",
+    ],
+    "manus": [
+        "google-genai>=0.7.0",
+    ],
+    "deerflow": [
+        "google-genai>=0.7.0",
+        "langgraph>=0.2.0",
+    ],
+    "hermes": [
+        "google-genai>=0.7.0",
+    ],
+    "gemini_deep_research": [
+        "google-genai>=0.7.0",
     ],
 }
 
@@ -1033,6 +1051,13 @@ def finalize_bundle(
             "requirements-all.txt",  # extras (fastapi, otel, mcp) exceed lane
         }),
         "tool_first_chain": frozenset({
+            "state_store.py",
+        }),
+        # langgraph lane uses langgraph's MemorySaver/PostgresSaver
+        # checkpointer, not a custom state_store.py. The LLM judge
+        # (AE38 v5) flagged the agent's custom state_store as a contract
+        # violation. Drop it; the canonical server.py imports MemorySaver.
+        "langgraph_python": frozenset({
             "state_store.py",
         }),
         # TS/JS lanes: block Python backfill. Agent-written .ts / .tsx

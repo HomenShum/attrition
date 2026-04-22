@@ -169,6 +169,21 @@ class GeminiDeepResearchAgent:
                 fallback_url = f"{GEMINI_ROOT}/models/{base_model}:generateContent?key={key}"
                 fallback_body = dict(body)
                 fallback_body.pop("background", None)
+                # Gemini :generateContent rejects built-in tools
+                # (googleSearch, urlContext, codeExecution) when
+                # functionDeclarations are also present — "Built-in
+                # tools and Function Calling cannot be combined".
+                # Strip the built-ins, keep functionDeclarations so the
+                # agent loop can still write_file / ast_parse_check.
+                has_fn_decls = any(
+                    isinstance(t, dict) and "functionDeclarations" in t
+                    for t in fallback_body.get("tools", [])
+                )
+                if has_fn_decls:
+                    fallback_body["tools"] = [
+                        t for t in fallback_body["tools"]
+                        if isinstance(t, dict) and "functionDeclarations" in t
+                    ]
                 try:
                     initial = _http_post(fallback_url, fallback_body)
                 except urllib.error.HTTPError as e2:

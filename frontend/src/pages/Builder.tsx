@@ -419,6 +419,23 @@ export function Builder() {
             minHeight: "calc(100vh - 80px)",
           }}
         >
+          {/* Checkpoint eyebrow — covers both 15-min (inspect scaffold)
+              and 30-min (refine + Download ZIP) stages. Consistent with
+              Architect's 1/5-min eyebrow and NextSteps' 60-min eyebrow. */}
+          <div
+            style={{
+              fontSize: 10,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "#d97757",
+              fontWeight: 600,
+              padding: "14px 16px 10px",
+              borderBottom: "1px solid rgba(255,255,255,0.04)",
+              background: "rgba(0,0,0,0.15)",
+            }}
+          >
+            15 / 30-min checkpoint · scaffold workbench · refine · clone once
+          </div>
           <div
             style={{
               display: "flex",

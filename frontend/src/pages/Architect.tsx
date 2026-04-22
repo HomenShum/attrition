@@ -450,82 +450,60 @@ export function Architect() {
         Skip to content
       </a>
       <main id="main" style={{ maxWidth: 960, margin: "0 auto", padding: "40px 32px 80px" }}>
-        <header style={{ marginBottom: 32 }}>
+        <header style={{ marginBottom: 28 }}>
           <div
             style={{
               fontSize: 11,
               letterSpacing: "0.2em",
               textTransform: "uppercase",
               color: "#d97757",
-              marginBottom: 6,
+              marginBottom: 8,
             }}
           >
-            attrition.sh · architecture compiler + verification layer
+            attrition.sh · agent scaffold compiler + verification layer
           </div>
           <h1
             style={{
-              fontSize: 34,
+              fontSize: 36,
               fontWeight: 600,
               margin: 0,
-              letterSpacing: "-0.015em",
-              lineHeight: 1.12,
-              maxWidth: 780,
+              letterSpacing: "-0.018em",
+              lineHeight: 1.1,
+              maxWidth: 820,
             }}
           >
-            Compile frontier agent runs into cheaper, verified
-            production workflows.
+            Ship your agent workflow to prod in 60 minutes.
+            <br />
+            <span style={{ color: "#d97757" }}>Clone once. Own forever.</span>
           </h1>
           <p
             style={{
               fontSize: 15,
-              color: "rgba(255,255,255,0.72)",
-              margin: "10px 0 0",
-              maxWidth: 720,
-              lineHeight: 1.55,
+              color: "rgba(255,255,255,0.78)",
+              margin: "12px 0 0",
+              maxWidth: 760,
+              lineHeight: 1.6,
             }}
           >
-            Capture what worked in Claude Code, Cursor, or your existing
-            agent stack. Distill it into a portable workflow asset.
-            Generate a new runtime, replay it on cheaper models, and
-            ship only what passes.
+            Paste your Claude Code / Cursor / LangChain workflow.{" "}
+            <strong style={{ color: "#fff" }}>60 seconds</strong> to a
+            classified plan.{" "}
+            <strong style={{ color: "#fff" }}>15 minutes</strong> to a
+            10-layer scaffold with live mock preview.{" "}
+            <strong style={{ color: "#fff" }}>30 minutes</strong> to refine
+            via chat and download the ZIP — once.{" "}
+            <strong style={{ color: "#fff" }}>60 minutes</strong> running
+            real traffic in your prod.
           </p>
-          <p
-            style={{
-              fontSize: 13,
-              color: "rgba(255,255,255,0.5)",
-              margin: "6px 0 0",
-              maxWidth: 720,
-              lineHeight: 1.55,
-            }}
-          >
-            We translate workflows between chains, tool runtimes, and
-            orchestrator-worker systems — with judged regression checks,
-            cost deltas, and runnable code. Three motions:{" "}
-            <strong style={{ color: "rgba(255,255,255,0.8)" }}>
-              compile down
-            </strong>
-            ,{" "}
-            <strong style={{ color: "rgba(255,255,255,0.8)" }}>
-              compile up
-            </strong>
-            , and{" "}
-            <strong style={{ color: "rgba(255,255,255,0.8)" }}>
-              translate across
-            </strong>
-            .
-          </p>
-          <p
-            style={{
-              fontSize: 13,
-              color: "rgba(255,255,255,0.55)",
-              margin: "14px 0 0",
-              fontWeight: 500,
-              letterSpacing: "-0.01em",
-            }}
-          >
-            Describe your workflow → we stream an architecture
-            recommendation.
-          </p>
+          {!slug ? (
+            <>
+              {/* Eval credibility strip — real numbers from daas/results/
+                  TELEMETRY_REPORT.md. Refreshes each baseline run. */}
+              <EvalCredibilityStrip />
+              {/* Five-checkpoint visual timeline. The core product shape. */}
+              <JourneyTimeline />
+            </>
+          ) : null}
         </header>
 
         {!slug ? (
@@ -673,6 +651,52 @@ export function Architect() {
                 Flash Lite against the same bounded enums.
               </p>
             </div>
+            {/* Vision / mission / thesis — the close-out before the CTA.
+                One paragraph. Repeatable in a pitch. Calibrated to roll
+                off the tongue in a demo. */}
+            <section
+              aria-label="Why attrition exists"
+              style={{
+                marginTop: 28,
+                padding: 16,
+                background: "rgba(255,255,255,0.02)",
+                border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 10,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 10,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.55)",
+                  marginBottom: 8,
+                }}
+              >
+                Why we built this
+              </div>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 13,
+                  lineHeight: 1.6,
+                  color: "rgba(255,255,255,0.82)",
+                  maxWidth: 760,
+                }}
+              >
+                Every agent demo that works in Claude Code or Cursor hits the
+                same cliff when you try to ship it: two weeks of manual wiring,
+                a dozen files you only half-understand, tests that can't tell
+                you if your refactor broke something real. attrition is the
+                one-command bridge from prototype to production — across any
+                SDK, any provider, any deploy target. We generate the
+                scaffold. You own the code. The whole point of the five
+                checkpoints above is to make the ONE clone moment land
+                correctly, so you never come back unless your workflow has
+                fundamentally changed.
+              </p>
+            </section>
+
             <div style={{ marginTop: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>
                 Nothing's built yet. We decide with you first.
@@ -698,6 +722,22 @@ export function Architect() {
           </section>
         ) : (
           <section>
+            {/* Checkpoint eyebrow — tells the user where they are in the
+                5-stage journey. Mirrors NextSteps.tsx formatting. */}
+            <div
+              style={{
+                fontSize: 10,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "#d97757",
+                marginBottom: 14,
+                fontWeight: 600,
+              }}
+            >
+              {session?.status === "ready" || session?.status === "accepted"
+                ? "5-min checkpoint · architecture blueprint"
+                : "1-min checkpoint · classifier streaming"}
+            </div>
             {/* Multi-turn transcript */}
             <div
               style={{
@@ -1244,6 +1284,277 @@ export function Architect() {
         )}
       </main>
     </div>
+  );
+}
+
+// --- Eval credibility strip ----------------------------------------------
+// Real numbers from daas/results/TELEMETRY_REPORT.md. When a new baseline
+// lands, re-run `python -m daas.benchmarks.publish_telemetry` and update
+// these constants. The strip is intentionally quiet in visual weight but
+// high in signal — it tells investors/builders "these are measured, not
+// aspirational."
+const EVAL_NUMBERS = {
+  passes: 43,
+  total: 60,
+  passPct: 72,
+  gates: 11,
+  costPerScaffoldUsd: 0.005,
+  lanesAt100: 6,
+  iterations: 5,
+  cumulativeSpendUsd: 1.11,
+} as const;
+
+function EvalCredibilityStrip() {
+  return (
+    <div
+      style={{
+        marginTop: 16,
+        padding: "10px 14px",
+        background: "rgba(34,197,94,0.05)",
+        border: "1px solid rgba(34,197,94,0.22)",
+        borderRadius: 8,
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 14,
+        alignItems: "center",
+        fontSize: 12,
+        color: "rgba(255,255,255,0.8)",
+      }}
+      aria-label="evaluation telemetry"
+    >
+      <span
+        style={{
+          fontSize: 10,
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          color: "#22c55e",
+          fontWeight: 600,
+        }}
+      >
+        Measured
+      </span>
+      <span>
+        <strong style={{ color: "#fff" }}>
+          {EVAL_NUMBERS.passes}/{EVAL_NUMBERS.total}
+        </strong>{" "}
+        workflows pass
+      </span>
+      <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+      <span>
+        <strong style={{ color: "#fff" }}>
+          {EVAL_NUMBERS.gates}-gate
+        </strong>{" "}
+        eval
+      </span>
+      <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+      <span>
+        <strong style={{ color: "#fff" }}>
+          ${EVAL_NUMBERS.costPerScaffoldUsd.toFixed(3)}
+        </strong>{" "}
+        per scaffold
+      </span>
+      <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+      <span>
+        <strong style={{ color: "#fff" }}>
+          {EVAL_NUMBERS.lanesAt100}
+        </strong>{" "}
+        lanes at 100%
+      </span>
+      <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+      <span>
+        <strong style={{ color: "#fff" }}>
+          {EVAL_NUMBERS.iterations}
+        </strong>{" "}
+        self-improvement cycles
+      </span>
+      <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+      <a
+        href="https://github.com/HomenShum/attrition/blob/main/daas/results/TELEMETRY_REPORT.md"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          color: "#22c55e",
+          textDecoration: "none",
+          fontWeight: 500,
+        }}
+      >
+        Telemetry report →
+      </a>
+    </div>
+  );
+}
+
+// --- The 5-checkpoint journey timeline -----------------------------------
+// The product's full shape at a glance. Users land and see exactly what
+// they're about to experience, then click through to start. This is the
+// CEO/demo-presenter surface — every label is calibrated to roll off the
+// tongue when you're walking someone through the app live.
+type Checkpoint = {
+  minute: string;
+  icon: string;
+  title: string;
+  subtitle: string;
+  body: string;
+  accent: string;
+};
+
+const CHECKPOINTS: Checkpoint[] = [
+  {
+    minute: "1 min",
+    icon: "●",
+    title: "It's alive",
+    subtitle: "Classifier streams",
+    body: "Your input stays pinned. Gemini Flash Lite tokens render in <2s. The engine is running against YOUR workflow, not a canned demo.",
+    accent: "#22c55e",
+  },
+  {
+    minute: "5 min",
+    icon: "◆",
+    title: "It gets me",
+    subtitle: "Architecture blueprint",
+    body: "Lane + SDK fit + component layers + Interpretive Boundary (what we're confident about vs inferring). Correct it with one chip.",
+    accent: "#d97757",
+  },
+  {
+    minute: "15 min",
+    icon: "▣",
+    title: "Real code",
+    subtitle: "Scaffold workbench",
+    body: "10-layer bundle materializes file-by-file. Preview tab runs ./run.sh --mock live in an xterm simulator. 11-gate verdict banner at the bottom.",
+    accent: "#8b5cf6",
+  },
+  {
+    minute: "30 min",
+    icon: "✓",
+    title: "It's mine",
+    subtitle: "Refine, then clone",
+    body: "Chat-refine with preview-then-apply diffs. Download ZIP unlocks only when every gate is green. The one-and-only clone moment.",
+    accent: "#f59e0b",
+  },
+  {
+    minute: "60 min",
+    icon: "◉",
+    title: "In prod",
+    subtitle: "Real traffic served",
+    body: "Drop into your repo. Edit .env. Replace _live_*.py stubs. Flip CONNECTOR_MODE=live. Deploy. Watch NextSteps page tick ✅ via webhook pings.",
+    accent: "#22d3ee",
+  },
+];
+
+function JourneyTimeline() {
+  return (
+    <section
+      aria-label="The five-checkpoint journey"
+      style={{ marginTop: 22 }}
+    >
+      <div
+        style={{
+          fontSize: 10,
+          letterSpacing: "0.22em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.55)",
+          marginBottom: 10,
+        }}
+      >
+        The journey · 5 checkpoints · clone exactly once
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(175px, 1fr))",
+          gap: 8,
+        }}
+      >
+        {CHECKPOINTS.map((c, i) => (
+          <article
+            key={c.minute}
+            style={{
+              position: "relative",
+              padding: "12px 12px 14px",
+              background: "rgba(255,255,255,0.02)",
+              border: `1px solid ${c.accent}30`,
+              borderRadius: 10,
+              borderLeft: `3px solid ${c.accent}`,
+              transition: "background 180ms ease",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 6,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 11,
+                  color: c.accent,
+                  fontWeight: 700,
+                  letterSpacing: "0.05em",
+                }}
+              >
+                {c.icon} {c.minute.toUpperCase()}
+              </span>
+              {i < CHECKPOINTS.length - 1 ? (
+                <span
+                  style={{
+                    flex: 1,
+                    borderTop: `1px dashed ${c.accent}40`,
+                    marginLeft: 6,
+                  }}
+                  aria-hidden="true"
+                />
+              ) : null}
+            </div>
+            <div
+              style={{
+                fontSize: 14,
+                fontWeight: 600,
+                color: "#fff",
+                marginBottom: 2,
+                letterSpacing: "-0.01em",
+              }}
+            >
+              {c.title}
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: c.accent,
+                marginBottom: 8,
+                fontWeight: 500,
+              }}
+            >
+              {c.subtitle}
+            </div>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 12,
+                color: "rgba(255,255,255,0.68)",
+                lineHeight: 1.5,
+              }}
+            >
+              {c.body}
+            </p>
+          </article>
+        ))}
+      </div>
+      <p
+        style={{
+          margin: "12px 0 0",
+          fontSize: 11,
+          color: "rgba(255,255,255,0.45)",
+          lineHeight: 1.55,
+          maxWidth: 780,
+        }}
+      >
+        Nothing ships a clone before the 30-min checkpoint. Download ZIP is
+        gated behind a green 11-gate verdict + your explicit &ldquo;this
+        matches what I want&rdquo; confirmation. By design.
+      </p>
+    </section>
   );
 }
 
