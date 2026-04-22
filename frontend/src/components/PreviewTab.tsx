@@ -17,8 +17,13 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useAction } from "convex/react";
 import { api } from "../_convex/api";
+
+// BYOK key persistence. Stays in localStorage only — never transmitted
+// to our server except as a runtime arg to the live-run action.
+const BYOK_KEY_STORAGE = "attrition:byok_anthropic_key";
+const LIVE_PROMPT_STORAGE = "attrition:last_live_prompt";
 
 type Line = {
   delayMs: number;
@@ -233,9 +238,21 @@ export function PreviewTab({
   const [runCount, setRunCount] = useState(0);
   const [recordingRun, setRecordingRun] = useState(false);
   const [recordedRunId, setRecordedRunId] = useState<string | null>(null);
+  const [liveRunning, setLiveRunning] = useState(false);
+  const [liveError, setLiveError] = useState<string | null>(null);
+  const [livePrompt, setLivePrompt] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    return window.localStorage.getItem(LIVE_PROMPT_STORAGE) || "";
+  });
+  const [byokKey, setByokKey] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    return window.localStorage.getItem(BYOK_KEY_STORAGE) || "";
+  });
+  const [showByok, setShowByok] = useState(false);
   const startRun = useMutation(api.domains.daas.agentTrace.startRun);
   const recordSpan = useMutation(api.domains.daas.agentTrace.recordSpan);
   const finishRun = useMutation(api.domains.daas.agentTrace.finishRun);
+  const runLiveAgent = useAction(api.domains.daas.liveAgent.runLiveAgent);
   const timersRef = useRef<number[]>([]);
   const termRef = useRef<HTMLDivElement | null>(null);
 
@@ -332,6 +349,51 @@ export function PreviewTab({
       console.error("recordAsTrace failed", err);
     } finally {
       setRecordingRun(false);
+    }
+  }
+
+  /**
+   * Tier-2/3: actually invoke Claude with a real LLM call + trace emission.
+   * The TS agent demonstrates the lane pattern using real tokens; the
+   * user can supply a BYOK Anthropic key to bypass our rate limit.
+   */
+  async function runLive(): Promise<void> {
+    if (liveRunning) return;
+    if (!livePrompt.trim()) {
+      setLiveError("Type a prompt first.");
+      return;
+    }
+    setLiveError(null);
+    setLiveRunning(true);
+    const runId = randomRunId();
+    try {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(LIVE_PROMPT_STORAGE, livePrompt);
+        if (byokKey) {
+          window.localStorage.setItem(BYOK_KEY_STORAGE, byokKey);
+        }
+      }
+      // Open the trace page FIRST — it subscribes to the runId and will
+      // render spans as they land from the server-side action.
+      const popup = window.open(`/runs/${runId}`, "_blank", "noopener");
+      // Kick off the action in parallel
+      await runLiveAgent({
+        runId,
+        sessionSlug: sessionSlug ?? undefined,
+        lane: runtimeLane,
+        userPrompt: livePrompt,
+        byokAnthropicKey: byokKey || undefined,
+      });
+      if (!popup) {
+        // Popup was blocked; navigate in-tab as fallback
+        window.location.href = `/runs/${runId}`;
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setLiveError(msg);
+      console.error("runLive failed", err);
+    } finally {
+      setLiveRunning(false);
     }
   }
 
@@ -497,6 +559,188 @@ export function PreviewTab({
         ) : null}
       </div>
 
+      {/* Tier-2/3 live-run section — real Claude Messages API call with
+          real tokens + real trace. Rate-limited to 5/hour on our shared
+          key; unlimited with BYOK (key stays in localStorage). */}
+      <div
+        style={{
+          padding: "14px 16px",
+          background: "rgba(34,211,238,0.04)",
+          border: "1px solid rgba(34,211,238,0.3)",
+          borderRadius: 8,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            marginBottom: 8,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 10,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "#22d3ee",
+              fontWeight: 600,
+            }}
+          >
+            Run live with Claude
+          </span>
+          <span
+            style={{
+              fontSize: 11,
+              color: "rgba(255,255,255,0.55)",
+            }}
+          >
+            real LLM call · real tokens · real trace
+          </span>
+        </div>
+        <p
+          style={{
+            margin: "0 0 8px",
+            fontSize: 11,
+            color: "rgba(255,255,255,0.65)",
+            lineHeight: 1.5,
+          }}
+        >
+          Type what you want the agent to do. We'll run it against Claude Haiku 4.5
+          on our side, dispatch mock versions of your tools, and stream every step
+          to a <code style={{ fontSize: 10 }}>/runs/:runId</code> page you can share.
+        </p>
+        <textarea
+          value={livePrompt}
+          onChange={(e) => setLivePrompt(e.target.value)}
+          placeholder={
+            runtimeLane === "orchestrator_worker"
+              ? "e.g. Order 50 units of SKU-442 if stock is sufficient, then give me the end-of-day summary."
+              : runtimeLane === "tool_first_chain"
+                ? "e.g. A customer asks about our refund policy. Look it up and draft a supportive reply."
+                : "e.g. Summarize this quarter's ops plan in 5 bullets."
+          }
+          rows={3}
+          disabled={liveRunning}
+          style={{
+            width: "100%",
+            padding: 10,
+            background: "rgba(0,0,0,0.35)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 6,
+            color: "rgba(255,255,255,0.92)",
+            fontSize: 12,
+            fontFamily: "inherit",
+            resize: "vertical",
+            lineHeight: 1.5,
+            marginBottom: 8,
+          }}
+        />
+        {showByok ? (
+          <div style={{ marginBottom: 8 }}>
+            <input
+              type="password"
+              value={byokKey}
+              onChange={(e) => setByokKey(e.target.value)}
+              placeholder="sk-ant-..."
+              disabled={liveRunning}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                background: "rgba(0,0,0,0.35)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 6,
+                color: "rgba(255,255,255,0.92)",
+                fontSize: 11,
+                fontFamily: "'JetBrains Mono', monospace",
+              }}
+            />
+            <p
+              style={{
+                margin: "6px 0 0",
+                fontSize: 10,
+                color: "rgba(255,255,255,0.5)",
+                lineHeight: 1.55,
+              }}
+            >
+              Your key stays in browser localStorage only. We send it as a runtime
+              arg for this call and don't persist it server-side.
+            </p>
+          </div>
+        ) : null}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            flexWrap: "wrap",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => void runLive()}
+            disabled={liveRunning || !livePrompt.trim()}
+            style={{
+              padding: "6px 14px",
+              background: liveRunning
+                ? "rgba(255,255,255,0.05)"
+                : livePrompt.trim()
+                  ? "rgba(34,211,238,0.25)"
+                  : "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(34,211,238,0.5)",
+              borderRadius: 6,
+              color: liveRunning || !livePrompt.trim() ? "rgba(255,255,255,0.4)" : "#fff",
+              fontSize: 12,
+              fontWeight: 500,
+              cursor: liveRunning || !livePrompt.trim() ? "not-allowed" : "pointer",
+            }}
+          >
+            {liveRunning ? "running…" : "Run live → open trace ↗"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowByok((v) => !v)}
+            style={{
+              padding: "4px 10px",
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 6,
+              color: "rgba(255,255,255,0.65)",
+              fontSize: 10,
+              cursor: "pointer",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+            }}
+          >
+            {showByok ? "hide key" : byokKey ? "BYOK · set" : "Use your own key"}
+          </button>
+          <span
+            style={{
+              fontSize: 10,
+              color: "rgba(255,255,255,0.45)",
+              marginLeft: "auto",
+            }}
+          >
+            {byokKey ? "unlimited · your key" : "5 runs/hour · shared key"}
+          </span>
+        </div>
+        {liveError ? (
+          <div
+            style={{
+              marginTop: 8,
+              padding: "6px 10px",
+              background: "rgba(239,68,68,0.08)",
+              border: "1px solid rgba(239,68,68,0.3)",
+              borderRadius: 5,
+              fontSize: 11,
+              color: "rgba(239,68,68,0.95)",
+            }}
+          >
+            {liveError}
+          </div>
+        ) : null}
+      </div>
+
       <div
         style={{
           padding: "10px 14px",
@@ -510,9 +754,10 @@ export function PreviewTab({
       >
         <strong style={{ color: "rgba(255,255,255,0.75)" }}>What this proves:</strong>{" "}
         the scaffold's orchestration shape, tool-dispatch order, and connector-resolver
-        boundary are all exercised. What it doesn't prove: live network calls, real
-        credentials, real latency. Those land in the 60-min checkpoint — see the
-        Download ZIP confirmation for the post-download walkthrough.
+        boundary are all exercised. What it doesn't prove yet: running the literal
+        emitted Python scaffold end-to-end (that's the 60-min checkpoint) — the "Run
+        live" button above demonstrates the lane's behavior using a TS agent driven
+        by real Claude calls.
       </div>
 
       <style

@@ -21,6 +21,7 @@ import type * as domains_daas_costCap from "../domains/daas/costCap.js";
 import type * as domains_daas_fidelity from "../domains/daas/fidelity.js";
 import type * as domains_daas_health from "../domains/daas/health.js";
 import type * as domains_daas_http from "../domains/daas/http.js";
+import type * as domains_daas_liveAgent from "../domains/daas/liveAgent.js";
 import type * as domains_daas_mutations from "../domains/daas/mutations.js";
 import type * as domains_daas_nextSteps from "../domains/daas/nextSteps.js";
 import type * as domains_daas_ownership from "../domains/daas/ownership.js";
@@ -52,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   "domains/daas/fidelity": typeof domains_daas_fidelity;
   "domains/daas/health": typeof domains_daas_health;
   "domains/daas/http": typeof domains_daas_http;
+  "domains/daas/liveAgent": typeof domains_daas_liveAgent;
   "domains/daas/mutations": typeof domains_daas_mutations;
   "domains/daas/nextSteps": typeof domains_daas_nextSteps;
   "domains/daas/ownership": typeof domains_daas_ownership;
