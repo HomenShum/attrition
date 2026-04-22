@@ -383,6 +383,74 @@ def load_run(run_id: str) -> Optional[dict]:
 '''
 
 
+def _checkpointer_py() -> str:
+    """Layer 5 variant — LangGraph MemorySaver checkpointer.
+
+    Only emitted for the langgraph_python lane. The skill manifest
+    (daas/skills/langgraph_python.md) tells the agent to write this
+    file; finalize backfills it canonically if the agent forgot.
+    """
+    return '''"""LangGraph checkpointer — the state layer for this lane.
+
+MemorySaver for development (in-process, lost on restart).
+PostgresSaver for production (durable, multi-instance, time-travel).
+
+The environment variable ``ATTRITION_CHECKPOINTER`` selects at
+import time. Default is ``memory`` (safe for mock mode).
+
+Swap to PostgresSaver by setting:
+    export ATTRITION_CHECKPOINTER=postgres
+    export POSTGRES_URL=postgresql://user:pass@host:5432/db
+"""
+from __future__ import annotations
+
+import os
+from typing import Any
+
+try:
+    from langgraph.checkpoint.memory import MemorySaver
+except ImportError:  # pragma: no cover — optional extra
+    MemorySaver = None  # type: ignore[assignment]
+
+
+def build_checkpointer() -> Any:
+    """Return the checkpointer instance configured for the current env."""
+    backend = os.environ.get("ATTRITION_CHECKPOINTER", "memory").lower()
+    if backend == "memory":
+        if MemorySaver is None:
+            raise ImportError(
+                "langgraph not installed; `pip install langgraph` to use the "
+                "MemorySaver checkpointer"
+            )
+        return MemorySaver()
+    if backend == "postgres":
+        # Postgres checkpointer lives in an optional extra. Importing
+        # lazily so mock-mode runs don't require the dep.
+        try:
+            from langgraph.checkpoint.postgres import PostgresSaver  # type: ignore
+        except ImportError as exc:  # pragma: no cover
+            raise ImportError(
+                "langgraph-checkpoint-postgres not installed; `pip install "
+                "langgraph-checkpoint-postgres` to use the PostgresSaver "
+                "checkpointer"
+            ) from exc
+        url = os.environ.get("POSTGRES_URL")
+        if not url:
+            raise RuntimeError(
+                "POSTGRES_URL required when ATTRITION_CHECKPOINTER=postgres"
+            )
+        return PostgresSaver.from_conn_string(url)
+    raise ValueError(
+        f"Unknown ATTRITION_CHECKPOINTER={backend!r}. "
+        "Expected 'memory' or 'postgres'."
+    )
+
+
+# The module-level instance most code imports.
+checkpointer: Any = build_checkpointer() if MemorySaver is not None else None
+'''
+
+
 def _eval_scenarios_py() -> str:
     """Layer 7 — mock-mode smoke tests + per-tool dispatch checks."""
     return '''"""Scenario-based smoke tests. Layer 7.
@@ -1053,10 +1121,14 @@ def finalize_bundle(
         "tool_first_chain": frozenset({
             "state_store.py",
         }),
-        # langgraph lane uses langgraph's MemorySaver/PostgresSaver
-        # checkpointer, not a custom state_store.py. The LLM judge
-        # (AE38 v5) flagged the agent's custom state_store as a contract
-        # violation. Drop it; the canonical server.py imports MemorySaver.
+        # langgraph: drop state_store.py AND align the gate so nine_layers
+        # expects checkpointer.py instead (langgraph's MemorySaver /
+        # PostgresSaver IS the state layer — a custom state_store.py is
+        # an anti-pattern). Gate-side change in attrition_csv_eval_harness
+        # LANE_REQUIRED_LAYERS. Skill-side guidance now explicitly tells
+        # the agent to emit checkpointer.py, not state_store.py.
+        # v6 regressed 3→0 because we dropped state_store without the
+        # matching gate change. Now both move together.
         "langgraph_python": frozenset({
             "state_store.py",
         }),
@@ -1138,6 +1210,15 @@ def finalize_bundle(
         ("eval/rubric.py", _eval_rubric_py(), "python"),
         ("observability.py", _observability_py(), "python"),
     ]
+    # Lane-specific backfill: langgraph_python needs checkpointer.py
+    # (MemorySaver for dev, swappable for PostgresSaver in prod) since
+    # the lane excludes state_store.py and the skill manifest directs
+    # the agent here. V7 showed the agent doesn't always follow the
+    # skill — it keeps writing state_store.py (dropped) and omitting
+    # checkpointer.py. Finalize now ensures the contract is satisfied
+    # regardless of whether the agent complied.
+    if runtime_lane == "langgraph_python":
+        candidates.append(("checkpointer.py", _checkpointer_py(), "python"))
 
     # Files we ALWAYS overwrite with canonical content — these have strict
     # contracts (valid JSON, correct entry-point reference) that agents

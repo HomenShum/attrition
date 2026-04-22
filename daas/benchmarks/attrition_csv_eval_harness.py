@@ -144,6 +144,25 @@ LANE_REQUIRED_LAYERS: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
         ),
         ("eval/",),
     ),
+    # langgraph_python: MemorySaver/PostgresSaver IS the state layer.
+    # Agent emits checkpointer.py (swappable MemorySaver ⇄ PostgresSaver)
+    # in lieu of state_store.py. Skill manifest now explicitly forbids
+    # state_store.py for this lane and the emitter drops any the agent
+    # writes. Gate expects checkpointer.py instead.
+    "langgraph_python": (
+        (
+            "workflow_spec.json",
+            "server.py",
+            "checkpointer.py",
+            "observability.py",
+            "mcp_server.py",
+            "README.md",
+            "requirements.txt",
+            "run.sh",
+            ".env.example",
+        ),
+        ("eval/",),
+    ),
     # TS/JS lanes: agent writes TypeScript, no Python runner.
     "convex_functions": (
         (

@@ -60,46 +60,66 @@
       "pass_rate_pct": 83.3,
       "elapsed_s": 2180.31,
       "total_cost_usd": 0.226
+    },
+    {
+      "version": "v7",
+      "pass": 52,
+      "fail": 8,
+      "skip": 0,
+      "rows_total": 60,
+      "pass_rate_pct": 86.7,
+      "elapsed_s": 2613.24,
+      "total_cost_usd": 0.2208
+    },
+    {
+      "version": "v8",
+      "pass": 53,
+      "fail": 7,
+      "skip": 0,
+      "rows_total": 60,
+      "pass_rate_pct": 88.3,
+      "elapsed_s": 2061.53,
+      "total_cost_usd": 0.217
     }
   ],
   "latest": {
-    "version": "v6",
+    "version": "v8",
     "lane_breakdown": [
       {
         "lane": "orchestrator_worker",
-        "pass": 18,
+        "pass": 14,
         "total": 19,
-        "pass_rate_pct": 94.7,
-        "cost_usd_sum": 0.0895,
-        "p50_elapsed_s": 24.95,
-        "p90_elapsed_s": 52.1
+        "pass_rate_pct": 73.7,
+        "cost_usd_sum": 0.0759,
+        "p50_elapsed_s": 23.19,
+        "p90_elapsed_s": 53.26
       },
       {
         "lane": "tool_first_chain",
-        "pass": 9,
+        "pass": 10,
         "total": 11,
-        "pass_rate_pct": 81.8,
-        "cost_usd_sum": 0.0473,
-        "p50_elapsed_s": 25.19,
-        "p90_elapsed_s": 72.63
+        "pass_rate_pct": 90.9,
+        "cost_usd_sum": 0.0486,
+        "p50_elapsed_s": 25.25,
+        "p90_elapsed_s": 61.72
       },
       {
         "lane": "langgraph_python",
-        "pass": 0,
+        "pass": 5,
         "total": 5,
-        "pass_rate_pct": 0.0,
-        "cost_usd_sum": 0.0055,
-        "p50_elapsed_s": 72.09,
-        "p90_elapsed_s": 97.02
+        "pass_rate_pct": 100.0,
+        "cost_usd_sum": 0.0058,
+        "p50_elapsed_s": 66.43,
+        "p90_elapsed_s": 71.6
       },
       {
         "lane": "claude_agent_sdk",
         "pass": 4,
         "total": 4,
         "pass_rate_pct": 100.0,
-        "cost_usd_sum": 0.0093,
-        "p50_elapsed_s": 34.09,
-        "p90_elapsed_s": 47.94
+        "cost_usd_sum": 0.0132,
+        "p50_elapsed_s": 37.89,
+        "p90_elapsed_s": 48.99
       },
       {
         "lane": "gemini_deep_research",
@@ -107,53 +127,53 @@
         "total": 4,
         "pass_rate_pct": 75.0,
         "cost_usd_sum": 0.0,
-        "p50_elapsed_s": 18.79,
-        "p90_elapsed_s": 51.71
+        "p50_elapsed_s": 26.61,
+        "p90_elapsed_s": 26.98
       },
       {
         "lane": "openai_agents_sdk",
-        "pass": 3,
+        "pass": 4,
         "total": 4,
-        "pass_rate_pct": 75.0,
-        "cost_usd_sum": 0.0057,
-        "p50_elapsed_s": 55.7,
-        "p90_elapsed_s": 77.8
+        "pass_rate_pct": 100.0,
+        "cost_usd_sum": 0.0055,
+        "p50_elapsed_s": 42.25,
+        "p90_elapsed_s": 71.21
       },
       {
         "lane": "simple_chain",
         "pass": 4,
         "total": 4,
         "pass_rate_pct": 100.0,
-        "cost_usd_sum": 0.0202,
-        "p50_elapsed_s": 22.52,
-        "p90_elapsed_s": 25.74
+        "cost_usd_sum": 0.0184,
+        "p50_elapsed_s": 20.41,
+        "p90_elapsed_s": 24.85
       },
       {
         "lane": "convex_functions",
         "pass": 3,
         "total": 3,
         "pass_rate_pct": 100.0,
-        "cost_usd_sum": 0.0136,
-        "p50_elapsed_s": 17.3,
-        "p90_elapsed_s": 17.33
+        "cost_usd_sum": 0.0156,
+        "p50_elapsed_s": 15.14,
+        "p90_elapsed_s": 24.21
       },
       {
         "lane": "deerflow",
         "pass": 2,
         "total": 2,
         "pass_rate_pct": 100.0,
-        "cost_usd_sum": 0.011,
-        "p50_elapsed_s": 27.57,
-        "p90_elapsed_s": 27.91
+        "cost_usd_sum": 0.0106,
+        "p50_elapsed_s": 23.88,
+        "p90_elapsed_s": 24.76
       },
       {
         "lane": "vercel_ai_sdk",
         "pass": 2,
         "total": 2,
         "pass_rate_pct": 100.0,
-        "cost_usd_sum": 0.0128,
-        "p50_elapsed_s": 22.49,
-        "p90_elapsed_s": 22.77
+        "cost_usd_sum": 0.0127,
+        "p50_elapsed_s": 22.23,
+        "p90_elapsed_s": 23.77
       },
       {
         "lane": "hermes",
@@ -161,39 +181,39 @@
         "total": 1,
         "pass_rate_pct": 100.0,
         "cost_usd_sum": 0.0056,
-        "p50_elapsed_s": 23.44,
-        "p90_elapsed_s": 23.44
+        "p50_elapsed_s": 23.1,
+        "p90_elapsed_s": 23.1
       },
       {
         "lane": "manus",
         "pass": 1,
         "total": 1,
         "pass_rate_pct": 100.0,
-        "cost_usd_sum": 0.0057,
-        "p50_elapsed_s": 26.85,
-        "p90_elapsed_s": 26.85
+        "cost_usd_sum": 0.0051,
+        "p50_elapsed_s": 20.17,
+        "p90_elapsed_s": 20.17
       }
     ],
     "driver_breakdown": [
       {
         "driver": "gemini_agent",
-        "pass": 39,
+        "pass": 36,
         "total": 40,
-        "pass_rate_pct": 97.5,
-        "cost_usd_sum": 0.2262,
-        "p50_elapsed_s": 22.95,
-        "p90_elapsed_s": 27.16,
-        "dispatch_err_count": 0
+        "pass_rate_pct": 90.0,
+        "cost_usd_sum": 0.217,
+        "p50_elapsed_s": 23.15,
+        "p90_elapsed_s": 27.18,
+        "dispatch_err_count": 2
       },
       {
         "driver": "openai_agents_sdk",
-        "pass": 2,
+        "pass": 5,
         "total": 6,
-        "pass_rate_pct": 33.3,
+        "pass_rate_pct": 83.3,
         "cost_usd_sum": 0.0,
-        "p50_elapsed_s": 78.34,
-        "p90_elapsed_s": 102.58,
-        "dispatch_err_count": 1
+        "p50_elapsed_s": 63.03,
+        "p90_elapsed_s": 77.42,
+        "dispatch_err_count": 0
       },
       {
         "driver": "gemini_deep_research",
@@ -201,8 +221,8 @@
         "total": 5,
         "pass_rate_pct": 80.0,
         "cost_usd_sum": 0.0,
-        "p50_elapsed_s": 13.79,
-        "p90_elapsed_s": 47.72,
+        "p50_elapsed_s": 26.6,
+        "p90_elapsed_s": 26.93,
         "dispatch_err_count": 0
       },
       {
@@ -211,18 +231,18 @@
         "total": 4,
         "pass_rate_pct": 75.0,
         "cost_usd_sum": 0.0,
-        "p50_elapsed_s": 48.18,
-        "p90_elapsed_s": 48.28,
+        "p50_elapsed_s": 48.61,
+        "p90_elapsed_s": 48.99,
         "dispatch_err_count": 0
       },
       {
         "driver": "langgraph",
-        "pass": 0,
+        "pass": 3,
         "total": 3,
-        "pass_rate_pct": 0.0,
+        "pass_rate_pct": 100.0,
         "cost_usd_sum": 0.0,
-        "p50_elapsed_s": 72.09,
-        "p90_elapsed_s": 72.51,
+        "p50_elapsed_s": 66.43,
+        "p90_elapsed_s": 67.99,
         "dispatch_err_count": 0
       },
       {
@@ -231,8 +251,8 @@
         "total": 2,
         "pass_rate_pct": 100.0,
         "cost_usd_sum": 0.0,
-        "p50_elapsed_s": 70.21,
-        "p90_elapsed_s": 72.57,
+        "p50_elapsed_s": 74.9,
+        "p90_elapsed_s": 76.42,
         "dispatch_err_count": 0
       }
     ],
@@ -240,25 +260,25 @@
       {
         "gate": "baseline_parity",
         "pass": 0,
-        "fail": 1,
-        "skip": 59
+        "fail": 2,
+        "skip": 58
       },
       {
         "gate": "connector_resolver_working",
-        "pass": 56,
-        "fail": 1,
+        "pass": 55,
+        "fail": 2,
         "skip": 3
       },
       {
         "gate": "correct_lane_picked",
-        "pass": 57,
-        "fail": 3,
-        "skip": 0
+        "pass": 54,
+        "fail": 5,
+        "skip": 1
       },
       {
         "gate": "cost_under_budget",
-        "pass": 59,
-        "fail": 1,
+        "pass": 58,
+        "fail": 2,
         "skip": 0
       },
       {
@@ -269,20 +289,20 @@
       },
       {
         "gate": "mcp_server_importable",
-        "pass": 50,
-        "fail": 1,
+        "pass": 49,
+        "fail": 2,
         "skip": 9
       },
       {
         "gate": "nine_layers_present",
-        "pass": 54,
-        "fail": 6,
+        "pass": 58,
+        "fail": 2,
         "skip": 0
       },
       {
         "gate": "runtime_used_correctly",
-        "pass": 59,
-        "fail": 1,
+        "pass": 58,
+        "fail": 2,
         "skip": 0
       },
       {
@@ -293,38 +313,50 @@
       },
       {
         "gate": "scaffold_runs_mock",
-        "pass": 54,
-        "fail": 1,
+        "pass": 51,
+        "fail": 4,
         "skip": 5
       },
       {
         "gate": "workflow_spec_roundtrip",
-        "pass": 59,
-        "fail": 1,
+        "pass": 58,
+        "fail": 2,
         "skip": 0
       }
     ],
     "dispatch_error_taxonomy": [
       {
-        "error": "'utf-8' codec can't decode byte 0xa7 in position 0: invalid start byte",
+        "error": "gemini HTTP 502: <!DOCTYPE html>",
+        "count": 1
+      },
+      {
+        "error": "<urlopen error [WinError 10054] An existing connection was forcibly closed by th",
         "count": 1
       }
     ],
     "telemetry": {
-      "tool_call_total": 0,
-      "input_token_total": 0,
-      "output_token_total": 0,
-      "token_total": 0,
-      "tool_call_name_freq": {},
-      "bundle_file_count_p50": 0.0,
-      "bundle_file_count_p90": 0.0,
-      "bundle_total_bytes_p50": 0,
-      "bundle_total_bytes_p90": 0
+      "tool_call_total": 939,
+      "input_token_total": 2850931,
+      "output_token_total": 83085,
+      "token_total": 2934016,
+      "tool_call_name_freq": {
+        "write_file": 719,
+        "ast_parse_check": 196,
+        "emit_done": 15,
+        "run_shell": 4,
+        "edit_file": 2,
+        "list_files": 2,
+        "read_file": 1
+      },
+      "bundle_file_count_p50": 15.0,
+      "bundle_file_count_p90": 19.0,
+      "bundle_total_bytes_p50": 18469,
+      "bundle_total_bytes_p90": 25114
     }
   },
   "cumulative": {
-    "total_rows": 360,
-    "total_cost_usd": 1.3351,
-    "total_elapsed_s": 9813.380000000001
+    "total_rows": 480,
+    "total_cost_usd": 1.7729,
+    "total_elapsed_s": 14488.150000000001
   }
 }

@@ -1303,14 +1303,14 @@ export function Architect() {
 // high in signal — it tells investors/builders "these are measured, not
 // aspirational."
 const EVAL_NUMBERS = {
-  passes: 50,
+  passes: 53,
   total: 60,
-  passPct: 83,
+  passPct: 88,
   gates: 11,
   costPerScaffoldUsd: 0.005,
-  lanesAt100: 7,
-  iterations: 6,
-  cumulativeSpendUsd: 1.34,
+  lanesAt100: 9,
+  iterations: 8,
+  cumulativeSpendUsd: 1.77,
 } as const;
 
 function EvalCredibilityStrip() {
@@ -1564,6 +1564,49 @@ function JourneyTimeline() {
         with every quality check green and you confident it matches
         &mdash; than copy-fix-copy-fix forever.
       </p>
+      {/* Anthropic cookbook alignment — signals to the target audience
+          that our scaffolds follow the same canonical shapes Anthropic
+          teaches in their own tutorial series. Tier-A social proof. */}
+      <div
+        style={{
+          marginTop: 14,
+          padding: "10px 14px",
+          background: "rgba(217,119,87,0.04)",
+          border: "1px solid rgba(217,119,87,0.18)",
+          borderRadius: 8,
+          fontSize: 12,
+          color: "rgba(255,255,255,0.75)",
+          lineHeight: 1.55,
+          maxWidth: 780,
+        }}
+      >
+        <span
+          style={{
+            fontSize: 10,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: "#d97757",
+            fontWeight: 600,
+            marginRight: 10,
+          }}
+        >
+          Aligned with
+        </span>
+        Our starter code follows the six canonical shapes Anthropic
+        ships in their{" "}
+        <a
+          href="https://github.com/anthropics/claude-cookbooks/tree/main/claude_agent_sdk"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#d97757", textDecoration: "none", fontWeight: 500 }}
+        >
+          Claude Agent SDK cookbook &rarr;
+        </a>
+        {" "}— research agents, chief-of-staff agents, observability
+        agents, site-reliability agents, OpenAI-to-Claude migration, and
+        session browsers. You get a scaffold that a senior Anthropic
+        engineer would recognize on first read.
+      </div>
     </section>
   );
 }

@@ -1,16 +1,16 @@
 # attrition eval telemetry — publication snapshot
 
-Generated from 6 baselines spanning 
-**360 row-dispatches** and 
-**$1.3351** of LLM spend.
+Generated from 8 baselines spanning 
+**480 row-dispatches** and 
+**$1.7729** of LLM spend.
 
 ## 1. Headline numbers
 
-- **Latest baseline**: v6 — **50/60** pass (83%)
-- **Pass-rate lift vs v1**: 5/60 (8%) → 50/60 (83%) — **+45 rows**
-- **Total $ spent** (cumulative, all baselines): $1.3351
-- **Total wall clock** (cumulative): 9813s = 163.6 min
-- **Total row-dispatches** across all baselines: 360
+- **Latest baseline**: v8 — **53/60** pass (88%)
+- **Pass-rate lift vs v1**: 5/60 (8%) → 53/60 (88%) — **+48 rows**
+- **Total $ spent** (cumulative, all baselines): $1.7729
+- **Total wall clock** (cumulative): 14488s = 241.5 min
+- **Total row-dispatches** across all baselines: 480
 
 ## 2. Baseline-over-time
 
@@ -22,34 +22,36 @@ Generated from 6 baselines spanning
 | v4 | 37 | 23 | 0 | 62% | 1712 | 0.2272 | SDK installs + openrouter slug + deep_research fallback |
 | v5 | 43 | 17 | 0 | 72% | 1884 | 0.2165 | TS-lane excludes + gate awareness + FORCED_CANONICAL |
 | v6 | 50 | 10 | 0 | 83% | 2180 | 0.2260 | deep_research payload + per-runtime max_turns + lane deps |
+| v7 | 52 | 8 | 0 | 87% | 2613 | 0.2208 |  |
+| v8 | 53 | 7 | 0 | 88% | 2062 | 0.2170 |  |
 
 ## 3. Latest baseline — by emit lane
 
 | Lane | Pass/Total | Rate | Cost ($) | p50 (s) | p90 (s) |
 |---|---|---|---|---|---|
-| orchestrator_worker | 18/19 | 94.7% | 0.0895 | 24.95 | 52.1 |
-| tool_first_chain | 9/11 | 81.8% | 0.0473 | 25.19 | 72.63 |
-| langgraph_python | 0/5 | 0.0% | 0.0055 | 72.09 | 97.02 |
-| claude_agent_sdk | 4/4 | 100.0% | 0.0093 | 34.09 | 47.94 |
-| gemini_deep_research | 3/4 | 75.0% | 0.0000 | 18.79 | 51.71 |
-| openai_agents_sdk | 3/4 | 75.0% | 0.0057 | 55.7 | 77.8 |
-| simple_chain | 4/4 | 100.0% | 0.0202 | 22.52 | 25.74 |
-| convex_functions | 3/3 | 100.0% | 0.0136 | 17.3 | 17.33 |
-| deerflow | 2/2 | 100.0% | 0.0110 | 27.57 | 27.91 |
-| vercel_ai_sdk | 2/2 | 100.0% | 0.0128 | 22.49 | 22.77 |
-| hermes | 1/1 | 100.0% | 0.0056 | 23.44 | 23.44 |
-| manus | 1/1 | 100.0% | 0.0057 | 26.85 | 26.85 |
+| orchestrator_worker | 14/19 | 73.7% | 0.0759 | 23.19 | 53.26 |
+| tool_first_chain | 10/11 | 90.9% | 0.0486 | 25.25 | 61.72 |
+| langgraph_python | 5/5 | 100.0% | 0.0058 | 66.43 | 71.6 |
+| claude_agent_sdk | 4/4 | 100.0% | 0.0132 | 37.89 | 48.99 |
+| gemini_deep_research | 3/4 | 75.0% | 0.0000 | 26.61 | 26.98 |
+| openai_agents_sdk | 4/4 | 100.0% | 0.0055 | 42.25 | 71.21 |
+| simple_chain | 4/4 | 100.0% | 0.0184 | 20.41 | 24.85 |
+| convex_functions | 3/3 | 100.0% | 0.0156 | 15.14 | 24.21 |
+| deerflow | 2/2 | 100.0% | 0.0106 | 23.88 | 24.76 |
+| vercel_ai_sdk | 2/2 | 100.0% | 0.0127 | 22.23 | 23.77 |
+| hermes | 1/1 | 100.0% | 0.0056 | 23.1 | 23.1 |
+| manus | 1/1 | 100.0% | 0.0051 | 20.17 | 20.17 |
 
 ## 4. Latest baseline — by driver runtime
 
 | Driver | Pass/Total | Rate | Cost ($) | p50 (s) | p90 (s) | Dispatch errors |
 |---|---|---|---|---|---|---|
-| gemini_agent | 39/40 | 97.5% | 0.2262 | 22.95 | 27.16 | 0 |
-| openai_agents_sdk | 2/6 | 33.3% | 0.0000 | 78.34 | 102.58 | 1 |
-| gemini_deep_research | 4/5 | 80.0% | 0.0000 | 13.79 | 47.72 | 0 |
-| claude_agent_sdk | 3/4 | 75.0% | 0.0000 | 48.18 | 48.28 | 0 |
-| langgraph | 0/3 | 0.0% | 0.0000 | 72.09 | 72.51 | 0 |
-| openrouter | 2/2 | 100.0% | 0.0000 | 70.21 | 72.57 | 0 |
+| gemini_agent | 36/40 | 90.0% | 0.2170 | 23.15 | 27.18 | 2 |
+| openai_agents_sdk | 5/6 | 83.3% | 0.0000 | 63.03 | 77.42 | 0 |
+| gemini_deep_research | 4/5 | 80.0% | 0.0000 | 26.6 | 26.93 | 0 |
+| claude_agent_sdk | 3/4 | 75.0% | 0.0000 | 48.61 | 48.99 | 0 |
+| langgraph | 3/3 | 100.0% | 0.0000 | 66.43 | 67.99 | 0 |
+| openrouter | 2/2 | 100.0% | 0.0000 | 74.9 | 76.42 | 0 |
 
 ## 5. Latest baseline — gate-level frequencies
 
@@ -58,17 +60,17 @@ Each row is dispatched once per baseline; gates are evaluated on the emitted bun
 
 | Gate | Pass | Fail | Skip | Pass rate |
 |---|---|---|---|---|
-| `baseline_parity` | 0 | 1 | 59 | 0% |
-| `connector_resolver_working` | 56 | 1 | 3 | 98% |
-| `correct_lane_picked` | 57 | 3 | 0 | 95% |
-| `cost_under_budget` | 59 | 1 | 0 | 98% |
+| `baseline_parity` | 0 | 2 | 58 | 0% |
+| `connector_resolver_working` | 55 | 2 | 3 | 96% |
+| `correct_lane_picked` | 54 | 5 | 1 | 92% |
+| `cost_under_budget` | 58 | 2 | 0 | 97% |
 | `latency_under_budget` | 58 | 2 | 0 | 97% |
-| `mcp_server_importable` | 50 | 1 | 9 | 98% |
-| `nine_layers_present` | 54 | 6 | 0 | 90% |
-| `runtime_used_correctly` | 59 | 1 | 0 | 98% |
+| `mcp_server_importable` | 49 | 2 | 9 | 96% |
+| `nine_layers_present` | 58 | 2 | 0 | 97% |
+| `runtime_used_correctly` | 58 | 2 | 0 | 97% |
 | `scaffold_compiles` | 58 | 2 | 0 | 97% |
-| `scaffold_runs_mock` | 54 | 1 | 5 | 98% |
-| `workflow_spec_roundtrip` | 59 | 1 | 0 | 98% |
+| `scaffold_runs_mock` | 51 | 4 | 5 | 93% |
+| `workflow_spec_roundtrip` | 58 | 2 | 0 | 97% |
 
 ## 6. Dispatch-error taxonomy (latest)
 
@@ -78,7 +80,8 @@ gaps, not scaffold bugs.
 
 | Count | Error head |
 |---|---|
-| 1 | `'utf-8' codec can't decode byte 0xa7 in position 0: invalid start byte` |
+| 1 | `gemini HTTP 502: <!DOCTYPE html>` |
+| 1 | `<urlopen error [WinError 10054] An existing connection was forcibly closed by th` |
 
 ## 7. Bugs the flywheel surfaced and fixed
 
@@ -139,17 +142,29 @@ These are known limitations, not scaffold bugs:
 
 ## 9. Agent-loop telemetry (latest baseline)
 
-_Per-row tool-call and token telemetry added to the harness after v5;_
-_the latest baseline's summary JSON pre-dates this schema. Re-run with_
-_the current harness to populate these fields._
+- **Total tool calls** across all rows: 939
+- **Total LLM tokens**: 2,934,016 (in: 2,850,931, out: 83,085)
+- **Emitted scaffold size**: p50 = 15.0 files / 18,469 bytes, p90 = 19.0 files / 25,114 bytes
+
+**Top tool-call names across the run:**
+
+| Tool | Calls |
+|---|---|
+| `write_file` | 719 |
+| `ast_parse_check` | 196 |
+| `emit_done` | 15 |
+| `run_shell` | 4 |
+| `edit_file` | 2 |
+| `list_files` | 2 |
+| `read_file` | 1 |
 
 ## 10. Cost efficiency
 
-At **$1.3351** cumulative spend across 
-360 row-dispatches, average cost-per-dispatch is 
+At **$1.7729** cumulative spend across 
+480 row-dispatches, average cost-per-dispatch is 
 **$0.0037**.
 
-For the latest baseline (v6): **$0.2260** for 60 rows = **$0.0038/row**.
+For the latest baseline (v8): **$0.2170** for 60 rows = **$0.0036/row**.
 
 ## 11. Reproduction
 

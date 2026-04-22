@@ -1,0 +1,1633 @@
+{
+  "harness_version": "attrition.v1",
+  "schema": "daas/benchmarks/attrition_eval_template_v1.csv",
+  "dry": false,
+  "elapsed_s": 459.42,
+  "rows_total": 5,
+  "pass": 4,
+  "fail": 1,
+  "skip": 0,
+  "total_cost_usd": 0.0057,
+  "per_row": [
+    {
+      "case_id": "AE11",
+      "overall_pass": true,
+      "overall_rationale": "all 9 deterministic gates pass; 2 stubbed: correct_lane_picked, baseline_parity",
+      "run_elapsed_s": 91.41,
+      "run_cost_usd": 0.0,
+      "dispatch_error": null,
+      "input_tokens": 325392,
+      "output_tokens": 4450,
+      "runtime_label": "langgraph",
+      "model": "langgraph:gemini-3.1-flash-lite-preview",
+      "tool_call_count": 49,
+      "tool_calls_summary": [
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        }
+      ],
+      "bundle_file_count": 13,
+      "bundle_total_bytes": 23922,
+      "gates": {
+        "scaffold_compiles": {
+          "passed": true,
+          "rationale": "7 .py files ast-parse valid"
+        },
+        "nine_layers_present": {
+          "passed": true,
+          "rationale": "all 10 required layers present for lane=langgraph_python"
+        },
+        "scaffold_runs_mock": {
+          "passed": true,
+          "rationale": "server.py parses + references mock/CONNECTOR_MODE"
+        },
+        "connector_resolver_working": {
+          "passed": true,
+          "rationale": "CONNECTOR_MODE referenced in 6 file(s): README.md"
+        },
+        "mcp_server_importable": {
+          "passed": true,
+          "rationale": "mcp_server.py ast-parses + references mcp/stdio"
+        },
+        "workflow_spec_roundtrip": {
+          "passed": true,
+          "rationale": "valid JSON, 4 top-level keys, roundtrip stable"
+        },
+        "cost_under_budget": {
+          "passed": true,
+          "rationale": "$0.0000 <= $0.0600 budget"
+        },
+        "latency_under_budget": {
+          "passed": true,
+          "rationale": "91.41s <= 180.0s budget (x1.5 for langgraph)"
+        },
+        "runtime_used_correctly": {
+          "passed": true,
+          "rationale": "runtime_label=langgraph matches emit_lane driver"
+        },
+        "correct_lane_picked": {
+          "passed": null,
+          "rationale": "judge network error: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>"
+        },
+        "baseline_parity": {
+          "passed": null,
+          "rationale": "not-yet-wired: requires BFCL/broadened benchmark replay for the emitted scaffold"
+        }
+      }
+    },
+    {
+      "case_id": "AE12",
+      "overall_pass": true,
+      "overall_rationale": "all 10 deterministic gates pass; 1 stubbed: baseline_parity",
+      "run_elapsed_s": 87.12,
+      "run_cost_usd": 0.0,
+      "dispatch_error": null,
+      "input_tokens": 276462,
+      "output_tokens": 3252,
+      "runtime_label": "langgraph",
+      "model": "langgraph:gemini-3.1-flash-lite-preview",
+      "tool_call_count": 49,
+      "tool_calls_summary": [
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "run_shell",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        }
+      ],
+      "bundle_file_count": 13,
+      "bundle_total_bytes": 23922,
+      "gates": {
+        "scaffold_compiles": {
+          "passed": true,
+          "rationale": "7 .py files ast-parse valid"
+        },
+        "nine_layers_present": {
+          "passed": true,
+          "rationale": "all 10 required layers present for lane=langgraph_python"
+        },
+        "scaffold_runs_mock": {
+          "passed": true,
+          "rationale": "server.py parses + references mock/CONNECTOR_MODE"
+        },
+        "connector_resolver_working": {
+          "passed": true,
+          "rationale": "CONNECTOR_MODE referenced in 6 file(s): README.md"
+        },
+        "mcp_server_importable": {
+          "passed": true,
+          "rationale": "mcp_server.py ast-parses + references mcp/stdio"
+        },
+        "workflow_spec_roundtrip": {
+          "passed": true,
+          "rationale": "valid JSON, 4 top-level keys, roundtrip stable"
+        },
+        "cost_under_budget": {
+          "passed": true,
+          "rationale": "$0.0000 <= $0.0600 budget"
+        },
+        "latency_under_budget": {
+          "passed": true,
+          "rationale": "87.12s <= 180.0s budget (x1.5 for langgraph)"
+        },
+        "runtime_used_correctly": {
+          "passed": true,
+          "rationale": "runtime_label=langgraph matches emit_lane driver"
+        },
+        "correct_lane_picked": {
+          "passed": true,
+          "rationale": "Flash Lite judge: The bundle includes the required server.py, checkpointer.py, and LangGraph dependencies, aligning with the specified lane contract and runtime requirements."
+        },
+        "baseline_parity": {
+          "passed": null,
+          "rationale": "not-yet-wired: requires BFCL/broadened benchmark replay for the emitted scaffold"
+        }
+      }
+    },
+    {
+      "case_id": "AE17",
+      "overall_pass": false,
+      "overall_rationale": "generate_scaffold raised: openai-agents run failed: Max turns (30) exceeded",
+      "run_elapsed_s": 138.92,
+      "run_cost_usd": 0.0,
+      "dispatch_error": "openai-agents run failed: Max turns (30) exceeded",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "runtime_label": null,
+      "model": null,
+      "tool_call_count": 0,
+      "tool_calls_summary": [],
+      "bundle_file_count": 0,
+      "bundle_total_bytes": 0,
+      "gates": {
+        "scaffold_compiles": {
+          "passed": false,
+          "rationale": "dispatch raised before gate: RuntimeError"
+        },
+        "scaffold_runs_mock": {
+          "passed": false,
+          "rationale": "dispatch raised before gate: RuntimeError"
+        },
+        "nine_layers_present": {
+          "passed": false,
+          "rationale": "dispatch raised before gate: RuntimeError"
+        },
+        "correct_lane_picked": {
+          "passed": false,
+          "rationale": "dispatch raised before gate: RuntimeError"
+        },
+        "connector_resolver_working": {
+          "passed": false,
+          "rationale": "dispatch raised before gate: RuntimeError"
+        },
+        "mcp_server_importable": {
+          "passed": false,
+          "rationale": "dispatch raised before gate: RuntimeError"
+        },
+        "workflow_spec_roundtrip": {
+          "passed": false,
+          "rationale": "dispatch raised before gate: RuntimeError"
+        },
+        "baseline_parity": {
+          "passed": false,
+          "rationale": "dispatch raised before gate: RuntimeError"
+        },
+        "cost_under_budget": {
+          "passed": false,
+          "rationale": "dispatch raised before gate: RuntimeError"
+        },
+        "latency_under_budget": {
+          "passed": false,
+          "rationale": "dispatch raised before gate: RuntimeError"
+        },
+        "runtime_used_correctly": {
+          "passed": false,
+          "rationale": "dispatch raised before gate: RuntimeError"
+        }
+      }
+    },
+    {
+      "case_id": "AE38",
+      "overall_pass": true,
+      "overall_rationale": "all 10 deterministic gates pass; 1 stubbed: baseline_parity",
+      "run_elapsed_s": 73.17,
+      "run_cost_usd": 0.0,
+      "dispatch_error": null,
+      "input_tokens": 248430,
+      "output_tokens": 4116,
+      "runtime_label": "langgraph",
+      "model": "langgraph:gemini-3.1-flash-lite-preview",
+      "tool_call_count": 49,
+      "tool_calls_summary": [
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 0,
+          "args_keys": [
+            "kwargs"
+          ],
+          "result_ok": false
+        }
+      ],
+      "bundle_file_count": 13,
+      "bundle_total_bytes": 23922,
+      "gates": {
+        "scaffold_compiles": {
+          "passed": true,
+          "rationale": "7 .py files ast-parse valid"
+        },
+        "nine_layers_present": {
+          "passed": true,
+          "rationale": "all 10 required layers present for lane=langgraph_python"
+        },
+        "scaffold_runs_mock": {
+          "passed": true,
+          "rationale": "server.py parses + references mock/CONNECTOR_MODE"
+        },
+        "connector_resolver_working": {
+          "passed": true,
+          "rationale": "CONNECTOR_MODE referenced in 6 file(s): README.md"
+        },
+        "mcp_server_importable": {
+          "passed": true,
+          "rationale": "mcp_server.py ast-parses + references mcp/stdio"
+        },
+        "workflow_spec_roundtrip": {
+          "passed": true,
+          "rationale": "valid JSON, 4 top-level keys, roundtrip stable"
+        },
+        "cost_under_budget": {
+          "passed": true,
+          "rationale": "$0.0000 <= $0.0600 budget"
+        },
+        "latency_under_budget": {
+          "passed": true,
+          "rationale": "73.17s <= 180.0s budget (x1.5 for langgraph)"
+        },
+        "runtime_used_correctly": {
+          "passed": true,
+          "rationale": "runtime_label=langgraph matches emit_lane driver"
+        },
+        "correct_lane_picked": {
+          "passed": true,
+          "rationale": "Flash Lite judge: The bundle includes the required LangGraph dependencies, a server.py runner, and a dedicated checkpointer.py implementing the specified MemorySaver/PostgresSaver logic."
+        },
+        "baseline_parity": {
+          "passed": null,
+          "rationale": "not-yet-wired: requires BFCL/broadened benchmark replay for the emitted scaffold"
+        }
+      }
+    },
+    {
+      "case_id": "AE42",
+      "overall_pass": true,
+      "overall_rationale": "all 10 deterministic gates pass; 1 stubbed: baseline_parity",
+      "run_elapsed_s": 23.43,
+      "run_cost_usd": 0.0057,
+      "dispatch_error": null,
+      "input_tokens": 52281,
+      "output_tokens": 1104,
+      "runtime_label": "gemini_agent",
+      "model": "google:gemini-3.1-flash-lite-preview",
+      "tool_call_count": 15,
+      "tool_calls_summary": [
+        {
+          "name": "write_file",
+          "elapsed_ms": 2,
+          "args_keys": [
+            "content",
+            "path"
+          ],
+          "result_ok": true
+        },
+        {
+          "name": "ast_parse_check",
+          "elapsed_ms": 21,
+          "args_keys": [
+            "path"
+          ],
+          "result_ok": true
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 2,
+          "args_keys": [
+            "content",
+            "path"
+          ],
+          "result_ok": true
+        },
+        {
+          "name": "ast_parse_check",
+          "elapsed_ms": 11,
+          "args_keys": [
+            "path"
+          ],
+          "result_ok": true
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 2,
+          "args_keys": [
+            "content",
+            "path"
+          ],
+          "result_ok": true
+        },
+        {
+          "name": "ast_parse_check",
+          "elapsed_ms": 18,
+          "args_keys": [
+            "path"
+          ],
+          "result_ok": true
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 2,
+          "args_keys": [
+            "content",
+            "path"
+          ],
+          "result_ok": true
+        },
+        {
+          "name": "ast_parse_check",
+          "elapsed_ms": 15,
+          "args_keys": [
+            "path"
+          ],
+          "result_ok": true
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 2,
+          "args_keys": [
+            "content",
+            "path"
+          ],
+          "result_ok": true
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 2,
+          "args_keys": [
+            "content",
+            "path"
+          ],
+          "result_ok": true
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 1,
+          "args_keys": [
+            "content",
+            "path"
+          ],
+          "result_ok": true
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 1,
+          "args_keys": [
+            "content",
+            "path"
+          ],
+          "result_ok": true
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 2,
+          "args_keys": [
+            "content",
+            "path"
+          ],
+          "result_ok": true
+        },
+        {
+          "name": "write_file",
+          "elapsed_ms": 2,
+          "args_keys": [
+            "content",
+            "path"
+          ],
+          "result_ok": true
+        },
+        {
+          "name": "ast_parse_check",
+          "elapsed_ms": 20,
+          "args_keys": [
+            "path"
+          ],
+          "result_ok": true
+        }
+      ],
+      "bundle_file_count": 15,
+      "bundle_total_bytes": 18110,
+      "gates": {
+        "scaffold_compiles": {
+          "passed": true,
+          "rationale": "9 .py files ast-parse valid"
+        },
+        "nine_layers_present": {
+          "passed": true,
+          "rationale": "all 10 required layers present for lane=langgraph_python"
+        },
+        "scaffold_runs_mock": {
+          "passed": true,
+          "rationale": "server.py parses + references mock/CONNECTOR_MODE"
+        },
+        "connector_resolver_working": {
+          "passed": true,
+          "rationale": "CONNECTOR_MODE referenced in 6 file(s): .env.example"
+        },
+        "mcp_server_importable": {
+          "passed": true,
+          "rationale": "mcp_server.py ast-parses + references mcp/stdio"
+        },
+        "workflow_spec_roundtrip": {
+          "passed": true,
+          "rationale": "valid JSON, 4 top-level keys, roundtrip stable"
+        },
+        "cost_under_budget": {
+          "passed": true,
+          "rationale": "$0.0057 <= $0.0600 budget"
+        },
+        "latency_under_budget": {
+          "passed": true,
+          "rationale": "23.43s <= 120.0s budget"
+        },
+        "runtime_used_correctly": {
+          "passed": true,
+          "rationale": "runtime_label=gemini_agent matches emit_lane driver"
+        },
+        "correct_lane_picked": {
+          "passed": true,
+          "rationale": "Flash Lite judge: The bundle includes the required StateGraph, create_react_agent, checkpointer, and server.py components while correctly referencing the langgraph package."
+        },
+        "baseline_parity": {
+          "passed": null,
+          "rationale": "not-yet-wired: requires BFCL/broadened benchmark replay for the emitted scaffold"
+        }
+      }
+    }
+  ]
+}

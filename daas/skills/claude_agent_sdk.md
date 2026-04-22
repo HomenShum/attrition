@@ -13,6 +13,34 @@
 - PyPI: `claude-agent-sdk`
 - GitHub: `github.com/anthropics/claude-agent-sdk-python`
 - Docs: `platform.claude.com/docs/en/agent-sdk/python`
+- Cookbook: `github.com/anthropics/claude-cookbooks/tree/main/claude_agent_sdk`
+  — canonical patterns: one-liner research · chief-of-staff ·
+  observability · site-reliability · migrating from OpenAI Agents SDK
+  · session browser.
+
+## Six canonical shapes (from Anthropic's cookbook)
+
+Pick one to follow based on the user's intent. Each shape is a
+validated starting point; the agent should match this structure
+rather than inventing a new one.
+
+1. **One-liner research agent** — minimal `query()` + WebSearch +
+   Read. For "gather and synthesize" tasks. Single agent loop.
+2. **Chief-of-staff agent** — CLAUDE.md for persistent instructions,
+   output styles per audience, plan mode before execution, slash
+   commands for user shortcuts, hooks for audit trails, subagents
+   for domain specialization.
+3. **Observability agent** — MCP server (Git, GitHub, or similar)
+   for read-only external system access. CI/CD monitoring shape.
+4. **Site-reliability agent** — MCP server with read-write tools
+   (metrics, configs, services). PreToolUse hooks for safety
+   validation. End-to-end incident lifecycle.
+5. **OpenAI migration agent** — faithful port from openai-agents
+   patterns (Runner.run_sync, @function_tool) to ClaudeSDKClient
+   + @tool + create_sdk_mcp_server. Same tool boundaries, different
+   SDK.
+6. **Session browser** — reads and replays prior session transcripts,
+   used for debugging long-running agent chains.
 
 ## Files the agent should write
 
@@ -76,15 +104,83 @@ if __name__ == "__main__":
   shape (`{"content": [{"type": "text", "text": "..."}]}`).
 - Async throughout. Use `asyncio.run` at the entrypoint.
 
+## Optional shape upgrades (from the cookbook, in priority order)
+
+Only add these if the declared workflow genuinely needs them — do
+not over-emit. Each adds real structure and real token cost.
+
+### Hooks for safety (PreToolUse)
+
+For lanes where the agent writes or mutates state (incident
+response, ops), add a PreToolUse hook that validates args before
+the tool runs. Cookbook pattern from notebook 03 (SRE agent):
+
+```python
+from claude_agent_sdk import ClaudeAgentOptions, HookEvent
+
+def validate_pool_size(event: HookEvent) -> HookEvent:
+    args = event.tool_input or {}
+    pool = args.get("pool_size")
+    if pool is not None and not (5 <= int(pool) <= 500):
+        raise ValueError(f"pool_size {pool!r} out of range 5..500")
+    return event
+
+options = ClaudeAgentOptions(
+    ...,
+    hooks={"PreToolUse": [validate_pool_size]},
+)
+```
+
+### CLAUDE.md for persistent instructions
+
+For chief-of-staff / domain-expert agents, persist context across
+runs via a `CLAUDE.md` in the working directory. The SDK auto-loads
+it. Ship a scaffolded one:
+
+```markdown
+# CLAUDE.md
+You are the on-call engineer for <service>. Always check the
+runbook at runbooks/ first. If the metric is X, escalate with
+Y. Use the `notify` tool only when threshold Z is breached.
+```
+
+### Subagent orchestration
+
+For multi-domain work (finance + legal + ops), spawn specialized
+subagents via `client.query()` with narrowed `allowed_tools`
+and `system_prompt`. Each subagent gets fresh context, returns a
+compacted result to the parent.
+
+### Bash tool for procedural knowledge
+
+Register Python scripts the agent can `bash`-exec for deterministic
+computations (amortization schedules, PII redaction, spreadsheet
+manipulation). Keeps reasoning separate from execution.
+
+### Output styles per audience
+
+Tailor the system prompt variant to the consumer: terse JSON for
+downstream tools, markdown memo for humans, SQL for a BI layer.
+Switch at the `ClaudeAgentOptions` level, not mid-stream.
+
 ## Known failure modes
 
 - Forgetting `ANTHROPIC_API_KEY` → silent hang at `query()`. Add
   explicit env check at main().
 - Tool returns non-structured dict → SDK raises. Wrap everything
   in `{"content": [{"type": "text", "text": json.dumps(result)}]}`.
+- Missing `allowed_tools` entry → Claude will refuse to call the
+  tool and emit a "sorry I can't do that" response. Always enumerate.
+- PreToolUse hook that raises → run terminates. If the hook is
+  advisory, log + return event unchanged; only raise on hard-block
+  conditions.
 
 ## Eval criteria
 
 - `python agent.py` starts without error when ANTHROPIC_API_KEY set.
 - Mock-mode returns structured content for every declared tool.
 - `ast.parse(agent.py)` + `ast.parse(tools.py)` both clean.
+- If hooks are declared, `HookEvent` is imported and the hook
+  function signature matches `(event: HookEvent) -> HookEvent`.
+- If CLAUDE.md is emitted, it's under 2KB and contains at least
+  one verb-imperative line ("Always...", "Use...", "Escalate...").

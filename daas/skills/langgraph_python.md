@@ -84,6 +84,21 @@ app = graph.compile(checkpointer=MemorySaver())
 - For multi-agent supervisor patterns, emit one subgraph per agent
   and a parent graph that routes via conditional edges.
 
+## DO NOT write state_store.py for this lane
+
+langgraph's **checkpointer IS the state store**. The
+`MemorySaver` / `PostgresSaver` interface owns put/put_writes/
+get_tuple/list — a parallel SQLite `state_store.py` is an
+architectural anti-pattern that the correct_lane_picked judge
+will (correctly) flag as "custom state_store instead of required
+MemorySaver/PostgresSaver checkpointer integration."
+
+Emit `checkpointer.py` (MemorySaver for dev, swappable for
+PostgresSaver in prod) NOT `state_store.py`. If you need additional
+durable storage beyond the checkpointer (e.g. to memoize expensive
+external calls), add a new named module — do NOT repurpose the
+`state_store.py` filename.
+
 ## Known failure modes
 
 - Recursion limit hit (default 25). Emit `config={"recursion_limit": 50}`
