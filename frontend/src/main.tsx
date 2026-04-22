@@ -14,6 +14,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { Architect } from "./pages/Architect";
 import { Builder } from "./pages/Builder";
+import { NextSteps } from "./pages/NextSteps";
 import { Radar } from "./pages/Radar";
 import { Fidelity } from "./pages/Fidelity";
 import { Telemetry } from "./pages/Telemetry";
@@ -53,6 +54,22 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             element={
               <ErrorBoundary label="builder">
                 <Builder />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/next-steps/:slug"
+            element={
+              <ErrorBoundary label="next-steps">
+                <NextSteps />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/next-steps"
+            element={
+              <ErrorBoundary label="next-steps">
+                <NextSteps />
               </ErrorBoundary>
             }
           />

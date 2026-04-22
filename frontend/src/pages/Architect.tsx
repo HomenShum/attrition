@@ -757,20 +757,7 @@ export function Architect() {
                 marginBottom: 10,
               }}
             >
-              <div
-                style={{
-                  fontSize: 11,
-                  letterSpacing: "0.2em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.5)",
-                }}
-              >
-                {session?.status === "ready" || session?.status === "accepted"
-                  ? "Triage complete"
-                  : session?.status === "classifying"
-                    ? "Classifying…"
-                    : "Understanding…"}
-              </div>
+              <ClassifierStatusBadge status={session?.status ?? "classifying"} />
               {costStatus ? (
                 <div
                   style={{
@@ -1256,6 +1243,100 @@ export function Architect() {
           </section>
         )}
       </main>
+    </div>
+  );
+}
+
+// --- 1-min checkpoint: "it's alive" signal -------------------------------
+// A pulsing streaming badge with a live latency counter. The whole point
+// is to make the classifier feel real and responsive during the first
+// <5 seconds after submit — otherwise users stare at a blank checklist
+// and assume the page is broken.
+function ClassifierStatusBadge({
+  status,
+}: {
+  status: string;
+}) {
+  const isStreaming = status === "classifying" || status === "understanding";
+  const isDone = status === "ready" || status === "accepted";
+  const [elapsedMs, setElapsedMs] = useState(0);
+  const startRef = useRef<number>(Date.now());
+  useEffect(() => {
+    if (!isStreaming) return;
+    startRef.current = Date.now();
+    setElapsedMs(0);
+    const id = window.setInterval(() => {
+      setElapsedMs(Date.now() - startRef.current);
+    }, 100);
+    return () => window.clearInterval(id);
+  }, [isStreaming]);
+
+  const label = isDone
+    ? "Triage complete"
+    : status === "classifying"
+      ? "Gemini Flash Lite · streaming"
+      : "Understanding your workflow…";
+
+  const dotColor = isDone ? "#22c55e" : "#d97757";
+  const pulsing = isStreaming;
+  const elapsedSec = (elapsedMs / 1000).toFixed(1);
+  const slo = elapsedMs < 2000 ? "within SLO" : elapsedMs < 5000 ? "nominal" : "slow";
+  const sloColor =
+    elapsedMs < 2000
+      ? "#22c55e"
+      : elapsedMs < 5000
+        ? "rgba(255,255,255,0.5)"
+        : "#f59e0b";
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        fontSize: 11,
+        letterSpacing: "0.18em",
+        textTransform: "uppercase",
+        color: "rgba(255,255,255,0.72)",
+      }}
+      aria-live="polite"
+    >
+      <span
+        style={{
+          width: 10,
+          height: 10,
+          borderRadius: "50%",
+          background: dotColor,
+          boxShadow: pulsing ? `0 0 0 0 ${dotColor}66` : "none",
+          animation: pulsing ? "attritionPulse 1.3s ease-out infinite" : "none",
+        }}
+        aria-hidden="true"
+      />
+      <span>{label}</span>
+      {isStreaming ? (
+        <span
+          style={{
+            fontVariantNumeric: "tabular-nums",
+            color: sloColor,
+            letterSpacing: "0.05em",
+            textTransform: "none",
+          }}
+          aria-label={`elapsed ${elapsedSec} seconds, ${slo}`}
+        >
+          · {elapsedSec}s · {slo}
+        </span>
+      ) : null}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            @keyframes attritionPulse {
+              0%   { box-shadow: 0 0 0 0 rgba(217,119,87,0.55); }
+              70%  { box-shadow: 0 0 0 10px rgba(217,119,87,0); }
+              100% { box-shadow: 0 0 0 0 rgba(217,119,87,0); }
+            }
+          `,
+        }}
+      />
     </div>
   );
 }

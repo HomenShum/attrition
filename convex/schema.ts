@@ -19,6 +19,7 @@ import {
   architectSessions,
   radarItems,
   daasGeneratedArtifacts,
+  scaffoldPings,
 } from "./domains/daas/schema";
 
 export default defineSchema({
@@ -36,4 +37,5 @@ export default defineSchema({
   architectSessions,
   radarItems,
   daasGeneratedArtifacts,
+  scaffoldPings,
 });

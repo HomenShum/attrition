@@ -15,13 +15,14 @@ import { Link, useParams } from "react-router-dom";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "../_convex/api";
 import { Nav } from "../components/Nav";
+import { PreviewTab } from "../components/PreviewTab";
 import { downloadBundleAsZip } from "../lib/downloadZip";
 import {
   loadRuntimeSelection,
   runtimeById,
 } from "../lib/runtime_selector";
 
-type Tab = "scaffold" | "eval" | "world_model" | "sources";
+type Tab = "scaffold" | "preview" | "eval" | "world_model" | "sources";
 
 // Evaluation gate — users only receive code that has been evaluated
 // and verified. Today's verdict comes from scaffold_runtime_fidelity.py
@@ -430,6 +431,9 @@ export function Builder() {
             <TabBtn active={tab === "scaffold"} onClick={() => setTab("scaffold")}>
               Scaffold plan
             </TabBtn>
+            <TabBtn active={tab === "preview"} onClick={() => setTab("preview")}>
+              Preview · ./run.sh --mock
+            </TabBtn>
             <TabBtn active={tab === "eval"} onClick={() => setTab("eval")}>
               Eval plan
             </TabBtn>
@@ -444,6 +448,7 @@ export function Builder() {
             <BetaBanner />
             <EvaluationGateBanner />
             {tab === "scaffold" && <ScaffoldTab runtimeLane={session.runtimeLane ?? ""} />}
+            {tab === "preview" && <PreviewTab runtimeLane={session.runtimeLane ?? ""} />}
             {tab === "eval" && <EvalTab runtimeLane={session.runtimeLane ?? ""} />}
             {tab === "world_model" && (
               <WorldModelTab worldModelLane={session.worldModelLane ?? "lite"} />
@@ -929,7 +934,20 @@ function ScaffoldTab({ runtimeLane }: { runtimeLane: string }) {
                 type="button"
                 onClick={async () => {
                   if (!slug || files.length === 0) return;
-                  await downloadBundleAsZip(`${slug}-${runtimeLane}`, files);
+                  const activeRuntime = loadRuntimeSelection();
+                  await downloadBundleAsZip(
+                    `${slug}-${runtimeLane}`,
+                    files,
+                    {
+                      slug,
+                      runtimeLane,
+                      driverRuntime: activeRuntime.runtime,
+                      driverModel: activeRuntime.model,
+                    },
+                  );
+                  // Open the 60-min NextSteps checklist in a new tab so
+                  // the user can watch their scaffold tick milestones live.
+                  window.open(`/next-steps/${slug}`, "_blank", "noopener");
                 }}
                 style={{
                   padding: "6px 12px",
@@ -941,7 +959,7 @@ function ScaffoldTab({ runtimeLane }: { runtimeLane: string }) {
                   fontWeight: 500,
                   cursor: "pointer",
                 }}
-                title="Scaffold passed runtime fidelity vs baseline"
+                title="Scaffold passed runtime fidelity vs baseline. Opens NextSteps in a new tab."
               >
                 Download ZIP · verified
               </button>

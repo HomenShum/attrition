@@ -552,6 +552,40 @@ export const daasFidelityVerdicts = defineTable({
   .index("by_verdict_createdAt", ["verdict", "createdAt"])
   .index("by_createdAt", ["createdAt"]);
 
+/**
+ * scaffoldPings — opt-in telemetry from downloaded scaffolds phoning home.
+ *
+ * Populated by POST /attritionPing (see convex/http.ts) when an emitted
+ * scaffold passes a milestone (mock_exec_pass, live_smoke_pass, etc.).
+ * The NextSteps UI subscribes to this table per session slug so the
+ * 60-min checklist ticks in real time as the user ships.
+ *
+ * Bounded (BOUND): pruned to 90 days via cron. Scaffold can re-ping the
+ * same event — we keep the latest row by (sessionSlug, event) via upsert
+ * in the mutation; index by (sessionSlug, event) supports that lookup.
+ * Auditable (HONEST_STATUS): the `raw` field records the full payload
+ * for forensic review.
+ */
+export const scaffoldPings = defineTable({
+  /** Maps back to architectSessions.sessionSlug */
+  sessionSlug: v.string(),
+  /** One of: downloaded, mock_exec_pass, live_smoke_pass, first_prod_request, deployed */
+  event: v.string(),
+  /** When the scaffold reported the event (client-supplied) */
+  clientTs: v.number(),
+  /** When the webhook received it (server time) */
+  serverTs: v.number(),
+  /** Optional — lane captured at download time (cross-check) */
+  runtimeLane: v.optional(v.string()),
+  /** Optional — driver used */
+  driverRuntime: v.optional(v.string()),
+  /** Full JSON payload the scaffold sent, bounded <4KB */
+  raw: v.string(),
+})
+  .index("by_sessionSlug_serverTs", ["sessionSlug", "serverTs"])
+  .index("by_sessionSlug_event", ["sessionSlug", "event"])
+  .index("by_event_serverTs", ["event", "serverTs"]);
+
 export const daasBenchmarkRuns = defineTable({
   /** One of DAAS_BENCHMARK_IDS */
   benchmarkId: v.string(),
